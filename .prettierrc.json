@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/prettierrc",
-  "semi": true,
+  "semi": false,
   "tabWidth": 2,
   "useTabs": false,
-  "trailingComma": "none",
+  "trailingComma": "all",
   "bracketSpacing": true,
   "arrowParens": "avoid",
   "endOfLine": "lf",
