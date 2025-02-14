@@ -1,24 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
+// 创建路由实例
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: () => import('../views/index.vue'),
-      children: {},
-    },
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/AboutView.vue'),
-    // },
-  ],
+  routes: [], // 初始化时使用空的路由数组
 })
 
 const basicRouter = [
@@ -36,6 +22,7 @@ const basicRouter = [
 ]
 
 const setRouter = async () => {
+  console.log(12)
   return new Promise(resolve => {
     const userStore = useUserStore()
     clearRouter()
@@ -45,16 +32,17 @@ const setRouter = async () => {
       router.addRoute({
         path: '/',
         name: 'page',
-        redirect: '/page/student',
+        // redirect: '/page/student',
         component: () => import('../views/index.vue'),
-        children: [
-          {
-            path: 'mainPage',
-            name: 'mainPage',
-            component: () => import('../views/student/mainPage/index.vue'),
-          },
-        ],
+        // children: [
+        //   {
+        //     path: 'mainPage',
+        //     name: 'mainPage',
+        //     component: () => import('../views/student/mainPage/index.vue'),
+        //   },
+        // ],
       })
+      console.log(router)
     } else if (identity === 'teacher') {
       console.log('teacher')
     } else if (identity === 'manager') {
@@ -65,33 +53,40 @@ const setRouter = async () => {
       redirect: '/404',
       hidden: true,
     })
-    userStore.changeIsLogin(true)
     resolve(true)
   })
 }
 
-router.beforeEach(async (to, next) => {
-  // 判断有没有登录
+// 配置路由守卫
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
-  if (to.name == 'login') {
-    next()
-    return
-  }
-  if (userStore.user === null) {
-    if (to.name == 'login') {
-      next()
-    } else {
-      router.push('login')
+
+  // 如果目标是登录页且用户已经登录，则跳转到首页或其他页面
+  if (to.name === 'login') {
+    if (userStore.user !== null) {
+      next({ name: 'home' }) // 假设你有一个首页（home）路由
+      return
     }
-  } else {
-    const res = await setRouter()
-    if (res === true) {
-      next({ ...to, replace: true })
-    } else next(false)
+    next() // 否则正常进入登录页
     return
+  } else if (userStore.user === null) {
+    next({ name: 'login' })
+    return
+  } else {
+    if (userStore.getIsLogin() === false) {
+      const res = await setRouter()
+      if (res === true) {
+        next({ ...to, replace: true }) // 跳转并替换历史记录
+      } else {
+        next(false) // 终止导航
+      }
+    } else {
+      next()
+    }
   }
 })
 
+// 初始化基本路由
 export const clearRouter = () => {
   router.routes = basicRouter
 }
