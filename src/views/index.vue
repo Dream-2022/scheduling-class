@@ -3,7 +3,6 @@
     <div class="navigation-tran">
       <div>
         <img src="@/assets/img/logo.png" class="navigation-logo" alt="logo" />
-        Aurora
       </div>
       <div class="navigation-title" @click="() => $router.push('../../userMainPage')"></div>
     </div>

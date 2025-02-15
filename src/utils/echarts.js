@@ -10,6 +10,7 @@ import {
   DatasetComponent,
   TransformComponent,
   LegendComponent,
+  GraphicComponent,
 } from 'echarts/components'
 
 // 标签自动布局，全局过渡动画等特性
@@ -33,6 +34,7 @@ echarts.use([
   LabelLayout,
   UniversalTransition,
   CanvasRenderer,
+  GraphicComponent,
 ])
 
 // 导出 echarts
