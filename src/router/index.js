@@ -22,7 +22,6 @@ const basicRouter = [
 ]
 
 const setRouter = async () => {
-  console.log(12)
   return new Promise(resolve => {
     const userStore = useUserStore()
     clearRouter()
@@ -42,7 +41,6 @@ const setRouter = async () => {
         //   },
         // ],
       })
-      console.log(router)
     } else if (identity === 'teacher') {
       console.log('teacher')
     } else if (identity === 'manager') {

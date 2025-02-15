@@ -1,8 +1,241 @@
 <template>
-  <div>321</div>
+  <div class="navigation">
+    <div class="navigation-tran">
+      <div>
+        <img src="@/assets/img/logo.png" class="navigation-logo" alt="logo" />
+        Aurora
+      </div>
+      <div class="navigation-title" @click="() => $router.push('../../userMainPage')"></div>
+    </div>
+  </div>
   <RouterView></RouterView>
 </template>
 <script setup>
 import { RouterView } from 'vue-router'
+import { ref, onMounted, getCurrentInstance } from 'vue'
+let internalInstance = getCurrentInstance()
+let echarts = internalInstance.appContext.config.globalProperties.$echarts
+
+let myChart = ref()
+onMounted(async () => {
+  setChart()
+})
+const setChart = () => {
+  let chartDom = document.querySelector('.navigation-title')
+  myChart.value = echarts.init(chartDom)
+  // 指定图表的配置项和数据
+  let option = {
+    graphic: {
+      elements: [
+        {
+          type: 'text',
+          left: 'center',
+          top: 'center',
+          style: {
+            text: 'Aurora',
+            fontSize: 24,
+            fontWeight: 'bold',
+            lineDash: [0, 200],
+            lineDashOffset: 0,
+            fill: 'transparent',
+            stroke: '#116DFF',
+            lineWidth: 1,
+          },
+          keyframeAnimation: {
+            duration: 8000,
+            loop: true,
+            keyframes: [
+              {
+                percent: 0.5,
+                style: {
+                  fill: 'transparent',
+                  lineDashOffset: 200,
+                  lineDash: [200, 0],
+                },
+              },
+              {
+                // Stop for a while.
+                percent: 0.1,
+                style: {
+                  fill: '#116DFF',
+                },
+              },
+              {
+                percent: 1,
+                style: {
+                  fill: '#116DFF',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
+  }
+  myChart.value.setOption(option)
+  window.addEventListener('resize', () => {
+    myChart.value.resize()
+  })
+}
 </script>
-<style scoped></style>
+<style scoped lang="scss">
+.navigation {
+  height: 70px;
+  line-height: 70px;
+}
+
+.navigation-logo {
+  width: 40px;
+  border-radius: 5px;
+}
+
+.navigation {
+  padding: 10px 0 10px 60px;
+  display: flex;
+  flex-flow: row;
+
+  @media (max-width: 765px) {
+    padding-left: 20px;
+  }
+
+  @media (min-width: 765px) and (max-width: 1024px) {
+    padding-left: 20px;
+  }
+
+  @media (min-width: 1024px) {
+  }
+
+  .navigation-tran {
+    height: 40px;
+    display: flex;
+    flex: 0.9;
+
+    @media (max-width: 765px) {
+      flex: 1;
+    }
+
+    @media (min-width: 765px) and (max-width: 1024px) {
+      margin-left: 25px;
+    }
+
+    @media (min-width: 1024px) {
+      margin-left: 50px;
+    }
+
+    .navigation-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+
+    .navigation-title {
+      height: 50px;
+      width: 120px;
+    }
+  }
+
+  .blank-box {
+    flex: 3;
+
+    @media (max-width: 765px) {
+      display: none;
+    }
+
+    @media (min-width: 765px) and (max-width: 1024px) {
+      flex: 1;
+    }
+
+    @media (min-width: 1024px) and (max-width: 1300px) {
+      flex: 1;
+    }
+
+    @media (min-width: 1300px) {
+      flex: 2;
+    }
+  }
+
+  .navigation-icon {
+    display: flex;
+    flex: 0.7;
+    line-height: 40px;
+
+    @media (max-width: 600px) {
+      flex: 1;
+    }
+
+    @media (min-width: 600px) and (max-width: 765px) {
+    }
+
+    @media (min-width: 765px) and (max-width: 1024px) {
+      flex: 1;
+    }
+
+    @media (min-width: 1024px) {
+    }
+
+    .el-dropdown-link {
+      color: #000;
+      line-height: 40px;
+      padding-left: 5px;
+    }
+
+    .el-divider {
+      background-color: #414141;
+      height: 40px;
+      width: 1.5px;
+      margin-right: 25px;
+      border-left: 1px solid #414141;
+    }
+
+    .iconfont {
+      margin-right: 15px;
+      margin-left: 15px;
+    }
+
+    .icon-down1::before {
+      font-size: 14px;
+      margin-left: 3px;
+    }
+
+    .dropdown-class {
+      .my-title {
+        margin: 10px 0 0 10px;
+        font-weight: 600;
+      }
+
+      .el-dropdown-menu {
+        margin: 20px 5px;
+      }
+
+      .icon-lingdang-xianxing {
+        margin: 0;
+      }
+    }
+  }
+
+  .navigation-portrait {
+    display: flex;
+    line-height: 40px;
+    height: 40px;
+
+    .portrait-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 35px;
+    }
+
+    .portrait-nickname {
+      font-size: 14px;
+      margin-left: 10px;
+    }
+
+    .navigation-button {
+      cursor: pointer;
+    }
+
+    .navigation-button:hover {
+      color: #000;
+    }
+  }
+}
+</style>
