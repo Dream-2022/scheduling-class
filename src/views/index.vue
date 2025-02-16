@@ -11,7 +11,7 @@
 </template>
 <script setup>
 import { RouterView } from 'vue-router'
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -72,10 +72,13 @@ const setChart = () => {
     },
   }
   myChart.value.setOption(option)
-  window.addEventListener('resize', () => {
-    myChart.value.resize()
-  })
 }
+
+onUnmounted(() => {
+  // 销毁图表实例
+  myChart.value.dispose()
+  window.removeEventListener('resize', setChart)
+})
 </script>
 <style scoped lang="scss">
 .navigation {
@@ -90,6 +93,7 @@ const setChart = () => {
 
 .navigation {
   padding: 10px 0 10px 60px;
+  background-color: yellow;
   display: flex;
   flex-flow: row;
 
