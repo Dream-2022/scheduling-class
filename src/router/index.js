@@ -23,10 +23,12 @@ const router = createRouter({
 
 const setRouter = async () => {
   return new Promise(resolve => {
+    console.log('11111111setRouter')
     const userStore = useUserStore()
     let identity = userStore.user.identity
     console.log(identity)
     if (identity === 'student') {
+      console.log('调用addRoute')
       router.addRoute({
         path: '/home',
         name: 'home',
@@ -64,10 +66,13 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'login' })
     return
   } else {
+    console.log('登录状态')
     if (userStore.getIsLogin() === false) {
       const res = await setRouter()
+      console.log('res:', res)
       if (res === true) {
-        next()
+        next({ name: 'home' })
+        //next()
       } else {
         next(false) // 终止导航
       }
