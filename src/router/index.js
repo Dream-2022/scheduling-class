@@ -23,16 +23,22 @@ const router = createRouter({
 
 const setRouter = async () => {
   return new Promise(resolve => {
-    console.log('11111111setRouter')
     const userStore = useUserStore()
     let identity = userStore.user.identity
     console.log(identity)
     if (identity === 'student') {
-      console.log('调用addRoute')
       router.addRoute({
         path: '/home',
         name: 'home',
+        redirect: '/home/student',
         component: () => import('../views/index.vue'),
+        children: [
+          {
+            path: 'student',
+            name: 'student',
+            component: () => import('../views/student/index.vue'),
+          },
+        ],
       })
     } else if (identity === 'teacher') {
       console.log('teacher')
@@ -56,7 +62,7 @@ router.beforeEach(async (to, from, next) => {
   // 如果目标是登录页且用户已经登录，则跳转到首页或其他页面
   if (to.name === 'login') {
     if (userStore.user !== null) {
-      next({ name: 'home' })
+      next('/login')
       return
     }
     next() // 否则正常进入登录页
@@ -66,10 +72,9 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'login' })
     return
   } else {
-    console.log('登录状态')
     if (userStore.getIsLogin() === false) {
+      console.log('登录状态')
       const res = await setRouter()
-      console.log('res:', res)
       if (res === true) {
         next({ name: 'home' })
         //next()
