@@ -6,18 +6,90 @@
       </div>
       <div class="navigation-title" @click="() => $router.push('../../userMainPage')"></div>
     </div>
+    <div class="blank-box"></div>
+    <div class="navigation-icon" v-if="userInfo != null">
+      <div style="display: flex">
+        <el-dropdown class="dropdown-class" style="margin-top: 10px">
+          <el-badge class="icon-badge">
+            <span class="iconfont icon-lingdang-xianxing" style="color: #000"></span>
+          </el-badge>
+          <template #dropdown>
+            <div class="my-title" style="margin: 10px 0 0 15px; font-weight: 600">我的消息</div>
+            <el-dropdown-menu style="padding-bottom: 10px">
+              <el-dropdown-item
+                v-for="item in messageContent"
+                :key="item"
+                style="width: 350px"
+                @click="messageClick(item.md5)"
+              >
+                <div>
+                  <strong>{{ messageContent.apkName }}</strong> 已分析完毕
+                </div>
+                <div style="margin-left: auto; color: #757575">去查看 >></div>
+              </el-dropdown-item>
+              <el-dropdown-item v-if="messageContent.length == 0">
+                <div style="margin: 0 80px">
+                  <el-empty description="暂无消息" />
+                </div>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <span
+          class="iconfont icon-wenhao-xianxingyuankuang"
+          @click="() => $router.push('/userIntroducePage')"
+        ></span>
+        <el-divider direction=" vertical" class="divider" />
+      </div>
+      <el-dropdown>
+        <span class="el-dropdown-link">
+          <span class="portrait-box">
+            <span class="portrait-nickname">{{ userInfo.userName }}</span>
+            <span class="iconfont icon-down1"></span>
+          </span>
+        </span>
+        <template #dropdown>
+          <div class="avatar">
+            <div class="avatar-box">
+              <img
+                :src="userInfo?.userIconPath == '' ? require('@/assets/img/title.png') : avatar"
+                class="drop-img"
+              />
+              <div>{{ userInfo.userName }}</div>
+            </div>
+          </div>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="personVisible = true">我的资料</el-dropdown-item>
+            <el-dropdown-item @click="staticAnalysis('userMemberPage')">开通会员</el-dropdown-item>
+            <el-dropdown-item @click="staticAnalysis('adminManagePage')">管理员端</el-dropdown-item>
+            <el-dropdown-item @click="signOutClick"
+              ><span class="iconfont icon-exit"></span>&nbsp;退出登录</el-dropdown-item
+            >
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
   </div>
   <RouterView></RouterView>
 </template>
 <script setup>
 import { RouterView } from 'vue-router'
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { useUserStore } from '@/stores/userStore'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
+const userStore = useUserStore()
+// logo 动画
 let myChart = ref()
+// 用户信息
+let userInfo = ref(null)
+let messageContent = ref([]) //消息栏的通知
 onMounted(async () => {
   setChart()
+  userStore.initialize()
+  userInfo.value = userStore.user
+  console.log(userInfo.value)
 })
 const setChart = () => {
   let chartDom = document.querySelector('.navigation-title')
@@ -81,11 +153,6 @@ onUnmounted(() => {
 })
 </script>
 <style scoped lang="scss">
-.navigation {
-  height: 70px;
-  line-height: 70px;
-}
-
 .navigation-logo {
   width: 40px;
   border-radius: 5px;
@@ -132,7 +199,7 @@ onUnmounted(() => {
     }
 
     .navigation-title {
-      height: 50px;
+      height: 45px;
       width: 120px;
     }
   }
