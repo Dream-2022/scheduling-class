@@ -5,7 +5,7 @@ export const useUserStore = defineStore('user', () => {
   let isLogin = ref(false)
   const user = ref({
     name: '李华',
-    identity: 'student',
+    identity: 'manager',
   })
 
   const getIsLogin = () => {

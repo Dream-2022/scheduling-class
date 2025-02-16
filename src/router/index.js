@@ -41,9 +41,33 @@ const setRouter = async () => {
         ],
       })
     } else if (identity === 'teacher') {
-      console.log('teacher')
+      router.addRoute({
+        path: '/home',
+        name: 'home',
+        redirect: '/home/teacher',
+        component: () => import('../views/index.vue'),
+        children: [
+          {
+            path: 'teacher',
+            name: 'teacher',
+            component: () => import('../views/teacher/index.vue'),
+          },
+        ],
+      })
     } else if (identity === 'manager') {
-      console.log('manager')
+      router.addRoute({
+        path: '/home',
+        name: 'home',
+        redirect: '/home/manager',
+        component: () => import('../views/index.vue'),
+        children: [
+          {
+            path: 'manager',
+            name: 'manager',
+            component: () => import('../views/manager/index.vue'),
+          },
+        ],
+      })
     }
     router.addRoute({
       path: '/:pathMatch(.*)',
