@@ -86,8 +86,7 @@ router.beforeEach(async (to, from, next) => {
   // 如果目标是登录页且用户已经登录，则跳转到首页或其他页面
   if (to.name === 'login') {
     if (userStore.user !== null) {
-      next('/login')
-      return
+      next()
     }
     next() // 否则正常进入登录页
     return

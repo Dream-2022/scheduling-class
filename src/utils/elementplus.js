@@ -6,6 +6,8 @@ import {
   ElButton,
   ElForm,
   ElBadge,
+  ElDivider,
+  ElEmpty,
   ElMessage,
   ElScrollbar,
   ElInput,
@@ -22,6 +24,8 @@ export default function (app) {
   app.use(ElButton)
   app.use(ElForm)
   app.use(ElBadge)
+  app.use(ElDivider)
+  app.use(ElEmpty)
   app.use(ElScrollbar)
   app.use(ElInput)
   app.use(ElDropdown)

@@ -10,7 +10,7 @@
     <div class="navigation-icon" v-if="userInfo != null">
       <div style="display: flex">
         <el-dropdown class="dropdown-class" style="margin-top: 10px">
-          <el-badge class="icon-badge">
+          <el-badge :value="1" class="icon-badge">
             <span class="iconfont icon-lingdang-xianxing" style="color: #000"></span>
           </el-badge>
           <template #dropdown>
@@ -39,7 +39,7 @@
           class="iconfont icon-wenhao-xianxingyuankuang"
           @click="() => $router.push('/userIntroducePage')"
         ></span>
-        <el-divider direction=" vertical" class="divider" />
+        <el-divider direction="vertical" class="divider" />
       </div>
       <el-dropdown>
         <span class="el-dropdown-link">
@@ -73,22 +73,25 @@
   <RouterView></RouterView>
 </template>
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
+const router = useRouter()
 // logo 动画
 let myChart = ref()
 // 用户信息
 let userInfo = ref(null)
+let avatar = ref('')
 let messageContent = ref([]) //消息栏的通知
 onMounted(async () => {
   setChart()
   userStore.initialize()
   userInfo.value = userStore.user
+  avatar.value = userInfo.value.avatar ? userInfo.value.avatar : '@/assets/img/cat.png'
   console.log(userInfo.value)
 })
 const setChart = () => {
@@ -144,6 +147,12 @@ const setChart = () => {
     },
   }
   myChart.value.setOption(option)
+}
+
+//退出登录
+function signOutClick() {
+  localStorage.removeItem('user')
+  router.push('/login')
 }
 
 onUnmounted(() => {
