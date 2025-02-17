@@ -89,7 +89,7 @@ let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
 const router = useRouter()
-let myChart = ref() // logo 动画
+let myChart = ref(null) // logo 动画
 let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
 let messageContent = ref([]) // 消息栏的通知
@@ -264,15 +264,12 @@ onUnmounted(() => {
     flex: 0.7;
     line-height: 40px;
 
-    @media (max-width: 600px) {
-      flex: 1;
-    }
-
-    @media (min-width: 600px) and (max-width: 765px) {
+    @media (max-width: 765px) {
+      flex: 0.4;
     }
 
     @media (min-width: 765px) and (max-width: 1024px) {
-      flex: 1;
+      flex: 0.6;
     }
 
     @media (min-width: 1024px) {
