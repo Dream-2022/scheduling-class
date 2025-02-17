@@ -1,5 +1,5 @@
 <template>
-  <div>manager</div>
+  <div>man</div>
 </template>
 <script setup></script>
 <style scoped></style>

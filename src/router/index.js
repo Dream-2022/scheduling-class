@@ -64,7 +64,7 @@ const setRouter = async () => {
           {
             path: 'manager',
             name: 'manager',
-            component: () => import('../views/manager/index.vue'),
+            component: () => import('../views/manager/mainPage//index.vue'),
           },
         ],
       })
