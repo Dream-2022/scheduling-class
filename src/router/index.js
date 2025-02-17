@@ -28,7 +28,7 @@ const setRouter = async () => {
     console.log(identity)
     if (identity === 'student') {
       router.addRoute({
-        path: '/home',
+        path: '/',
         name: 'home',
         redirect: '/home/student',
         component: () => import('../views/index.vue'),
@@ -42,7 +42,7 @@ const setRouter = async () => {
       })
     } else if (identity === 'teacher') {
       router.addRoute({
-        path: '/home',
+        path: '/',
         name: 'home',
         redirect: '/home/teacher',
         component: () => import('../views/index.vue'),
@@ -56,15 +56,47 @@ const setRouter = async () => {
       })
     } else if (identity === 'manager') {
       router.addRoute({
-        path: '/home',
+        path: '/manager',
         name: 'home',
-        redirect: '/home/manager',
+        redirect: '/manager/mainPage',
         component: () => import('../views/index.vue'),
         children: [
           {
-            path: 'manager',
-            name: 'manager',
+            path: 'mainPage',
+            name: 'mainPage',
             component: () => import('../views/manager/mainPage//index.vue'),
+          },
+          {
+            path: 'functionPage',
+            name: 'functionPage',
+            redirect: '/functionPage/course',
+            component: () => import('../views/manager/functionPage/index.vue'),
+            children: [
+              {
+                path: 'course',
+                component: () => import('../views/manager/functionPage/coursePage/index.vue'),
+              },
+              {
+                path: 'exam',
+                component: () => import('../views/manager/functionPage/examPage/index.vue'),
+              },
+              {
+                path: 'information',
+                component: () => import('../views/manager/functionPage/informationPage/index.vue'),
+              },
+              {
+                path: 'analysis',
+                component: () => import('../views/manager/functionPage/analysisPage/index.vue'),
+              },
+              {
+                path: 'application',
+                component: () => import('../views/manager/functionPage/applicationPage/index.vue'),
+              },
+              {
+                path: 'manage',
+                component: () => import('../views/manager/functionPage/managePage/index.vue'),
+              },
+            ],
           },
         ],
       })

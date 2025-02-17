@@ -6,7 +6,7 @@
         v-model="searchValue"
         @keyup.enter="searchClick"
         class="search-content"
-        placeholder="MD5，包名，文件名，APP名称"
+        placeholder="教师，排课计划，节假日调休"
       />
       <el-button color="#065fed" @click="searchClick">搜索</el-button>
     </div>
@@ -61,7 +61,7 @@ function staticAnalysis(string) {
   router.push(`../${string}`)
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .component-box {
   margin: 10px auto;
   margin-top: 0px;
@@ -73,15 +73,6 @@ function staticAnalysis(string) {
   .search-word {
     margin-top: 5px;
     margin-right: 20px;
-
-    @media (max-width: 765px) {
-    }
-
-    @media (min-width: 765px) and (max-width: 1024px) {
-    }
-
-    @media (min-width: 1024px) {
-    }
   }
 
   .search-box {
