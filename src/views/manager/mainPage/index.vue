@@ -193,7 +193,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import WOW from 'wow.js'
-import Chart from '@/views/components/Chart.vue'
+import Chart from '@/components/Chart.vue'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
