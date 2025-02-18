@@ -7,6 +7,8 @@ import {
   ElForm,
   ElBadge,
   ElDivider,
+  ElProgress,
+  ElRow,
   ElEmpty,
   ElMessage,
   ElScrollbar,
@@ -25,6 +27,8 @@ export default function (app) {
   app.use(ElForm)
   app.use(ElBadge)
   app.use(ElDivider)
+  app.use(ElProgress)
+  app.use(ElRow)
   app.use(ElEmpty)
   app.use(ElScrollbar)
   app.use(ElInput)

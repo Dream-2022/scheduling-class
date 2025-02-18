@@ -18,7 +18,6 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const initialize = () => {
-    console.log('初始化逻辑执行')
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       user.value = JSON.parse(savedUser)
