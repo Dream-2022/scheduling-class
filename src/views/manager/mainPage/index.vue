@@ -207,8 +207,8 @@ let selectedOption1 = ref('近一周趋势图')
 let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
-let myChart1 = ref()
-let option1 = ref({})
+let myChart1 = null
+let option1 = null
 
 onMounted(async () => {
   const wow = new WOW({})
@@ -246,9 +246,8 @@ async function handleCommand4(command) {
 
 const setChart1 = () => {
   let chartDom1 = document.getElementById('chart1-content')
-  myChart1.value = echarts.init(chartDom1)
-  // 指定图表的配置项和数据
-  option1.value = {
+  myChart1 = echarts.init(chartDom1)
+  option1 = {
     title: {
       show: true,
       text: `{value|检测数量}`,
@@ -261,7 +260,7 @@ const setChart1 = () => {
             backgroundColor: {
               image: '@/asset/echarts/bar-chart.png',
             },
-            height: 15, // 可以只指定图片的高度，从而图片的宽度根据图片的长宽比自动得到。
+            height: 15,
             width: 16,
           },
         },
@@ -302,18 +301,15 @@ const setChart1 = () => {
       {
         type: 'category',
         axisTick: {
-          show: false, // 坐标轴刻度线
+          show: false,
         },
         axisLine: {
-          // 轴线
           show: false,
         },
         splitLine: {
-          // 网格线
           show: false,
         },
         axisLabel: {
-          // 坐标轴标签
           show: false,
         },
         data: [1, 2, 3, 2, 1, 4, 5],
@@ -324,18 +320,15 @@ const setChart1 = () => {
       {
         type: 'value',
         axisTick: {
-          show: false, // 坐标轴刻度线
+          show: false,
         },
         axisLine: {
-          // 轴线
           show: false,
         },
         splitLine: {
-          // 网格线
           show: false,
         },
         axisLabel: {
-          // 坐标轴标签
           show: false,
         },
         boundaryGap: false,
@@ -372,39 +365,19 @@ const setChart1 = () => {
   }
   console.log(option1)
   // 使用刚指定的配置项和数据显示图表。
-  myChart1.value.setOption(option1)
+  myChart1.setOption(option1)
 }
 
 const chartOption2 = ref({
   title: {
-    show: true,
     text: '{value|检测数量}',
     subtext: '{value|平均}{titleSize| 1 }{value|次}',
     textStyle: {
       color: '#065fed',
-      fontSize: '18',
-      rich: {
-        titleIcon: {
-          backgroundColor: {
-            image: '@/assets/echarts/bar-chart.png',
-          },
-          height: 15,
-          width: 16,
-        },
-      },
-    },
-    subtextStyle: {
-      fontSize: '14',
-      rich: {
-        titleSize: {
-          fontSize: '18',
-          fontWeight: '600',
-        },
-      },
+      rich: {},
     },
   },
   tooltip: {
-    trigger: 'axis',
     axisPointer: {
       type: 'cross',
       label: {
@@ -412,46 +385,14 @@ const chartOption2 = ref({
       },
     },
   },
-  toolbox: {
-    feature: {
-      saveAsImage: {
-        title: '下载该图表',
-      },
-    },
-  },
-  grid: {
-    left: '0%',
-    right: '0%',
-    bottom: '0%',
-    containLabel: true,
-  },
   xAxis: [
     {
-      type: 'category',
-      axisTick: { show: false },
-      axisLine: { show: false },
-      splitLine: { show: false },
-      axisLabel: { show: false },
       data: [1, 2, 3, 2, 1, 4, 5],
-      boundaryGap: false,
-    },
-  ],
-  yAxis: [
-    {
-      type: 'value',
-      axisTick: { show: false },
-      axisLine: { show: false },
-      splitLine: { show: false },
-      axisLabel: { show: false },
-      boundaryGap: false,
     },
   ],
   series: [
     {
       type: 'line',
-      stack: 'Total',
-      smooth: true,
-      symbol: 'none',
       itemStyle: { color: '#547BF1' },
       emphasis: { focus: 'series' },
       areaStyle: {
