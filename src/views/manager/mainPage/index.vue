@@ -55,7 +55,9 @@
         </el-dropdown>
       </div>
       <div class="wow fadeInLeft chart2">
-        <div id="chart2-content"></div>
+        <div class="chart-content">
+          <Chart :option="chartOption2" />
+        </div>
         <el-dropdown @command="handleCommand2">
           <span class="el-dropdown-link"
             >{{ selectedOption2 }}<span class="iconfont icon-down"></span
@@ -191,6 +193,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import WOW from 'wow.js'
+import Chart from '@/views/components/Chart.vue'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -371,6 +374,97 @@ const setChart1 = () => {
   // 使用刚指定的配置项和数据显示图表。
   myChart1.value.setOption(option1)
 }
+
+const chartOption2 = ref({
+  title: {
+    show: true,
+    text: '{value|检测数量}',
+    subtext: '{value|平均}{titleSize| 1 }{value|次}',
+    textStyle: {
+      color: '#065fed',
+      fontSize: '18',
+      rich: {
+        titleIcon: {
+          backgroundColor: {
+            image: '@/assets/echarts/bar-chart.png',
+          },
+          height: 15,
+          width: 16,
+        },
+      },
+    },
+    subtextStyle: {
+      fontSize: '14',
+      rich: {
+        titleSize: {
+          fontSize: '18',
+          fontWeight: '600',
+        },
+      },
+    },
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'cross',
+      label: {
+        backgroundColor: '#6a7985',
+      },
+    },
+  },
+  toolbox: {
+    feature: {
+      saveAsImage: {
+        title: '下载该图表',
+      },
+    },
+  },
+  grid: {
+    left: '0%',
+    right: '0%',
+    bottom: '0%',
+    containLabel: true,
+  },
+  xAxis: [
+    {
+      type: 'category',
+      axisTick: { show: false },
+      axisLine: { show: false },
+      splitLine: { show: false },
+      axisLabel: { show: false },
+      data: [1, 2, 3, 2, 1, 4, 5],
+      boundaryGap: false,
+    },
+  ],
+  yAxis: [
+    {
+      type: 'value',
+      axisTick: { show: false },
+      axisLine: { show: false },
+      splitLine: { show: false },
+      axisLabel: { show: false },
+      boundaryGap: false,
+    },
+  ],
+  series: [
+    {
+      type: 'line',
+      stack: 'Total',
+      smooth: true,
+      symbol: 'none',
+      itemStyle: { color: '#547BF1' },
+      emphasis: { focus: 'series' },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: '#547BF1' },
+          { offset: 1, color: '#EDF1FE' },
+        ]),
+      },
+      symbolSize: 5,
+      data: [1, 2, 3, 2, 1, 4, 4],
+    },
+  ],
+})
 
 //点击快捷入口
 function staticAnalysis(string) {
@@ -564,7 +658,8 @@ function staticAnalysis(string) {
       #chart1-content,
       #chart2-content,
       #chart3-content,
-      #chart4-content {
+      #chart4-content,
+      .chart-content {
         height: 75%;
         width: 94%;
         padding: 0 3%;
