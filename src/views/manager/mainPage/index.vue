@@ -205,7 +205,7 @@ let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
 let myChart1 = ref()
-let option1 = ref()
+let option1 = ref({})
 
 onMounted(async () => {
   const wow = new WOW({})
@@ -243,152 +243,127 @@ async function handleCommand4(command) {
 
 const setChart1 = () => {
   let chartDom1 = document.getElementById('chart1-content')
-  console.log(userInfo.value, chartDom1)
   myChart1.value = echarts.init(chartDom1)
   // 指定图表的配置项和数据
   option1.value = {
-    media: [
-      {
-        option: {
-          title: {
-            show: true,
-            text: `{value|检测数量}`,
-            subtext: `{value|平均}{titleSize| 1 }{value|次}`,
-            textStyle: {
-              color: '#065fed', //文字颜色
-              fontSize: '18', //文字大小
-              rich: {
-                titleIcon: {
-                  backgroundColor: {
-                    image: '@/asset/echarts/bar-chart.png',
-                  },
-                  height: 15, // 可以只指定图片的高度，从而图片的宽度根据图片的长宽比自动得到。
-                  width: 16,
-                },
-              },
+    title: {
+      show: true,
+      text: `{value|检测数量}`,
+      subtext: `{value|平均}{titleSize| 1 }{value|次}`,
+      textStyle: {
+        color: '#065fed', //文字颜色
+        fontSize: '18', //文字大小
+        rich: {
+          titleIcon: {
+            backgroundColor: {
+              image: '@/asset/echarts/bar-chart.png',
             },
-            subtextStyle: {
-              fontSize: '14',
-              rich: {
-                titleSize: {
-                  fontSize: '18',
-                  fontWeight: '600',
-                },
-              },
-            },
+            height: 15, // 可以只指定图片的高度，从而图片的宽度根据图片的长宽比自动得到。
+            width: 16,
           },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross',
-              label: {
-                backgroundColor: '#6a7985',
-              },
-            },
-          },
-          toolbox: {
-            feature: {
-              saveAsImage: {
-                title: '下载该图表',
-              },
-            },
-          },
-          grid: {
-            left: '0%',
-            right: '0%',
-            bottom: '0%',
-            containLabel: true,
-          },
-          xAxis: [
-            {
-              type: 'category',
-              axisTick: {
-                show: false, // 坐标轴刻度线
-              },
-              axisLine: {
-                // 轴线
-                show: false,
-              },
-              splitLine: {
-                // 网格线
-                show: false,
-              },
-              axisLabel: {
-                // 坐标轴标签
-                show: false,
-              },
-              data: [1, 2, 3, 2, 1, 4, 5],
-              boundaryGap: false,
-            },
-          ],
-          yAxis: [
-            {
-              type: 'value',
-              axisTick: {
-                show: false, // 坐标轴刻度线
-              },
-              axisLine: {
-                // 轴线
-                show: false,
-              },
-              splitLine: {
-                // 网格线
-                show: false,
-              },
-              axisLabel: {
-                // 坐标轴标签
-                show: false,
-              },
-              boundaryGap: false,
-            },
-          ],
-          series: [
-            {
-              type: 'line',
-              stack: 'Total',
-              smooth: true,
-              symbol: 'none',
-              itemStyle: {
-                color: '#547BF1',
-              },
-              emphasis: {
-                focus: 'series',
-              },
-              areaStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  {
-                    offset: 0,
-                    color: '#547BF1',
-                  },
-                  {
-                    offset: 1,
-                    color: '#EDF1FE',
-                  },
-                ]),
-              },
-              symbolSize: 5,
-              data: [1, 2, 3, 2, 1, 4, 4],
-            },
-          ],
         },
       },
-      {
-        query: {
-          maxAspectRatio: 0.94,
-        },
-        option: {
-          title: {
-            text: '检测',
-            subtext: `平均 0 次`,
-            textStyle: {
-              color: '#065fed', //文字颜色
-              fontSize: '14', //文字大小
-            },
-            subtextStyle: {
-              fontSize: '12',
-            },
+      subtextStyle: {
+        fontSize: '14',
+        rich: {
+          titleSize: {
+            fontSize: '18',
+            fontWeight: '600',
           },
         },
+      },
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross',
+        label: {
+          backgroundColor: '#6a7985',
+        },
+      },
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          title: '下载该图表',
+        },
+      },
+    },
+    grid: {
+      left: '0%',
+      right: '0%',
+      bottom: '0%',
+      containLabel: true,
+    },
+    xAxis: [
+      {
+        type: 'category',
+        axisTick: {
+          show: false, // 坐标轴刻度线
+        },
+        axisLine: {
+          // 轴线
+          show: false,
+        },
+        splitLine: {
+          // 网格线
+          show: false,
+        },
+        axisLabel: {
+          // 坐标轴标签
+          show: false,
+        },
+        data: [1, 2, 3, 2, 1, 4, 5],
+        boundaryGap: false,
+      },
+    ],
+    yAxis: [
+      {
+        type: 'value',
+        axisTick: {
+          show: false, // 坐标轴刻度线
+        },
+        axisLine: {
+          // 轴线
+          show: false,
+        },
+        splitLine: {
+          // 网格线
+          show: false,
+        },
+        axisLabel: {
+          // 坐标轴标签
+          show: false,
+        },
+        boundaryGap: false,
+      },
+    ],
+    series: [
+      {
+        type: 'line',
+        stack: 'Total',
+        smooth: true,
+        symbol: 'none',
+        itemStyle: {
+          color: '#547BF1',
+        },
+        emphasis: {
+          focus: 'series',
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+              offset: 0,
+              color: '#547BF1',
+            },
+            {
+              offset: 1,
+              color: '#EDF1FE',
+            },
+          ]),
+        },
+        symbolSize: 5,
+        data: [1, 2, 3, 2, 1, 4, 4],
       },
     ],
   }
