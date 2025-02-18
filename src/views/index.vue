@@ -68,7 +68,7 @@
                 >管理员端</el-dropdown-item
               >
               <el-dropdown-item @click="signOutClick"
-                ><span class="iconfont icon-exit"></span>&nbsp;退出登录</el-dropdown-item
+                ><span class="iconfont icon-exit"></span>退出登录</el-dropdown-item
               >
             </el-dropdown-menu>
           </template>

@@ -131,8 +131,11 @@ router.beforeEach(async (to, from, next) => {
       console.log('登录状态')
       const res = await setRouter()
       if (res === true) {
-        next({ name: 'home' })
-        //next()
+        if (to.name === 'home') {
+          next({ name: 'home' })
+        } else {
+          next({ path: to.path })
+        }
       } else {
         next(false) // 终止导航
       }
