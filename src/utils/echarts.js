@@ -2,10 +2,12 @@ import * as echarts from 'echarts/core'
 
 import { BarChart, LineChart, ScatterChart, PieChart } from 'echarts/charts'
 
-// 引入提示框，标题，直角坐标系，数据集，内置数据转换器组件，组件后缀都为 Component
+// 组件后缀都为 Component
 import {
   TitleComponent,
   TooltipComponent,
+  ToolboxComponent,
+  AxisPointerComponent,
   GridComponent,
   DatasetComponent,
   TransformComponent,
@@ -23,6 +25,8 @@ import { CanvasRenderer } from 'echarts/renderers'
 echarts.use([
   TitleComponent,
   TooltipComponent,
+  ToolboxComponent,
+  AxisPointerComponent,
   GridComponent,
   DatasetComponent,
   TransformComponent,

@@ -25,7 +25,6 @@ const setRouter = async () => {
   return new Promise(resolve => {
     const userStore = useUserStore()
     let identity = userStore.user.identity
-    console.log(identity)
     if (identity === 'student') {
       router.addRoute({
         path: '/',
@@ -114,7 +113,6 @@ const setRouter = async () => {
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   clearRouter()
-  console.log('第二步', userStore.user)
   // 如果目标是登录页且用户已经登录，则跳转到首页或其他页面
   if (to.name === 'login') {
     if (userStore.user !== null) {
@@ -127,7 +125,6 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'login' })
     return
   } else {
-    console.log(to, to.path)
     if (userStore.getIsLogin() === false) {
       console.log('登录状态', to.path)
       const res = await setRouter()
@@ -148,7 +145,6 @@ router.beforeEach(async (to, from, next) => {
 
 // 初始化基本路由
 export const clearRouter = () => {
-  console.log('第一步')
   router.routes = basicRouter
 }
 

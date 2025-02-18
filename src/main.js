@@ -4,10 +4,13 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-// 引入echarts
+// 引入 echarts
 import echarts from '@/utils/echarts.js'
-// 引入element-plus
+// 引入 element-plus
 import installElementPlus from '@/utils/elementplus.js'
+// 引入动画效果
+import 'animate.css/animate.min.css'
+import 'wow.js/css/libs/animate.css'
 
 const app = createApp(App)
 

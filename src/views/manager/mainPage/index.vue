@@ -39,7 +39,7 @@
   </div>
   <div class="middle-box">
     <div class="left-boxes">
-      <div class="wow fadeInLeft pulse chart1" v-if="userInfo != null">
+      <div class="wow fadeInLeft pulse chart1">
         <div id="chart1-content"></div>
         <el-dropdown @command="handleCommand1">
           <span class="el-dropdown-link"
@@ -54,11 +54,7 @@
           </template>
         </el-dropdown>
       </div>
-      <div class="wow fadeInLeft chart1" v-else>
-        <span class="chart-title1">检测数量</span>
-        <div class="none-data">暂无数据</div>
-      </div>
-      <div class="wow fadeInLeft chart2" v-if="userInfo != null">
+      <div class="wow fadeInLeft chart2">
         <div id="chart2-content"></div>
         <el-dropdown @command="handleCommand2">
           <span class="el-dropdown-link"
@@ -73,11 +69,7 @@
           </template>
         </el-dropdown>
       </div>
-      <div class="wow fadeInLeft chart2" v-else>
-        <span class="chart-title2">会员积分</span>
-        <div class="none-data">暂无数据</div>
-      </div>
-      <div class="wow fadeInLeft chart3" v-if="userInfo != null">
+      <div class="wow fadeInLeft chart3">
         <div id="chart3-content"></div>
         <el-dropdown @command="handleCommand3">
           <span class="el-dropdown-link"
@@ -92,11 +84,7 @@
           </template>
         </el-dropdown>
       </div>
-      <div class="wow fadeInLeft chart3" v-else>
-        <span class="chart-title3">邀请好友</span>
-        <div class="none-data">暂无数据</div>
-      </div>
-      <div class="wow fadeInLeft chart4" v-if="userInfo != null">
+      <div class="wow fadeInLeft chart4">
         <div id="chart4-content"></div>
         <el-dropdown @command="handleCommand4">
           <span class="el-dropdown-link"
@@ -110,10 +98,6 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-      </div>
-      <div class="wow fadeInLeft chart4" v-else>
-        <span class="chart-title4">apk检测</span>
-        <div class="none-data">暂无数据</div>
       </div>
       <div class="wow fadeInUp footer1">
         <div class="footer-title">
@@ -195,36 +179,43 @@
       <div class="footer-title">
         <el-divider direction="vertical" />
         <div class="title-box">签到</div>
-        <div class="iconfont icon-jinbi1"></div>
         <div class="wow fadeInRight Gold">123</div>
       </div>
-      <div class="button-box">
-        <div class="prompt">
-          <span>签到 1 天可获取 100 积分</span>
-        </div>
-      </div>
+      <div class="button-box"></div>
     </div>
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import WOW from 'wow.js'
+let internalInstance = getCurrentInstance()
+let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
 const router = useRouter()
 
 let searchValue = ref('') //搜索内容
 let userInfo = ref(null)
+// charts图标选中
+let selectedOption1 = ref('近一周趋势图')
+let selectedOption2 = ref('近一周趋势图')
+let selectedOption3 = ref('近一周趋势图')
+let selectedOption4 = ref('近一周趋势图')
+let myChart1 = ref()
+let option1 = ref()
 
-onMounted(() => {
+onMounted(async () => {
   const wow = new WOW({})
   wow.init()
   userStore.initialize()
   userInfo.value = userStore.user
-  console.log(userInfo)
+  console.log(userInfo.value)
+  let chartDom1 = document.getElementById('chart1-content')
+  console.log(userInfo.value, chartDom1)
+  setChart1()
 })
 //点击搜索
 async function searchClick() {
@@ -233,6 +224,177 @@ async function searchClick() {
     return
   }
   router.push(`/function/manager/${searchValue.value}`)
+}
+
+//下拉框的改变
+async function handleCommand1(command) {
+  console.log(command)
+}
+
+async function handleCommand2(command) {
+  console.log(command)
+}
+async function handleCommand3(command) {
+  console.log(command)
+}
+async function handleCommand4(command) {
+  console.log(command)
+}
+
+const setChart1 = () => {
+  let chartDom1 = document.getElementById('chart1-content')
+  console.log(userInfo.value, chartDom1)
+  myChart1.value = echarts.init(chartDom1)
+  // 指定图表的配置项和数据
+  option1.value = {
+    media: [
+      {
+        option: {
+          title: {
+            show: true,
+            text: `{value|检测数量}`,
+            subtext: `{value|平均}{titleSize| 1 }{value|次}`,
+            textStyle: {
+              color: '#065fed', //文字颜色
+              fontSize: '18', //文字大小
+              rich: {
+                titleIcon: {
+                  backgroundColor: {
+                    image: '@/asset/echarts/bar-chart.png',
+                  },
+                  height: 15, // 可以只指定图片的高度，从而图片的宽度根据图片的长宽比自动得到。
+                  width: 16,
+                },
+              },
+            },
+            subtextStyle: {
+              fontSize: '14',
+              rich: {
+                titleSize: {
+                  fontSize: '18',
+                  fontWeight: '600',
+                },
+              },
+            },
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross',
+              label: {
+                backgroundColor: '#6a7985',
+              },
+            },
+          },
+          toolbox: {
+            feature: {
+              saveAsImage: {
+                title: '下载该图表',
+              },
+            },
+          },
+          grid: {
+            left: '0%',
+            right: '0%',
+            bottom: '0%',
+            containLabel: true,
+          },
+          xAxis: [
+            {
+              type: 'category',
+              axisTick: {
+                show: false, // 坐标轴刻度线
+              },
+              axisLine: {
+                // 轴线
+                show: false,
+              },
+              splitLine: {
+                // 网格线
+                show: false,
+              },
+              axisLabel: {
+                // 坐标轴标签
+                show: false,
+              },
+              data: [1, 2, 3, 2, 1, 4, 5],
+              boundaryGap: false,
+            },
+          ],
+          yAxis: [
+            {
+              type: 'value',
+              axisTick: {
+                show: false, // 坐标轴刻度线
+              },
+              axisLine: {
+                // 轴线
+                show: false,
+              },
+              splitLine: {
+                // 网格线
+                show: false,
+              },
+              axisLabel: {
+                // 坐标轴标签
+                show: false,
+              },
+              boundaryGap: false,
+            },
+          ],
+          series: [
+            {
+              type: 'line',
+              stack: 'Total',
+              smooth: true,
+              symbol: 'none',
+              itemStyle: {
+                color: '#547BF1',
+              },
+              emphasis: {
+                focus: 'series',
+              },
+              areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  {
+                    offset: 0,
+                    color: '#547BF1',
+                  },
+                  {
+                    offset: 1,
+                    color: '#EDF1FE',
+                  },
+                ]),
+              },
+              symbolSize: 5,
+              data: [1, 2, 3, 2, 1, 4, 4],
+            },
+          ],
+        },
+      },
+      {
+        query: {
+          maxAspectRatio: 0.94,
+        },
+        option: {
+          title: {
+            text: '检测',
+            subtext: `平均 0 次`,
+            textStyle: {
+              color: '#065fed', //文字颜色
+              fontSize: '14', //文字大小
+            },
+            subtextStyle: {
+              fontSize: '12',
+            },
+          },
+        },
+      },
+    ],
+  }
+  console.log(option1)
+  // 使用刚指定的配置项和数据显示图表。
+  myChart1.value.setOption(option1)
 }
 
 //点击快捷入口
@@ -438,7 +600,7 @@ function staticAnalysis(string) {
       .el-dropdown {
         border-radius: 10px;
         margin: 3% 3% 0 3%;
-        padding: 0px 5px 3px 5px;
+        padding: 3px 5px 3px 5px;
         font-size: 12px;
 
         // display: flex;
@@ -807,11 +969,6 @@ function staticAnalysis(string) {
 
     .button-box {
       text-align: center;
-
-      .prompt {
-        font-size: 12px;
-        color: $word-black-color;
-      }
 
       .el-button {
         width: 200px;
