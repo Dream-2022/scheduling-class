@@ -56,18 +56,18 @@ const setRouter = async () => {
       })
     } else if (identity === 'manager') {
       router.addRoute({
-        path: '/manager',
+        path: '/',
         name: 'home',
         redirect: '/manager/mainPage',
         component: () => import('../views/index.vue'),
         children: [
           {
-            path: 'mainPage',
+            path: 'manager/mainPage',
             name: 'mainPage',
-            component: () => import('../views/manager/mainPage//index.vue'),
+            component: () => import('../views/manager/mainPage/index.vue'),
           },
           {
-            path: 'functionPage',
+            path: 'manager/functionPage',
             name: 'functionPage',
             redirect: '/functionPage/course',
             component: () => import('../views/manager/functionPage/index.vue'),
@@ -127,8 +127,9 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'login' })
     return
   } else {
+    console.log(to, to.path)
     if (userStore.getIsLogin() === false) {
-      console.log('登录状态')
+      console.log('登录状态', to.path)
       const res = await setRouter()
       if (res === true) {
         if (to.name === 'home') {
