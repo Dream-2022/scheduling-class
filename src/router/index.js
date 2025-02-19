@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { ElMessage } from 'element-plus'
 
 const basicRouter = [
   {
@@ -122,6 +123,7 @@ router.beforeEach(async (to, from, next) => {
     return
   } else if (userStore.user == null) {
     console.log('未登录跳转到登录页')
+    ElMessage.warning('请先登录, 已为您跳转到登录页')
     next({ name: 'login' })
     return
   } else {
