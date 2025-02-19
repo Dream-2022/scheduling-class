@@ -40,7 +40,9 @@
   <div class="middle-box">
     <div class="left-boxes">
       <div class="wow fadeInLeft pulse chart1">
-        <div id="chart1-content"></div>
+        <div class="chart-content">
+          <Chart :option="chartOption1" />
+        </div>
         <el-dropdown @command="handleCommand1">
           <span class="el-dropdown-link"
             >{{ selectedOption1 }}<span class="iconfont icon-down"></span
@@ -72,7 +74,9 @@
         </el-dropdown>
       </div>
       <div class="wow fadeInLeft chart3">
-        <div id="chart3-content"></div>
+        <div class="chart-content">
+          <Chart :option="chartOption3" />
+        </div>
         <el-dropdown @command="handleCommand3">
           <span class="el-dropdown-link"
             >{{ selectedOption3 }}<span class="iconfont icon-down"></span
@@ -87,7 +91,9 @@
         </el-dropdown>
       </div>
       <div class="wow fadeInLeft chart4">
-        <div id="chart4-content"></div>
+        <div class="chart-content">
+          <Chart :option="chartOption4" />
+        </div>
         <el-dropdown @command="handleCommand4">
           <span class="el-dropdown-link"
             >{{ selectedOption4 }}<span class="iconfont icon-down"></span
@@ -207,8 +213,6 @@ let selectedOption1 = ref('近一周趋势图')
 let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
-let myChart1 = null
-let option1 = null
 
 onMounted(async () => {
   const wow = new WOW({})
@@ -218,7 +222,6 @@ onMounted(async () => {
   console.log(userInfo.value)
   let chartDom1 = document.getElementById('chart1-content')
   console.log(userInfo.value, chartDom1)
-  setChart1()
 })
 //点击搜索
 async function searchClick() {
@@ -244,136 +247,128 @@ async function handleCommand4(command) {
   console.log(command)
 }
 
-const setChart1 = () => {
-  let chartDom1 = document.getElementById('chart1-content')
-  myChart1 = echarts.init(chartDom1)
-  option1 = {
-    title: {
-      show: true,
-      text: `{value|检测数量}`,
-      subtext: `{value|平均}{titleSize| 1 }{value|次}`,
-      textStyle: {
-        color: '#065fed', //文字颜色
-        fontSize: '18', //文字大小
-        rich: {
-          titleIcon: {
-            backgroundColor: {
-              image: '@/asset/echarts/bar-chart.png',
-            },
-            height: 15,
-            width: 16,
-          },
-        },
-      },
-      subtextStyle: {
-        fontSize: '14',
-        rich: {
-          titleSize: {
-            fontSize: '18',
-            fontWeight: '600',
-          },
-        },
-      },
+const chartOption1 = ref({
+  title: {
+    show: true,
+    text: `{value|学期进度}`,
+    subtext: `{titleSize| 20 }{value|%}`,
+    textStyle: {
+      rich: {},
     },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-        label: {
-          backgroundColor: '#6a7985',
+  },
+  series: [
+    {
+      type: 'gauge',
+      center: ['50%', '80%'],
+      startAngle: 200,
+      endAngle: -20,
+      min: 0,
+      max: 100,
+      itemStyle: {
+        color: '#FFAB91',
+      },
+      progress: {
+        show: true,
+        width: 5,
+      },
+      pointer: {
+        show: false,
+      },
+      axisLine: {
+        lineStyle: {
+          width: 5,
         },
       },
+      axisTick: {
+        distance: -15,
+        length: 5,
+        splitNumber: 2,
+        lineStyle: {
+          width: 2,
+          color: '#999',
+        },
+      },
+      splitLine: {
+        distance: -20,
+        length: 5,
+        lineStyle: {
+          width: 3,
+          color: '#999',
+        },
+      },
+      axisLabel: {
+        show: false,
+      },
+      anchor: {
+        show: false,
+      },
+      title: {
+        show: false,
+      },
+      detail: {
+        valueAnimation: true,
+        width: '100%',
+        lineHeight: 40,
+        borderRadius: 8,
+        offsetCenter: [0, '-15%'],
+        fontSize: 18,
+        fontWeight: 'bolder',
+        formatter: '{value} %',
+        color: 'inherit',
+      },
+      data: [
+        {
+          value: 20,
+        },
+      ],
     },
-    toolbox: {
-      feature: {
-        saveAsImage: {
-          title: '下载该图表',
-        },
+    {
+      type: 'gauge',
+      center: ['50%', '80%'],
+      startAngle: 200,
+      endAngle: -20,
+      min: 0,
+      max: 100,
+      itemStyle: {
+        color: '#FD7347',
       },
+      progress: {
+        show: true,
+        width: 8,
+      },
+      pointer: {
+        show: false,
+      },
+      axisLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+      splitLine: {
+        show: false,
+      },
+      axisLabel: {
+        show: false,
+      },
+      detail: {
+        show: false,
+      },
+      data: [
+        {
+          value: 20,
+        },
+      ],
     },
-    grid: {
-      left: '0%',
-      right: '0%',
-      bottom: '0%',
-      containLabel: true,
-    },
-    xAxis: [
-      {
-        type: 'category',
-        axisTick: {
-          show: false,
-        },
-        axisLine: {
-          show: false,
-        },
-        splitLine: {
-          show: false,
-        },
-        axisLabel: {
-          show: false,
-        },
-        data: [1, 2, 3, 2, 1, 4, 5],
-        boundaryGap: false,
-      },
-    ],
-    yAxis: [
-      {
-        type: 'value',
-        axisTick: {
-          show: false,
-        },
-        axisLine: {
-          show: false,
-        },
-        splitLine: {
-          show: false,
-        },
-        axisLabel: {
-          show: false,
-        },
-        boundaryGap: false,
-      },
-    ],
-    series: [
-      {
-        type: 'line',
-        stack: 'Total',
-        smooth: true,
-        symbol: 'none',
-        itemStyle: {
-          color: '#547BF1',
-        },
-        emphasis: {
-          focus: 'series',
-        },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            {
-              offset: 0,
-              color: '#547BF1',
-            },
-            {
-              offset: 1,
-              color: '#EDF1FE',
-            },
-          ]),
-        },
-        symbolSize: 5,
-        data: [1, 2, 3, 2, 1, 4, 4],
-      },
-    ],
-  }
-  console.log(option1)
-  // 使用刚指定的配置项和数据显示图表。
-  myChart1.setOption(option1)
-}
+  ],
+})
 
 const chartOption2 = ref({
   title: {
-    text: '{value|检测数量}',
+    text: '{value|近期反馈}',
     subtext: '{value|平均}{titleSize| 1 }{value|次}',
     textStyle: {
-      color: '#065fed',
+      color: '#6C54F1',
       rich: {},
     },
   },
@@ -393,12 +388,20 @@ const chartOption2 = ref({
   series: [
     {
       type: 'line',
-      itemStyle: { color: '#547BF1' },
+      smooth: true,
+      itemStyle: { color: '#6C54F1' },
       emphasis: { focus: 'series' },
+      symbol: 'none',
       areaStyle: {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: '#547BF1' },
-          { offset: 1, color: '#EDF1FE' },
+          {
+            offset: 0,
+            color: '#6C54F1',
+          },
+          {
+            offset: 1,
+            color: '#F9F8FE',
+          },
         ]),
       },
       symbolSize: 5,
@@ -407,6 +410,94 @@ const chartOption2 = ref({
   ],
 })
 
+const chartOption3 = ref({
+  title: {
+    text: `{value|邀请好友}`,
+    subtext: `{titleSize|2 }{value|个}`,
+    textStyle: {
+      color: '#ed8b31',
+      rich: {},
+    },
+  },
+  toolbox: {
+    feature: {
+      saveAsImage: {
+        title: '下载该图表',
+      },
+    },
+  },
+  grid: {
+    left: '5%',
+    right: '5%',
+    containLabel: true,
+  },
+  xAxis: {
+    type: 'category',
+    data: [7, 7, 8, 9, 6, 2],
+  },
+  yAxis: {
+    type: 'value',
+  },
+  series: {
+    type: 'bar',
+    data: [8, 5, 2, 3, 6, 8],
+    itemStyle: {
+      color: '#ed8b31',
+      borderRadius: [50, 50, 0, 0],
+    },
+    barGap: '90%',
+    barCategoryGap: '65%' /*多个并排柱子设置柱子之间的间距*/,
+    barMinHeight: 3, // 设置柱状图的最小高度，单位可以是像素或者百分比
+  },
+})
+
+const chartOption4 = ref({
+  title: {
+    text: `{value|教师占用率}`,
+    subtext: `{titleSize|61 }{value|%}`,
+    textStyle: {
+      color: '#ed8b31',
+      rich: {},
+    },
+  },
+  tooltip: {
+    trigger: 'item',
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: [20, 60],
+      center: ['50%', '58%'],
+      itemStyle: {
+        borderRadius: 8,
+        borderWidth: 3,
+        borderColor: 'white',
+      },
+      labelLine: {
+        show: false,
+      },
+      label: {
+        show: false,
+      },
+      data: [
+        {
+          value: 40,
+          name: 'rose 1',
+          itemStyle: {
+            color: '#DBDEE5',
+          },
+        },
+        {
+          value: 45,
+          name: 'rose 2',
+          itemStyle: {
+            color: '#7ab25f',
+          },
+        },
+      ],
+    },
+  ],
+})
 //点击快捷入口
 function staticAnalysis(string) {
   //跳转页面

@@ -1,6 +1,6 @@
 import * as echarts from 'echarts/core'
 
-import { BarChart, LineChart, ScatterChart, PieChart } from 'echarts/charts'
+import { BarChart, LineChart, ScatterChart, PieChart, GaugeChart } from 'echarts/charts'
 
 // 组件后缀都为 Component
 import {
@@ -33,6 +33,7 @@ echarts.use([
   LegendComponent,
   BarChart,
   PieChart,
+  GaugeChart,
   LineChart,
   ScatterChart,
   LabelLayout,

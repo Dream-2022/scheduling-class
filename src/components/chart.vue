@@ -94,23 +94,13 @@ const defaultOption = {
       boundaryGap: false,
     },
   ],
-  series: [
-    {
-      smooth: true,
-      itemStyle: {
-        color: '#547BF1',
-      },
-      stack: 'Total',
-      symbol: 'none',
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          { offset: 0, color: '#547BF1' },
-          { offset: 1, color: '#EDF1FE' },
-        ]),
-      },
-      data: [1, 2, 3, 2, 1, 4, 5],
+  series: {
+    itemStyle: {
+      color: '#547BF1',
     },
-  ],
+    stack: 'Total',
+    data: [1, 2, 3, 2, 1, 4, 5],
+  },
 }
 
 // 合并默认配置和父组件传入的配置
@@ -124,8 +114,25 @@ watch(
   { deep: true },
 )
 
+function renderChart() {
+  if (chartInstance) {
+    chartInstance.dispose()
+  }
+  chartInstance = echarts.init(chartContainer.value)
+  console.log('mergedOption', mergedOption)
+  chartInstance.setOption(mergedOption) // 使用合并后的配置
+}
+
+// 窗口大小变化时，调整图表大小
+function resizeChart() {
+  if (chartInstance) {
+    chartInstance.resize()
+  }
+}
+
 onMounted(() => {
   renderChart()
+  window.addEventListener('resize', resizeChart)
 })
 
 onBeforeUnmount(() => {
@@ -133,14 +140,6 @@ onBeforeUnmount(() => {
     chartInstance.dispose()
   }
 })
-
-function renderChart() {
-  if (chartInstance) {
-    chartInstance.dispose()
-  }
-  chartInstance = echarts.init(chartContainer.value)
-  chartInstance.setOption(mergedOption) // 使用合并后的配置
-}
 </script>
 
 <style scoped></style>
