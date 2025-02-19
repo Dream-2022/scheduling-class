@@ -115,17 +115,17 @@ router.beforeEach(async (to, from, next) => {
   clearRouter()
   // 如果目标是登录页且用户已经登录，则跳转到首页或其他页面
   if (to.name === 'login') {
-    if (userStore.user !== null) {
+    if (userStore.user != null) {
       next()
     }
     next() // 否则正常进入登录页
     return
-  } else if (userStore.user === null) {
+  } else if (userStore.user == null) {
     console.log('未登录跳转到登录页')
     next({ name: 'login' })
     return
   } else {
-    if (userStore.getIsLogin() === false) {
+    if (userStore.getIsLogin() == false) {
       console.log('登录状态', to.path)
       const res = await setRouter()
       if (res === true) {
