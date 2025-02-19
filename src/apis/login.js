@@ -1,27 +1,26 @@
 import http from '@/utils/http.js'
 
 //获取验证码
-export const getCodeAPI = (email, k) => {
+export const getCodeAPI = email => {
   return http({
     url: '/user-info/sendCode',
     method: 'GET',
     params: {
       email,
-      k,
     },
   })
 }
 //登录
-export const loginAPI = (username, password, k) => {
+export const loginAPI = (username, password, grant_type) => {
   return http({
-    url: '/user-info/login',
+    url: '/oauth2/token',
     method: 'POST',
-    params: {
-      k,
-    },
     data: {
       username,
       password,
+      grant_type,
+      client_id: 'scheduling',
+      client_secret: 'scheduling-secret',
     },
   })
 }

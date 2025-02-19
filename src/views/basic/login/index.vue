@@ -151,7 +151,7 @@ const router = useRouter()
 const userStore = useUserStore()
 // const webSocketStore = useWebSocketStore()
 const loginData = ref({
-  account: '87247104',
+  account: '2022401714',
   password: '123',
 })
 const registerData = ref({
@@ -225,20 +225,21 @@ const toLogin = () => {
   signUpMode.value = false
 }
 const login = async () => {
-  const res = await loginAPI(loginData.value.account, loginData.value.password, 'v')
+  console.log(loginData.value.account, loginData.value.password)
+  const res = await loginAPI(loginData.value.account, loginData.value.password, 'password')
   console.log(res)
-  if (res.data.code == 200) {
-    console.log(res.headers)
+  if (res.data.code == 0) {
     userStore.setUserInfo(
-      res.data.data,
-      res.headers.get('Accesstoken'),
-      res.headers.get('Refreshtoken'),
+      loginData.value.account,
+      res.data.data.authorities[0],
+      res.data.data.access_token,
+      res.data.data.refresh_token,
     )
     ElMessage.success(res.data.message)
     localStorage.setItem('user', JSON.stringify(userStore.user))
     // webSocketStore.initialize(userStore.user.userMail)
     setTimeout(() => {
-      router.push('/userMainPage')
+      router.push('/manager/home')
     }, 100)
   } else {
     ElMessage.error(res.data.message)

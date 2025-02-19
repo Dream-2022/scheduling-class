@@ -17,6 +17,16 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const setUserInfo = (username, identity, token, refreshToken) => {
+    user.value = {
+      name: username,
+      identity,
+      token,
+      refreshToken,
+    }
+    localStorage.setItem('user', JSON.stringify(user.value))
+  }
+
   const initialize = () => {
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
@@ -28,5 +38,6 @@ export const useUserStore = defineStore('user', () => {
     user,
     getIsLogin,
     initialize,
+    setUserInfo,
   }
 })
