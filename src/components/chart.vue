@@ -119,7 +119,6 @@ function renderChart() {
     chartInstance.dispose()
   }
   chartInstance = echarts.init(chartContainer.value)
-  console.log('mergedOption', mergedOption)
   chartInstance.setOption(mergedOption) // 使用合并后的配置
 }
 

@@ -32,6 +32,7 @@ export const useUserStore = defineStore('user', () => {
     if (savedUser) {
       user.value = JSON.parse(savedUser)
     }
+    return user.value
   }
 
   return {

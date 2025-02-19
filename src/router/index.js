@@ -24,8 +24,9 @@ const router = createRouter({
 
 const setRouter = async () => {
   return new Promise(resolve => {
+    console.log('设置路由')
     const userStore = useUserStore()
-    let identity = userStore.user.identity
+    let identity = userStore.initialize().identity
     if (identity === 'student') {
       router.addRoute({
         path: '/',
@@ -54,7 +55,7 @@ const setRouter = async () => {
           },
         ],
       })
-    } else if (identity === 'manager') {
+    } else if (identity === 'ADMIN') {
       router.addRoute({
         path: '/',
         name: 'home',
@@ -114,14 +115,15 @@ const setRouter = async () => {
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   clearRouter()
+  const user = userStore.initialize()
   // 如果目标是登录页且用户已经登录，则跳转到首页或其他页面
   if (to.name === 'login') {
-    if (userStore.user != null) {
+    if (user != null) {
       next()
     }
     next() // 否则正常进入登录页
     return
-  } else if (userStore.user == null) {
+  } else if (user == null) {
     console.log('未登录跳转到登录页')
     ElMessage.warning('请先登录, 已为您跳转到登录页')
     next({ name: 'login' })

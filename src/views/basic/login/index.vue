@@ -239,7 +239,7 @@ const login = async () => {
     localStorage.setItem('user', JSON.stringify(userStore.user))
     // webSocketStore.initialize(userStore.user.userMail)
     setTimeout(() => {
-      router.push('/manager/home')
+      router.push('/manager/mainPage')
     }, 100)
   } else {
     ElMessage.error(res.data.message)
