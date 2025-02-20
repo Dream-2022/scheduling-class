@@ -453,10 +453,10 @@ const chartOption3 = ref({
 
 const chartOption4 = ref({
   title: {
-    text: `{value|教师占用率}`,
+    text: `{value|教室占用率}`,
     subtext: `{titleSize|61 }{value|%}`,
     textStyle: {
-      color: '#ed8b31',
+      color: '#7ab25f',
       rich: {},
     },
   },

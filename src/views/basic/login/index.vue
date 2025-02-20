@@ -14,7 +14,7 @@
             <el-input
               v-model="loginData.account"
               style="width: 300px; height: 50px"
-              placeholder="请输入账号id"
+              placeholder="请输入学号"
               :prefix-icon="User"
             ></el-input>
           </el-form-item>
@@ -26,6 +26,18 @@
               placeholder="请输入密码"
               :prefix-icon="Lock"
             ></el-input>
+          </el-form-item>
+          <el-form-item prop="type">
+            <el-select
+              v-model="typeValue"
+              clearable
+              placeholder="请选择身份"
+              style="width: 300px; height: 50px"
+            >
+              <el-option label="&nbsp;&nbsp;&nbsp;学生" value="学生" />
+              <el-option label="&nbsp;&nbsp;&nbsp;教师" value="教师" />
+              <el-option label="&nbsp;&nbsp;&nbsp;校园管理者" value="校园管理者" />
+            </el-select>
           </el-form-item>
           <div class="submit-btn" @click="login">立即登录</div>
           <span @click="toEmailLogin" style="color: #6266f5; text-decoration: underline"
@@ -66,12 +78,12 @@
           </el-form-item>
           <div class="submit-btn" @click="emailLogin">邮箱登录</div>
           <span @click="toIdLogin" style="color: #6266f5; text-decoration: underline"
-            >账号id登录</span
+            >学号登录</span
           >
         </el-form>
       </form>
       <form class="sign-up-form">
-        <h2 class="form-title">注册</h2>
+        <h2 class="form-title">管理员注册</h2>
         <el-form :model="registerData" :rules="registerRules" size="large">
           <el-form-item prop="email">
             <el-input
@@ -104,15 +116,7 @@
               >获取验证码</el-button
             >
           </el-form-item>
-          <el-form-item prop="invitationCode">
-            <el-input
-              v-model="registerData.invitationCode"
-              style="width: 300px; height: 50px"
-              :prefix-icon="CircleCheck"
-              placeholder="选填邀请码"
-            ></el-input>
-          </el-form-item>
-          <div @click="register" class="submit-btn">注册</div>
+          <div @click="register" class="submit-btn">确认</div>
         </el-form>
       </form>
     </div>
@@ -120,7 +124,7 @@
       <div class="desc-warp-item sign-up-desc">
         <div class="content">
           <!-- <p>快来加入我们吧</p> -->
-          <button class="button" @click="toRegister" id="sign-up-btn">注册</button>
+          <button class="button" @click="toRegister" id="sign-up-btn">管理员注册</button>
         </div>
         <img src="@/assets/img/log.svg" alt="" />
       </div>
@@ -142,13 +146,14 @@ import { useUserStore } from '@/stores/userStore.js'
 // import { useWebSocketStore } from '@/stores/webSocketStore.js'
 import { loginAPI, getCodeAPI, registerAPI, login2API } from '@/apis/login'
 import { useRouter } from 'vue-router'
-import { Lock, Clock, User, CircleCheck } from '@element-plus/icons-vue'
+import { Lock, Clock, User } from '@element-plus/icons-vue'
 
 // id 还是邮箱登录 true 是id,false 是邮箱
 const loginOptions = ref(true)
 const signUpMode = ref(false)
 const router = useRouter()
 const userStore = useUserStore()
+let typeValue = ref('') //身份
 // const webSocketStore = useWebSocketStore()
 const loginData = ref({
   account: '2022401714',
@@ -166,7 +171,7 @@ const modifyData = ref({
   code: '',
 })
 const loginRules = {
-  account: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+  account: [{ required: true, message: '请输入学号', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     {
@@ -277,22 +282,6 @@ const register = async () => {
     ElMessage.error(res.data.message)
   }
 }
-// const modify = async () => {
-//   const res = await modifyAPI(
-//     modifyData.value.email,
-//     modifyData.value.password,
-//     modifyData.value.code,
-//   )
-//   if (res.data.code === 200) {
-//     userStore.setUserInfo(res.data.data)
-//     ElMessage.success(res.data.message)
-//     setTimeout(() => {
-//       location.href = 'https://192.168.50.8:5173/'
-//     }, 2000)
-//   } else {
-//     ElMessage.error(res.data.message)
-//   }
-// }
 const getModifyCode = async () => {
   let regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
   console.log(regex.test(modifyData.value.email))
@@ -383,6 +372,10 @@ onMounted(() => {
 .form-warp .sign-up-form {
   opacity: 0;
   z-index: 3;
+}
+
+:deep(.el-select__wrapper) {
+  min-height: 50px;
 }
 
 .container.sign-up-mode .form-warp {
