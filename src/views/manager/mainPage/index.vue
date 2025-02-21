@@ -43,18 +43,6 @@
         <div class="chart-content">
           <Chart :option="chartOption1" />
         </div>
-        <el-dropdown @command="handleCommand1">
-          <span class="el-dropdown-link"
-            >{{ selectedOption1 }}<span class="iconfont icon-down"></span
-          ></span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
       </div>
       <div class="wow fadeInLeft chart2">
         <div class="chart-content">
@@ -110,45 +98,49 @@
       <div class="wow fadeInUp footer1">
         <div class="footer-title">
           <el-divider direction="vertical" />
-          <div class="title-box">范本库</div>
-          <div class="more-view" @click="() => $router.push('/userTemplatePage')">
+          <div class="title-box">申请</div>
+          <div class="more-view" @click="() => $router.push('/functionPage/application')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
-        <div class="template-boxes">
-          <!-- <div
-            class="template-box"
-            v-for="(item, index) in templateList.slice(0, 6)"
+        <div class="application-boxes">
+          <div
+            class="application-box"
+            v-for="(item, index) in applicationList"
             :key="item"
-            @mouseenter="isDisable[index] = false"
-            @mouseleave="isDisable[index] = true"
+            @mouseenter="isDisable.arr[index] = false"
+            @mouseleave="isDisable.arr[index] = true"
           >
             <span style="display: flex">
-              <span class="template-title" @click="templateClick(item.essayId)">{{
-                item?.essayTitle
+              <span class="application-title" @click="applicationClick(item.essayId)">{{
+                item?.title
               }}</span>
               <span
-                @click="temLoadClick(item.essayId)"
+                @click="temLoadClick(item.id)"
                 style="z-index: 10px; color: #4d4d4d; cursor: pointer"
-                :class="isDisable[index] == true ? 'disabled' : ''"
+                :class="isDisable.arr[index] == true ? 'disabled' : ''"
               >
-                下载
+                查看
                 <i class="iconfont icon-download1" style="margin-left: 5px"></i>
               </span>
+              <span
+                class="application-detail"
+                :class="isDisable.arr[index] == true ? '' : 'disabled'"
+              >
+                <span>{{ item.leaveStartTime }}</span>
+                <span>{{ item.leaveDays }} 天</span>
+                <span>{{ item.leaveCourseCount }} 大节课</span>
+              </span>
             </span>
-            <span class="template-bottom" @click="templateClick(item.essayId)">
-              <span class="first-label" v-if="item.labelList && item.labelList.length > 0">{{
-                item?.labelList[0]
-              }}</span>
-              <span class="second-label" v-if="item.labelList && item.labelList.length > 0">{{
-                item?.labelList[1]
-              }}</span>
-              <span class="name-label">{{ item?.essayWriter }}</span>
-              <span class="time-label">{{ item?.publicationTime }}</span>
+            <span class="application-bottom" @click="applicationClick(item.essayId)">
+              <span class="first-label">{{ item?.leaveType }}</span>
+              <span class="second-label">{{ item?.leaveReason }}</span>
+              <span class="name-label">{{ item?.applicant }}</span>
+              <span class="time-label">{{ item?.time }}</span>
             </span>
-          </div> -->
+          </div>
         </div>
-        <div><img src="@/assets/img/book.png" class="template-img" /></div>
+        <div><img src="@/assets/img/book.png" class="application-img" /></div>
       </div>
       <div class="wow fadeInUp footer2">
         <div class="footer-title">
@@ -180,7 +172,7 @@
             </span>
           </div> -->
         </div>
-        <div><img src="@/assets/img/book.png" class="template-img" /></div>
+        <div><img src="@/assets/img/book.png" class="application-img" /></div>
       </div>
     </div>
     <div class="wow fadeInRight right-boxes">
@@ -194,7 +186,7 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
@@ -206,10 +198,50 @@ let echarts = internalInstance.appContext.config.globalProperties.$echarts
 const userStore = useUserStore()
 const router = useRouter()
 
-let searchValue = ref('') //搜索内容
-let userInfo = ref(null)
+let searchValue = ref('') // 搜索内容
+let userInfo = reactive([]) // 用户信息
+let isDisable = reactive({
+  arr: [],
+})
+let applicationList = reactive([
+  {
+    id: 124,
+    title: '需要实习两天',
+    // 申请时间
+    time: '2025-2-8 15:30',
+    // 请假开始时间
+    leaveStartTime: '2025-2-10',
+    // 请假天数
+    leaveDays: '2',
+    // 请假课程数量
+    leaveCourseCount: '5',
+    // 请假类型
+    leaveType: '公假',
+    // 申请事项
+    leaveReason: '调课申请',
+    // 申请人信息
+    applicant: '赵六(N21452153)',
+  },
+  {
+    id: 122,
+    title: '外出学习（老吉大）',
+    // 申请时间
+    time: '2025-2-8 12:30',
+    // 请假开始时间
+    leaveStartTime: '2025-2-10',
+    // 请假天数
+    leaveDays: '1',
+    // 请假课程数量
+    leaveCourseCount: '2',
+    // 请假类型
+    leaveType: '事假',
+    // 申请事项
+    leaveReason: '代课申请',
+    // 申请人信息
+    applicant: '王五(N219856153)',
+  },
+])
 // charts图标选中
-let selectedOption1 = ref('近一周趋势图')
 let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
@@ -218,10 +250,14 @@ onMounted(async () => {
   const wow = new WOW({})
   wow.init()
   userStore.initialize()
-  userInfo.value = userStore.user
-  console.log(userInfo.value)
+  userInfo.push(...[userStore.user])
+  console.log(userInfo)
   let chartDom1 = document.getElementById('chart1-content')
-  console.log(userInfo.value, chartDom1)
+  console.log(userInfo, chartDom1)
+  for (let i = 0; i < applicationList.length; i++) {
+    isDisable.arr[i] = true
+  }
+  console.log(isDisable.arr)
 })
 //点击搜索
 async function searchClick() {
@@ -230,11 +266,6 @@ async function searchClick() {
     return
   }
   router.push(`/function/manager/${searchValue.value}`)
-}
-
-//下拉框的改变
-async function handleCommand1(command) {
-  console.log(command)
 }
 
 async function handleCommand2(command) {
@@ -302,19 +333,13 @@ const chartOption1 = ref({
       anchor: {
         show: false,
       },
-      title: {
-        show: false,
-      },
       detail: {
         valueAnimation: true,
-        width: '100%',
-        lineHeight: 40,
-        borderRadius: 8,
         offsetCenter: [0, '-15%'],
         fontSize: 18,
         fontWeight: 'bolder',
         formatter: '{value} %',
-        color: 'inherit',
+        color: '#065fed',
       },
       data: [
         {
@@ -330,7 +355,7 @@ const chartOption1 = ref({
       min: 0,
       max: 100,
       itemStyle: {
-        color: '#FD7347',
+        color: '#065fed',
       },
       progress: {
         show: true,
@@ -506,7 +531,6 @@ function staticAnalysis(string) {
 }
 </script>
 <style lang="scss" scoped>
-@import '@/assets/scss/default.scss';
 .component-box {
   margin: 10px auto;
   margin-top: 0px;
@@ -674,7 +698,6 @@ function staticAnalysis(string) {
     .chart2,
     .chart3,
     .chart4 {
-      padding-bottom: 3%;
       border-radius: 10px;
 
       @media (max-width: 765px) {
@@ -687,10 +710,6 @@ function staticAnalysis(string) {
       @media (min-width: 1300px) {
       }
 
-      #chart1-content,
-      #chart2-content,
-      #chart3-content,
-      #chart4-content,
       .chart-content {
         height: 75%;
         width: 94%;
@@ -705,9 +724,6 @@ function staticAnalysis(string) {
         padding: 3px 5px 3px 5px;
         font-size: 12px;
 
-        // display: flex;
-        // justify-content: center;
-        // align-content: center;
         #el-id-5859-0 {
           display: flex;
           justify-content: center;
@@ -717,6 +733,11 @@ function staticAnalysis(string) {
         .icon-down::before {
           font-size: 12px;
         }
+      }
+      .el-dropdown-link {
+        outline: none;
+        border: none;
+        box-shadow: none;
       }
     }
 
@@ -827,7 +848,7 @@ function staticAnalysis(string) {
         }
       }
 
-      .template-img {
+      .application-img {
         height: 60px;
         position: absolute;
         bottom: 0;
@@ -838,19 +859,20 @@ function staticAnalysis(string) {
     .footer1 {
       grid-area: footer1;
 
-      .template-boxes {
+      .application-boxes {
+        color: $word-black-color;
         cursor: pointer;
         word-wrap: break-word;
         font-size: 14px;
         padding: 10px 5px 0 10px;
 
-        .template-box {
+        .application-box {
           margin-bottom: 6px;
           padding: 5px 5px 5px 5px;
           border-radius: 5px;
           // border-bottom: 1px solid #ccc;
 
-          .template-title {
+          .application-title {
             margin-right: auto;
             margin-bottom: 5px;
             overflow: hidden;
@@ -859,8 +881,16 @@ function staticAnalysis(string) {
             -webkit-line-clamp: 2;
             text-overflow: ellipsis;
           }
+          .application-detail {
+            span {
+              padding-left: 8px;
+            }
+          }
+          .disabled {
+            display: none;
+          }
 
-          .template-bottom {
+          .application-bottom {
             font-size: 12px;
             display: flex;
             flex-wrap: wrap;
@@ -901,7 +931,7 @@ function staticAnalysis(string) {
           }
         }
 
-        .template-box:hover {
+        .application-box:hover {
           background-color: #f3f5f8;
         }
       }
@@ -931,7 +961,7 @@ function staticAnalysis(string) {
           padding: 5px 5px 5px 5px;
           // border-bottom: 1px solid #ccc;
 
-          .template-title {
+          .analysis-title {
             margin-bottom: 5px;
             overflow: hidden;
             display: -webkit-box;
