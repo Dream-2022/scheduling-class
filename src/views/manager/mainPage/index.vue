@@ -204,8 +204,12 @@
                 <div class="class-right-box">
                   <div class="class-right-title">参与教师</div>
                   <div class="class-teacher">
-                    <div v-for="teacher in item.teachers" :key="teacher">
-                      <img src="@/assets/img/cat.jpeg" class="class-teacher-img" />
+                    <div v-for="(teacher, index) in item.teachers" :key="teacher">
+                      <img
+                        src="@/assets/img/cat.jpeg"
+                        class="class-teacher-img"
+                        :style="{ transform: `translateX(${index * -10}px)` }"
+                      />
                     </div>
                   </div>
                 </div>
@@ -323,6 +327,29 @@ let teacherList = reactive({
 })
 let classList = reactive({
   arr: [
+    {
+      id: 0,
+      title: '第一次排课',
+      status: '已发布',
+      time: '2025-2-8 15:30',
+      assign: 122,
+      class: 23,
+      noCourse: 1,
+      teachers: [
+        {
+          id: 0,
+          name: '李华',
+          subject: '物理',
+          picture: '@/assets/img/book.png',
+        },
+        {
+          id: 1,
+          name: '华',
+          subject: '物理',
+          picture: '@/assets/img/cat.png',
+        },
+      ],
+    },
     {
       id: 0,
       title: '第一次排课',
@@ -1063,7 +1090,7 @@ function staticAnalysis(string) {
       .footer2-child1,
       .footer2-child2 {
         border-radius: 8px;
-        background-color: rgb(174, 208, 244, 0);
+        background-color: #fff;
         box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
         .teacher-boxes {
@@ -1093,9 +1120,9 @@ function staticAnalysis(string) {
 
               .teacher-subject {
                 padding: 2.5px 6px;
-                white-space: nowrap; //不允许换行
-                overflow: hidden; //超出包裹器隐藏
-                text-overflow: ellipsis; //显示省略符号来代表被修剪的文本。
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
               }
 
               .teacher-status {
@@ -1109,7 +1136,9 @@ function staticAnalysis(string) {
         }
 
         .class-boxes {
+          border-radius: 8px;
           .class-box {
+            border-radius: 0 0 8px 8px;
             display: flex;
             padding: 10px 20px;
 
@@ -1138,6 +1167,7 @@ function staticAnalysis(string) {
               .class-left-bottom {
                 color: $word-grey-color;
                 font-size: 14px;
+                line-height: 30px;
               }
             }
 
@@ -1151,12 +1181,19 @@ function staticAnalysis(string) {
                   font-size: 14px;
                   margin-bottom: 6px;
                 }
+
+                .class-right-content {
+                  line-height: 30px;
+                  font-size: 18px;
+                  font-weight: 600;
+                }
                 .class-teacher {
                   display: flex;
-                  .class-teacher-img:nth-child(n) {
-                    width: 30px;
+
+                  .class-teacher-img {
+                    width: 25px;
                     border-radius: 15px;
-                    transform: translateX(calc(var(--index) * -15px));
+                    border: 2px solid #fff;
                   }
                 }
               }
@@ -1167,6 +1204,10 @@ function staticAnalysis(string) {
 
       .footer2-child1 {
         margin-bottom: 2%;
+      }
+
+      .footer2-child2 {
+        height: 100%;
       }
     }
   }
