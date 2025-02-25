@@ -13,28 +13,28 @@
   </div>
   <div class="module-boxes">
     <div class="module-box">
-      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('userRecentPage')" />
-      <div @click="staticAnalysis('userRecentPage')">排课计划</div>
+      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course')" />
+      <div @click="staticAnalysis('course')">排课计划</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('userMyAnalysisPage')" />
-      <div @click="staticAnalysis('userMyAnalysisPage')">排考试</div>
+      <img src="@/assets/3D/private.png" @click="staticAnalysis('exam')" />
+      <div @click="staticAnalysis('exam')">排考试</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/0-t.png" @click="Analysis('userUploadPage', false)" />
-      <div @click="Analysis('userUploadPage', false)">学校信息</div>
+      <img src="@/assets/3D/0-t.png" @click="staticAnalysis('information')" />
+      <div @click="staticAnalysis('information')">学校信息</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/1-t.png" @click="Analysis('userUploadPage', true)" />
-      <div @click="Analysis('userUploadPage', true)">统计分析</div>
+      <img src="@/assets/3D/1-t.png" @click="staticAnalysis('analysis')" />
+      <div @click="staticAnalysis('analysis')">统计分析</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('userBlackWhitePage')" />
-      <div @click="staticAnalysis('userBlackWhitePage')">申请处理</div>
+      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('application')" />
+      <div @click="staticAnalysis('application')">申请处理</div>
     </div>
-    <div class="module-box" @click="staticAnalysis('userMemberPage')">
-      <img src="@/assets/3D/2-t.png" />
-      <div @click="staticAnalysis('userMemberPage')">系统管理</div>
+    <div class="module-box">
+      <img src="@/assets/3D/2-t.png" @click="staticAnalysis('manage')" />
+      <div @click="staticAnalysis('manage')">系统管理</div>
     </div>
   </div>
   <div class="middle-box">
@@ -98,8 +98,8 @@
       <div class="wow fadeInUp footer1">
         <div class="footer-title">
           <el-divider direction="vertical" />
-          <div class="title-box">申请</div>
-          <div class="more-view" @click="() => $router.push('/functionPage/application')">
+          <div class="title-box">请假申请</div>
+          <div class="more-view" @click="() => $router.push('/manager/functionPage/application')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -125,16 +125,20 @@
               </span>
               <span
                 class="application-detail"
-                :class="isDisable.arr[index] == true ? '' : 'disabled'"
+                :class="isDisable?.arr[index] == true ? '' : 'disabled'"
               >
-                <span>{{ item.leaveStartTime }}</span>
-                <span>{{ item.leaveDays }} 天</span>
-                <span>{{ item.leaveCourseCount }} 大节课</span>
+                <span>{{ item?.leaveStartTime }}</span>
+                <span>{{ item?.leaveDays }} 天</span>
+                <span>{{ item?.leaveCourseCount }} 大节课</span>
               </span>
             </span>
             <span class="application-bottom" @click="applicationClick(item.essayId)">
-              <span class="first-label">{{ item?.leaveType }}</span>
-              <span class="second-label">{{ item?.leaveReason }}</span>
+              <span class="first-label" :class="getLabel(item?.leaveType, true)">{{
+                item?.leaveType
+              }}</span>
+              <span class="second-label" :class="getLabel(item?.leaveReason, false)">{{
+                item?.leaveReason
+              }}</span>
               <span class="name-label">{{ item?.applicant }}</span>
               <span class="time-label">{{ item?.time }}</span>
             </span>
@@ -147,7 +151,7 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">工作量 / 周</div>
-            <div class="more-view" @click="() => $router.push('/userRecentPage')">
+            <div class="more-view" @click="() => $router.push('/manager/functionPage/course')">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
@@ -173,7 +177,7 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">排课</div>
-            <div class="more-view" @click="() => $router.push('/userRecentPage')">
+            <div class="more-view" @click="() => $router.push('/manager/functionPage/course')">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
@@ -182,7 +186,12 @@
               <div class="class-left">
                 <div class="class-left-top">
                   <div class="class-left-title">{{ item.title }}</div>
-                  <div class="class-left-status">{{ item.status }}</div>
+                  <div
+                    class="class-left-status"
+                    :class="item.status === '已发布' ? 'class-status1' : 'class-status2'"
+                  >
+                    {{ item.status }}
+                  </div>
                 </div>
                 <div class="class-left-bottom">
                   {{ item.time }}
@@ -221,28 +230,10 @@
     </div>
     <div class="wow fadeInRight right-boxes">
       <div class="right-box1">
-        <div class="panel-box">
-          <div class="iconfont icon-daichuli"></div>
-          <div class="panel-word">待处理</div>
-          <div class="panel-number">12</div>
-          <div class="panel-button">查看</div>
-        </div>
-        <div class="panel-box">
-          <div class="iconfont icon-daichuli1"></div>
-          <div class="panel-word">待解决</div>
-          <div class="panel-number">5</div>
-          <div class="panel-button">查看</div>
-        </div>
-        <div class="panel-box">
-          <div class="iconfont icon-zaixiankaoshi"></div>
-          <div class="panel-word">待考试</div>
-          <div class="panel-number">--</div>
-          <div class="panel-button">查看</div>
-        </div>
-        <div class="panel-box">
-          <div class="iconfont icon-yiwanchengdingdan"></div>
-          <div class="panel-word">已完成</div>
-          <div class="panel-number">23</div>
+        <div class="panel-box" v-for="item in panelContents.arr" :key="item">
+          <div class="iconfont" :class="item.class" :style="'color: ' + item.color"></div>
+          <div class="panel-word">{{ item.content }}</div>
+          <div class="panel-number">{{ item.value }}</div>
           <div class="panel-button">查看</div>
         </div>
       </div>
@@ -250,7 +241,7 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">反馈</div>
-          <div class="more-view" @click="() => $router.push('/userRecentPage')">
+          <div class="more-view" @click="() => $router.push('/manager/functionPage/course')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -262,9 +253,19 @@
             </div>
             <div class="feedback-bottom">
               <div class="feedback-bottom-top">
-                <div class="feedback-identity">{{ item.identity }}</div>
+                <div
+                  class="feedback-identity"
+                  :class="item?.identity === 'teacher' ? 'teacher-identity' : 'student-identity'"
+                >
+                  {{ item?.identity }}
+                </div>
                 <div class="feedback-name">{{ item.name }}</div>
-                <div class="feedback-status">{{ item.status }}</div>
+                <div
+                  class="feedback-status"
+                  :class="item.status === '已解决' ? 'green-status' : 'red-status'"
+                >
+                  {{ item.status }}
+                </div>
               </div>
               <div class="feedback-time">{{ item.time }}</div>
             </div>
@@ -292,23 +293,39 @@ const router = useRouter()
 let searchValue = ref('') // 搜索内容
 let userInfo = reactive([]) // 用户信息
 const customColors = [
-  { color: '#368eec', percentage: 50 },
+  { color: '#7ab25f', percentage: 25 },
+  { color: '#547bf1', percentage: 50 },
+  { color: '#ef943f', percentage: 75 },
   { color: '#f56c6c', percentage: 100 },
 ]
-// const panelContents=[
-//   {
-//     content: '待处理',
-//   },
-//   {
-//     content: '待解决',
-//   },
-//   {
-//     content: '待处理',
-//   },
-//   {
-//     content: '待处理',
-//   },
-// ]
+const panelContents = reactive({
+  arr: [
+    {
+      content: '待处理',
+      value: 12,
+      color: '#FFAB91',
+      class: 'icon-daichuli',
+    },
+    {
+      content: '待解决',
+      value: 5,
+      color: '#6C54F1',
+      class: 'icon-daichuli1',
+    },
+    {
+      content: '待考试',
+      value: '--',
+      color: '#ed8b31',
+      class: 'icon-zaixiankaoshi',
+    },
+    {
+      content: '已完成',
+      value: 23,
+      color: '#7ab25f',
+      class: 'icon-yiwanchengdingdan',
+    },
+  ],
+})
 let isDisable = reactive({
   arr: [],
 })
@@ -357,7 +374,7 @@ let teacherList = reactive({
       name: '李华',
       subject: '物理',
       status: '教授',
-      job: 70,
+      job: 99,
     },
     {
       id: 1,
@@ -387,7 +404,7 @@ let classList = reactive({
     {
       id: 0,
       title: '第一次排课',
-      status: '已发布',
+      status: '未发布',
       time: '2025-2-8 15:30',
       assign: 122,
       class: 23,
@@ -464,14 +481,31 @@ onMounted(async () => {
   wow.init()
   userStore.initialize()
   userInfo.push(...[userStore.user])
-  console.log(userInfo)
-  let chartDom1 = document.getElementById('chart1-content')
-  console.log(userInfo, chartDom1)
   for (let i = 0; i < applicationList.length; i++) {
     isDisable.arr[i] = true
   }
-  console.log(isDisable.arr)
 })
+//获取颜色
+function getLabel(content, number) {
+  console.log(content)
+  if (number == true) {
+    if (content === '事假') {
+      return 'first-label1'
+    } else if (content === '公假') {
+      return 'first-label2'
+    } else {
+      return 'first-label3'
+    }
+  } else {
+    if (content === '调课申请') {
+      return 'second-label1'
+    } else if (content === '代课申请') {
+      return 'second-label2'
+    } else {
+      return 'second-label3'
+    }
+  }
+}
 //点击搜索
 async function searchClick() {
   if (searchValue.value == '' || searchValue.value == null) {
@@ -739,8 +773,8 @@ const chartOption4 = ref({
 //点击快捷入口
 function staticAnalysis(string) {
   //跳转页面
-  console.log('点击')
-  router.push(`../${string}`)
+  console.log('点击', `manager/functionPage/${string}`)
+  router.push(`/manager/functionPage/${string}`)
 }
 </script>
 <style lang="scss" scoped>
@@ -1078,19 +1112,37 @@ function staticAnalysis(string) {
             align-items: center;
 
             .first-label {
-              background-color: $main-blue;
               color: #fff;
               border-radius: 5px;
               padding: 0 5px;
+            }
+
+            .first-label1 {
+              background-color: $main-blue;
+            }
+            .first-label2 {
+              background-color: $main-purple;
+            }
+            .first-label3 {
+              background-color: $word-grey-color;
             }
 
             .second-label {
               margin-left: 5px;
               margin-right: 8px;
               background-color: #e6eaf2;
-              color: $main-blue;
               border-radius: 5px;
               padding: 0 5px;
+            }
+
+            .second-label1 {
+              color: $main-blue;
+            }
+            .second-label2 {
+              color: $main-purple;
+            }
+            .second-label3 {
+              color: $word-black-color;
             }
 
             .name-label {
@@ -1205,9 +1257,14 @@ function staticAnalysis(string) {
                   display: inline-block;
                   font-size: 12px;
                   padding: 1px 6px;
-                  background-color: $yellow;
                   border-radius: 5px;
                   color: #fff;
+                }
+                .class-status1 {
+                  background-color: $main-blue;
+                }
+                .class-status2 {
+                  background-color: $main-yellow;
                 }
               }
 
@@ -1281,10 +1338,17 @@ function staticAnalysis(string) {
 
       .panel-box {
         display: flex;
+        cursor: pointer;
         flex: 1;
         flex-direction: column;
         align-items: center;
         gap: 6px;
+
+        &:hover .panel-button {
+          color: #fff;
+          background-color: $main-blue;
+          box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
+        }
 
         .iconfont::before {
           font-size: 34px;
@@ -1306,7 +1370,6 @@ function staticAnalysis(string) {
           border: 1px solid $main-blue;
           border-radius: 8px;
           padding: 0.5px 8px;
-          cursor: pointer;
         }
       }
 
@@ -1347,11 +1410,17 @@ function staticAnalysis(string) {
               gap: 8px;
             }
             .feedback-identity {
-              background-color: $main-purple;
               color: #fff;
               padding: 0 5px;
               border-radius: 5px;
               font-size: 11px;
+            }
+
+            .teacher-identity {
+              background-color: $main-purple;
+            }
+            .student-identity {
+              background-color: $main-blue;
             }
 
             .feedback-time {
@@ -1359,11 +1428,18 @@ function staticAnalysis(string) {
             }
 
             .feedback-status {
-              color: $red-word;
-              background-color: $red-back;
               padding: 0 5px;
               font-size: 11px;
               border-radius: 2px;
+            }
+
+            .red-status {
+              color: $red-word;
+              background-color: $red-back;
+            }
+            .green-status {
+              color: $green-word;
+              background-color: $green-back;
             }
           }
         }
