@@ -21,6 +21,7 @@ export default [
       '**/coverage/**',
       'commitlint.config.cjs',
       'node_modules',
+      'src/assets',
     ],
   },
 ]

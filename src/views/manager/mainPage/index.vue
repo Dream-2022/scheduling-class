@@ -121,7 +121,7 @@
                 :class="isDisable.arr[index] == true ? 'disabled' : ''"
               >
                 查看
-                <i class="iconfont icon-download1" style="margin-left: 5px"></i>
+                <i class="iconfont icon-Rightyou" style="font-size: 12px"></i>
               </span>
               <span
                 class="application-detail"
@@ -220,14 +220,56 @@
       </div>
     </div>
     <div class="wow fadeInRight right-boxes">
-      <div>
-        <div class="footer-title">
-          <el-divider direction="vertical" />
-          <div class="title-box">签到</div>
-          <div class="wow fadeInRight Gold">123</div>
+      <div class="right-box1">
+        <div class="panel-box">
+          <div class="iconfont icon-daichuli"></div>
+          <div class="panel-word">待处理</div>
+          <div class="panel-number">12</div>
+          <div class="panel-button">查看</div>
+        </div>
+        <div class="panel-box">
+          <div class="iconfont icon-daichuli1"></div>
+          <div class="panel-word">待解决</div>
+          <div class="panel-number">5</div>
+          <div class="panel-button">查看</div>
+        </div>
+        <div class="panel-box">
+          <div class="iconfont icon-zaixiankaoshi"></div>
+          <div class="panel-word">待考试</div>
+          <div class="panel-number">--</div>
+          <div class="panel-button">查看</div>
+        </div>
+        <div class="panel-box">
+          <div class="iconfont icon-yiwanchengdingdan"></div>
+          <div class="panel-word">已完成</div>
+          <div class="panel-number">23</div>
+          <div class="panel-button">查看</div>
         </div>
       </div>
-      <div class="feedback-boxes">
+      <div class="right-box2">
+        <div class="footer-title">
+          <el-divider direction="vertical" />
+          <div class="title-box">反馈</div>
+          <div class="more-view" @click="() => $router.push('/userRecentPage')">
+            查看更多<span class="iconfont icon-Rightyou"></span>
+          </div>
+        </div>
+        <div class="feedback-boxes">
+          <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
+            <div class="feedback-top">
+              <div class="feedback-content">{{ item.content }}</div>
+              <div class="feedback-class">{{ item.class }}</div>
+            </div>
+            <div class="feedback-bottom">
+              <div class="feedback-bottom-top">
+                <div class="feedback-identity">{{ item.identity }}</div>
+                <div class="feedback-name">{{ item.name }}</div>
+                <div class="feedback-status">{{ item.status }}</div>
+              </div>
+              <div class="feedback-time">{{ item.time }}</div>
+            </div>
+          </div>
+        </div>
         <div><img src="@/assets/img/book.png" class="application-img" /></div>
       </div>
     </div>
@@ -238,6 +280,7 @@ import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
+import '@/assets/iconfont/iconfont.css'
 import WOW from 'wow.js'
 import Chart from '@/components/Chart.vue'
 let internalInstance = getCurrentInstance()
@@ -252,6 +295,20 @@ const customColors = [
   { color: '#368eec', percentage: 50 },
   { color: '#f56c6c', percentage: 100 },
 ]
+// const panelContents=[
+//   {
+//     content: '待处理',
+//   },
+//   {
+//     content: '待解决',
+//   },
+//   {
+//     content: '待处理',
+//   },
+//   {
+//     content: '待处理',
+//   },
+// ]
 let isDisable = reactive({
   arr: [],
 })
@@ -372,6 +429,28 @@ let classList = reactive({
           picture: '@/assets/img/cat.png',
         },
       ],
+    },
+  ],
+})
+let feedbackList = reactive({
+  arr: [
+    {
+      id: 0,
+      name: '张三',
+      content: '排课系统的使用方法',
+      time: '2023-10-10 15:30',
+      status: '已解决', //已解决,未解决,已拒绝
+      identity: 'teacher',
+      class: '计科院 软件工程 22.4',
+    },
+    {
+      id: 11,
+      name: '张李',
+      content: '排课系统的使用方法',
+      time: '2023-10-10 14:30',
+      status: '未解决',
+      identity: 'student',
+      class: '计科院 软件工程 22.7',
     },
   ],
 })
@@ -950,38 +1029,6 @@ function staticAnalysis(string) {
       color: $word-black-color;
       border-radius: 10px;
       position: relative;
-
-      .footer-title {
-        display: flex;
-        align-items: center;
-        border-radius: 10px 10px 0 0;
-        height: 40px;
-        line-height: 25px;
-        border-bottom: 1px solid #ccc;
-
-        .el-divider {
-          height: 13px;
-          border-left: 5px solid $title-color;
-          margin-right: 4px;
-        }
-
-        .title-box {
-          color: $title-color;
-          font-weight: 600;
-          margin-right: auto;
-        }
-
-        .more-view {
-          font-size: 12px;
-          color: $word-shallow-color;
-          margin-right: 8px;
-          cursor: pointer;
-        }
-
-        .iconfont::before {
-          font-size: 12px;
-        }
-      }
     }
 
     .footer1 {
@@ -1031,7 +1078,7 @@ function staticAnalysis(string) {
             align-items: center;
 
             .first-label {
-              background-color: $button-color;
+              background-color: $main-blue;
               color: #fff;
               border-radius: 5px;
               padding: 0 5px;
@@ -1041,7 +1088,7 @@ function staticAnalysis(string) {
               margin-left: 5px;
               margin-right: 8px;
               background-color: #e6eaf2;
-              color: $button-color;
+              color: $main-blue;
               border-radius: 5px;
               padding: 0 5px;
             }
@@ -1203,7 +1250,7 @@ function staticAnalysis(string) {
       }
 
       .footer2-child1 {
-        margin-bottom: 2%;
+        margin-bottom: 1%;
       }
 
       .footer2-child2 {
@@ -1214,61 +1261,160 @@ function staticAnalysis(string) {
 
   .right-boxes {
     flex: 3;
-    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
     border-radius: 10px;
-    box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
-    .footer-title {
-      display: flex;
-      align-items: center;
-      border-radius: 10px 10px 0 0;
-      height: 55px;
-      line-height: 25px;
-      border-bottom: 1px solid #ccc;
+    .right-box1,
+    .right-box2 {
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
-      .el-divider {
-        height: 13px;
-        border-left: 5px solid $title-color;
-        margin-right: 4px;
-      }
-
-      .title-box {
-        color: $title-color;
-        font-weight: 600;
-        margin-right: auto;
-      }
-
-      .more-view {
-        font-size: 12px;
-        color: $word-shallow-color;
-        margin-right: 8px;
-        cursor: pointer;
-      }
-
-      .iconfont::before {
-        font-size: 16px;
-      }
-
-      .icon-jinbi1 {
-        color: #f6a71b;
-      }
-
-      .Gold {
-        margin-left: 5px;
-        margin-right: 20px;
-        color: #ea8930;
-      }
-    }
-    .feedback-boxes {
       .application-img {
         height: 80px;
         position: absolute;
         bottom: 0;
         right: 10%;
       }
+
+      .panel-box {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+
+        .iconfont::before {
+          font-size: 34px;
+        }
+        .iconfont:nth-child(1) {
+          color: yellow;
+        }
+        .panel-word {
+          font-size: 12px;
+          color: $word-shallow-color;
+        }
+        .panel-number {
+          font-size: 20px;
+          font-weight: 600;
+        }
+        .panel-button {
+          font-size: 12px;
+          color: $main-blue;
+          border: 1px solid $main-blue;
+          border-radius: 8px;
+          padding: 0.5px 8px;
+          cursor: pointer;
+        }
+      }
+
+      .feedback-boxes {
+        padding: 10px 10px;
+        font-size: 12px;
+        border-radius: 8px;
+
+        .feedback-box {
+          border-radius: 0 0 8px 8px;
+          cursor: pointer;
+          padding: 5px;
+          line-height: 20px;
+
+          &:hover {
+            background-color: #f3f5f8;
+          }
+
+          .feedback-top {
+            display: flex;
+
+            .feedback-content {
+              font-size: 14px;
+              margin-right: auto;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+
+          .feedback-bottom {
+            display: flex;
+            margin-top: 5px;
+
+            .feedback-bottom-top {
+              margin-right: auto;
+              display: flex;
+              gap: 8px;
+            }
+            .feedback-identity {
+              background-color: $main-purple;
+              color: #fff;
+              padding: 0 5px;
+              border-radius: 5px;
+              font-size: 11px;
+            }
+
+            .feedback-time {
+              color: $word-grey-color;
+            }
+
+            .feedback-status {
+              color: $red-word;
+              background-color: $red-back;
+              padding: 0 5px;
+              font-size: 11px;
+              border-radius: 2px;
+            }
+          }
+        }
+      }
+    }
+
+    .right-box1 {
+      display: flex;
+      justify-content: center;
+      padding: 15px 0;
+    }
+
+    .right-box2 {
+      margin-top: 2%;
+      height: 100%;
     }
   }
 }
+
+.footer-title {
+  display: flex;
+  align-items: center;
+  border-radius: 10px 10px 0 0;
+  height: 40px;
+  line-height: 25px;
+  border-bottom: 1px solid #ccc;
+
+  .el-divider {
+    height: 13px;
+    border-left: 5px solid $title-color;
+    margin-right: 4px;
+  }
+
+  .title-box {
+    color: $title-color;
+    font-weight: 600;
+    margin-right: auto;
+  }
+
+  .more-view {
+    font-size: 12px;
+    color: $word-shallow-color;
+    margin-right: 8px;
+    cursor: pointer;
+
+    .iconfont::before {
+      font-size: 12px;
+    }
+  }
+}
+
 :deep(.el-progress-circle) {
   height: 50px !important;
   width: 50px !important;
