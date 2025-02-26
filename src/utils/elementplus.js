@@ -11,6 +11,7 @@ import {
   ElRow,
   ElEmpty,
   ElMessage,
+  ElSteps,
   ElScrollbar,
   ElInput,
   ElDropdown,
@@ -30,6 +31,8 @@ export default function (app) {
   app.use(ElProgress)
   app.use(ElRow)
   app.use(ElEmpty)
+  app.use(ElMessage)
+  app.use(ElSteps)
   app.use(ElScrollbar)
   app.use(ElInput)
   app.use(ElDropdown)
@@ -39,5 +42,4 @@ export default function (app) {
   app.use(ElBreadcrumb)
   app.use(ElIcon)
   app.use(ElAvatar)
-  app.use(ElMessage)
 }

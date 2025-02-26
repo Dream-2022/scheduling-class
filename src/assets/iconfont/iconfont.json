@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "4425897",
+      "name": "循环",
+      "font_class": "xunhuan",
+      "unicode": "e7b1",
+      "unicode_decimal": 59313
+    },
+    {
+      "icon_id": "16077883",
+      "name": "统计",
+      "font_class": "tongji",
+      "unicode": "e680",
+      "unicode_decimal": 59008
+    },
+    {
       "icon_id": "27188551",
       "name": "down",
       "font_class": "down",

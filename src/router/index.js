@@ -97,6 +97,14 @@ const setRouter = async () => {
                 path: 'manage',
                 component: () => import('../views/manager/functionPage/managePage/index.vue'),
               },
+              {
+                path: 'workload',
+                component: () => import('../views/manager/functionPage/workloadPage/index.vue'),
+              },
+              {
+                path: 'scheduling',
+                component: () => import('../views/manager/functionPage/schedulingPage/index.vue'),
+              },
             ],
           },
         ],
