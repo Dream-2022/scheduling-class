@@ -12,10 +12,9 @@
           v-if="router.currentRoute.value.fullPath !== '/manager/mainPage'"
           @click="navigationClick($event)"
         >
-          <div value="home">首页</div>
-          <div value="course">计划</div>
+          <div value="course">计划表</div>
           <div value="scheduling">排课</div>
-          <div value="schedule">排考试</div>
+          <div value="schedule">排考</div>
           <div value="information">学校信息</div>
           <div value="analysis">统计分析</div>
           <div value="application">申请处理</div>
@@ -117,19 +116,19 @@ onMounted(async () => {
   if (path !== '/manager/mainPage') {
     let activeIndex = 0
     if (path.includes('/course') || path.includes('/exam')) {
-      activeIndex = 1
+      activeIndex = 0
     } else if (path.includes('/scheduling')) {
-      activeIndex = 2
+      activeIndex = 1
     } else if (path.includes('/schedule')) {
-      activeIndex = 3
+      activeIndex = 2
     } else if (path.includes('/information')) {
-      activeIndex = 4
+      activeIndex = 3
     } else if (path.includes('/analysis')) {
-      activeIndex = 5
+      activeIndex = 4
     } else if (path.includes('/application')) {
-      activeIndex = 6
+      activeIndex = 5
     } else if (path.includes('/manage')) {
-      activeIndex = 7
+      activeIndex = 6
     }
     document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
     console.log(document.querySelectorAll('.navigation-box div'))
@@ -147,13 +146,8 @@ function navigationClick(event) {
   }
   event.target.classList.add('active')
   const value = event.target.getAttribute('value')
-  console.log(value)
-  if (value === 'home') {
-    router.push('/manager/mainPage')
-  } else {
-    console.log(`/manager/functionPage/${value}`)
-    router.push(`/manager/functionPage/${value}`)
-  }
+  console.log(`/manager/functionPage/${value}`)
+  router.push(`/manager/functionPage/${value}`)
 }
 //退出登录
 function signOutClick() {

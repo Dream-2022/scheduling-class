@@ -17,6 +17,7 @@ import {
   ElDropdown,
   ElSelect,
   ElTable,
+  ElTabs,
   ElMenu,
   ElBreadcrumb,
   ElIcon,
@@ -38,6 +39,7 @@ export default function (app) {
   app.use(ElDropdown)
   app.use(ElSelect)
   app.use(ElTable)
+  app.use(ElTabs)
   app.use(ElMenu)
   app.use(ElBreadcrumb)
   app.use(ElIcon)
