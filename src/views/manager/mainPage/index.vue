@@ -487,7 +487,6 @@ onMounted(async () => {
 })
 //获取颜色
 function getLabel(content, number) {
-  console.log(content)
   if (number == true) {
     if (content === '事假') {
       return 'first-label1'
@@ -772,8 +771,6 @@ const chartOption4 = ref({
 })
 //点击快捷入口
 function staticAnalysis(string) {
-  //跳转页面
-  console.log('点击', `manager/functionPage/${string}`)
   router.push(`/manager/functionPage/${string}`)
 }
 </script>

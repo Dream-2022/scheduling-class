@@ -6,7 +6,21 @@
         <div>
           <img src="@/assets/img/logo.png" class="navigation-logo" alt="logo" />
         </div>
-        <div class="navigation-title" @click="() => $router.push('../../userMainPage')"></div>
+        <div class="navigation-title" @click="() => $router.push('/manager/mainPage')"></div>
+        <div
+          class="navigation-box"
+          v-if="router.currentRoute.value.fullPath !== '/manager/mainPage'"
+          @click="navigationClick($event)"
+        >
+          <div value="home">首页</div>
+          <div value="course">计划</div>
+          <div value="scheduling">排课</div>
+          <div value="schedule">排考试</div>
+          <div value="information">学校信息</div>
+          <div value="analysis">统计分析</div>
+          <div value="application">申请处理</div>
+          <div value="manage">系统管理</div>
+        </div>
       </div>
       <div class="blank-box"></div>
       <div class="navigation-icon" v-if="userInfo != null">
@@ -98,7 +112,49 @@ onMounted(async () => {
   userStore.initialize()
   userInfo.value = userStore.user
   avatar.value = userInfo.value.avatar ? userInfo.value.avatar : defaultAvatar
+  //首页不显示导航栏
+  const path = router.currentRoute.value.fullPath
+  if (path !== '/manager/mainPage') {
+    let activeIndex = 0
+    if (path.includes('/course') || path.includes('/exam')) {
+      activeIndex = 1
+    } else if (path.includes('/scheduling')) {
+      activeIndex = 2
+    } else if (path.includes('/schedule')) {
+      activeIndex = 3
+    } else if (path.includes('/information')) {
+      activeIndex = 4
+    } else if (path.includes('/analysis')) {
+      activeIndex = 5
+    } else if (path.includes('/application')) {
+      activeIndex = 6
+    } else if (path.includes('/manage')) {
+      activeIndex = 7
+    }
+    document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
+    console.log(document.querySelectorAll('.navigation-box div'))
+    console.log(document.querySelectorAll('.navigation-box div')[activeIndex])
+  }
+
+  //获取消息栏的通知
+  // const res = await getMessage()
+  // messageContent.value = res.data
 })
+function navigationClick(event) {
+  const navigation = document.querySelectorAll('.navigation-box div')
+  for (let x of navigation) {
+    x.classList.remove('active')
+  }
+  event.target.classList.add('active')
+  const value = event.target.getAttribute('value')
+  console.log(value)
+  if (value === 'home') {
+    router.push('/manager/mainPage')
+  } else {
+    console.log(`/manager/functionPage/${value}`)
+    router.push(`/manager/functionPage/${value}`)
+  }
+}
 //退出登录
 function signOutClick() {
   localStorage.removeItem('user')
@@ -212,7 +268,7 @@ onUnmounted(() => {
   .navigation-tran {
     height: 40px;
     display: flex;
-    flex: 0.9;
+    flex: 3;
 
     @media (max-width: 765px) {
       flex: 1;
@@ -236,10 +292,30 @@ onUnmounted(() => {
       height: 45px;
       width: 120px;
     }
+    .navigation-box {
+      line-height: 45px;
+      display: flex;
+      margin-left: 2%;
+
+      & > div {
+        cursor: pointer;
+        padding: 0 10px;
+        padding-bottom: 10px;
+        transition: all 0.1s;
+        &:hover {
+          color: $title-color;
+        }
+      }
+      .active {
+        font-weight: 600;
+        color: $main-blue;
+        border-bottom: 3px solid $main-blue;
+      }
+    }
   }
 
   .blank-box {
-    flex: 3;
+    flex: 1;
 
     @media (max-width: 765px) {
       display: none;

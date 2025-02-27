@@ -105,6 +105,10 @@ const setRouter = async () => {
                 path: 'scheduling',
                 component: () => import('../views/manager/functionPage/schedulingPage/index.vue'),
               },
+              {
+                path: 'schedule',
+                component: () => import('../views/manager/functionPage/schedulePage/index.vue'),
+              },
             ],
           },
         ],

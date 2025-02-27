@@ -9,8 +9,8 @@
         <el-step title="排课优先级" />
         <el-step title="设置课程教室" />
       </el-steps>
-      <el-button color="#626aef" :dark="isDark">Default</el-button>
-      <el-button color="#626aef" :dark="isDark">Default</el-button>
+      <el-button color="#626aef">Default</el-button>
+      <el-button color="#626aef">Default</el-button>
     </div>
   </div>
 </template>
@@ -24,7 +24,8 @@
     align-items: center;
     width: 95%;
     background-color: #fff;
-    border-radius: 24px 24px 8px 8px;
+    border-radius: 26px 26px 8px 8px;
+
     height: 50px;
 
     .el-button {
@@ -37,6 +38,6 @@
 }
 :deep(.el-steps--simple) {
   background-color: #fff !important;
-  border-radius: 24px 24px 8px 8px;
+  border-radius: 26px 26px 8px 8px;
 }
 </style>
