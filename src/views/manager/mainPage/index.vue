@@ -14,11 +14,15 @@
   <div class="module-boxes">
     <div class="module-box">
       <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course')" />
-      <div @click="staticAnalysis('course')">排课计划</div>
+      <div @click="staticAnalysis('course')">计划表</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('exam')" />
-      <div @click="staticAnalysis('exam')">排考试</div>
+      <img src="@/assets/3D/private.png" @click="staticAnalysis('scheduling')" />
+      <div @click="staticAnalysis('schedule')">排课</div>
+    </div>
+    <div class="module-box">
+      <img src="@/assets/3D/private.png" @click="staticAnalysis('schedule')" />
+      <div @click="staticAnalysis('schedule')">排考试</div>
     </div>
     <div class="module-box">
       <img src="@/assets/3D/0-t.png" @click="staticAnalysis('information')" />
@@ -772,6 +776,29 @@ const chartOption4 = ref({
 //点击快捷入口
 function staticAnalysis(string) {
   router.push(`/manager/functionPage/${string}`)
+  let activeIndex = 0
+  if (string === 'course' || string === 'exam') {
+    activeIndex = 0
+  } else if (string === 'scheduling') {
+    activeIndex = 1
+  } else if (string === 'schedule') {
+    activeIndex = 2
+  } else if (string === 'information') {
+    activeIndex = 3
+  } else if (string === 'analysis') {
+    activeIndex = 4
+  } else if (string === 'application') {
+    activeIndex = 5
+  } else if (string === 'manage') {
+    activeIndex = 6
+  }
+  setTimeout(() => {
+    let doc = document.querySelector('.navigation-box .active')
+    if (doc) {
+      doc.classList.remove('active')
+    }
+    document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
+  }, 50)
 }
 </script>
 <style lang="scss" scoped>
@@ -817,13 +844,13 @@ function staticAnalysis(string) {
 
 .module-boxes {
   color: $word-black-color;
-  width: 70%;
+  width: 75%;
   font-size: 15px;
   margin: 0 auto;
   margin-top: 55px;
   display: grid;
-  grid-template-columns: repeat(6, 10%);
-  grid-gap: 10px 8%;
+  grid-template-columns: repeat(7, 10%);
+  grid-gap: 10px 5%;
 
   @media (max-width: 765px) {
     margin-top: 45px;
