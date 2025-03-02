@@ -798,7 +798,7 @@ function staticAnalysis(string) {
       doc.classList.remove('active')
     }
     document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
-  }, 50)
+  }, 80)
 }
 </script>
 <style lang="scss" scoped>

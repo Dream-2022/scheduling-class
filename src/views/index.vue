@@ -234,6 +234,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   position: absolute;
   width: 100%;
+  min-height: 100vh;
   top: 0%;
   background-size: cover;
   background: linear-gradient(

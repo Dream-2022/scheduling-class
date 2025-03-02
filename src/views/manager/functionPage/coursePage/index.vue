@@ -1,14 +1,20 @@
 <template>
   <div class="course-page">
-    <div class="course-left">
-      <el-tabs tab-position="left">
-        <el-tab-pane label="排课表"></el-tab-pane>
-        <el-tab-pane label="排考试表"></el-tab-pane>
-      </el-tabs>
+    <div class="course-content-title">
+      <div class="left-title">
+        <div :class="active[0] ? 'active' : 'gray-active'" @click="setActive(0)">排课表</div>
+        <div>/</div>
+        <div :class="active[1] ? 'active' : 'gray-active'" @click="setActive(1)">排考试表</div>
+      </div>
+      <!-- 新增搜索图标和输入框 -->
+      <div class="search-container" @click.stop="toggleSearch">
+        <el-icon class="el-icon--right"><Search /></el-icon>
+        <Search v-if="!isSearching && !searchQuery" />
+        <input v-else type="text" v-model="searchQuery" @blur="handleBlur" />
+      </div>
     </div>
     <div class="course-right">
-      <div class="class-part">
-        <div class="course-content-title">排课表</div>
+      <div class="class-part" v-if="active[0]">
         <div class="course-boxes">
           <div class="course-box" v-for="item in classList.arr" :key="item">
             <div class="course-box-left">
@@ -64,14 +70,13 @@
               </el-button>
               <el-button color="#368eec" plain>
                 查看
-                <el-icon class="el-icon--right"><Edit /></el-icon>
+                <el-icon class="el-icon--right"><Search /></el-icon>
               </el-button>
             </div>
           </div>
         </div>
       </div>
-      <div class="exam-part">
-        <div class="course-content-title">排考试表</div>
+      <div class="exam-part" v-else>
         <div class="course-boxes">
           <div class="course-box" v-for="item in classList.arr" :key="item">
             <div class="course-box-left">
@@ -137,8 +142,8 @@
   </div>
 </template>
 <script setup>
-import { reactive } from 'vue'
-import { Delete, Edit, Check } from '@element-plus/icons-vue'
+import { reactive, ref } from 'vue'
+import { Delete, Edit, Search } from '@element-plus/icons-vue'
 let classList = reactive({
   arr: [
     {
@@ -189,34 +194,70 @@ let classList = reactive({
     },
   ],
 })
+let active = ref([true, false])
+let isSearching = ref(false)
+let searchQuery = ref('')
+
+function setActive(index) {
+  active.value = [false, false]
+  active.value[index] = true
+}
+
+function toggleSearch() {
+  isSearching.value = true
+}
+
+function handleBlur() {
+  if (!searchQuery.value) {
+    isSearching.value = false
+  }
+}
 </script>
 <style lang="scss" scoped>
 .course-page {
   width: 90%;
   margin: 60px auto;
   margin-top: 10px;
-  display: flex;
-  gap: 20px;
 
-  .course-left {
-    background-color: #fff;
-    padding: 20px 0 0 10px;
-    border-radius: 26px 8px 8px 26px;
-    height: 750px;
-    box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
+  .course-content-title {
+    background-color: $blue-back;
+    border-radius: 8px;
+    padding: 0 20px;
+    line-height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    > div > div {
+      display: inline-block;
+      padding: 0 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .left-title {
+      // margin-right: auto;
+    }
+    .active {
+      color: $deep-color;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .search-container {
+      display: flex;
+      align-items: center;
+      input {
+        border: none;
+        outline: none;
+        padding: 5px;
+        border-radius: 4px;
+        transition: width 0.3s;
+        width: 150px;
+      }
+    }
   }
   .course-right {
     flex: 1;
     border-radius: 8px 26px 26px 8px;
 
-    .course-content-title {
-      background-color: $blue-back;
-      border-radius: 8px;
-      text-align: center;
-      line-height: 40px;
-      color: $deep-color;
-      font-weight: 600;
-    }
     .course-box {
       background-color: #fff;
       border-radius: 8px;
@@ -291,10 +332,6 @@ let classList = reactive({
         }
       }
     }
-  }
-
-  .exam-part {
-    margin-top: 40px;
   }
 }
 :deep(.el-tabs__header.el-tabs__header-vertical.is-left) {
