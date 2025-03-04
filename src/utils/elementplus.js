@@ -10,6 +10,7 @@ import {
   ElProgress,
   ElRow,
   ElEmpty,
+  ElCascader,
   ElMessage,
   ElSteps,
   ElScrollbar,
@@ -32,6 +33,7 @@ export default function (app) {
   app.use(ElProgress)
   app.use(ElRow)
   app.use(ElEmpty)
+  app.use(ElCascader)
   app.use(ElMessage)
   app.use(ElSteps)
   app.use(ElScrollbar)
