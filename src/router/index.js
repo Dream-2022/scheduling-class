@@ -77,6 +77,7 @@ const setRouter = async () => {
                 path: 'course',
                 component: () => import('../views/manager/functionPage/coursePage/index.vue'),
                 redirect: '/main',
+                props: true,
                 children: [
                   {
                     path: 'main',
