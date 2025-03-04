@@ -143,7 +143,7 @@
 </template>
 <script setup>
 import { reactive, ref } from 'vue'
-import { Delete, Edit, Search } from '@element-plus/icons-vue'
+import { Delete, Edit, Check, Search } from '@element-plus/icons-vue'
 let classList = reactive({
   arr: [
     {

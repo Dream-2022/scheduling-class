@@ -70,12 +70,30 @@ const setRouter = async () => {
           {
             path: 'manager/functionPage',
             name: 'functionPage',
-            redirect: '/functionPage/course',
+            // redirect: '/functionPage/course',
             component: () => import('../views/manager/functionPage/index.vue'),
             children: [
               {
                 path: 'course',
                 component: () => import('../views/manager/functionPage/coursePage/index.vue'),
+                redirect: '/main',
+                children: [
+                  {
+                    path: 'main',
+                    component: () =>
+                      import('../views/manager/functionPage/coursePage/components/main.vue'),
+                  },
+                  {
+                    path: ':id/class',
+                    component: () =>
+                      import('../views/manager/functionPage/coursePage/components/class.vue'),
+                  },
+                  {
+                    path: ':id/exam',
+                    component: () =>
+                      import('../views/manager/functionPage/coursePage/components/exam.vue'),
+                  },
+                ],
               },
               {
                 path: 'exam',

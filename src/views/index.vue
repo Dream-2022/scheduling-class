@@ -12,7 +12,7 @@
           v-if="router.currentRoute.value.fullPath !== '/manager/mainPage'"
           @click="navigationClick($event)"
         >
-          <div value="course">计划表</div>
+          <div value="course/main">计划表</div>
           <div value="scheduling">排课</div>
           <div value="schedule">排考</div>
           <div value="information">学校信息</div>
@@ -93,7 +93,7 @@
 </template>
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import { ref, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, onUnmounted, getCurrentInstance, watch } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
@@ -107,13 +107,33 @@ let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
 let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
+  console.log('首页')
   setChart()
   userStore.initialize()
   userInfo.value = userStore.user
   avatar.value = userInfo.value.avatar ? userInfo.value.avatar : defaultAvatar
-  //首页不显示导航栏
-  const path = router.currentRoute.value.fullPath
-  if (path !== '/manager/mainPage') {
+  let path = router.currentRoute.value.fullPath
+  findActive(path)
+})
+function navigationClick(event) {
+  const navigation = document.querySelectorAll('.navigation-box div')
+  for (let x of navigation) {
+    x.classList.remove('active')
+  }
+  event.target.classList.add('active')
+  const value = event.target.getAttribute('value')
+  console.log(`/manager/functionPage/${value}`)
+  router.push(`/manager/functionPage/${value}`)
+}
+watch(
+  () => router.currentRoute.value.fullPath,
+  path => {
+    findActive(path)
+  },
+)
+function findActive(path) {
+  let divList = document.querySelectorAll('.navigation-box div')
+  if (path !== '/manager/mainPage' && divList.length > 0) {
     let activeIndex = 0
     if (path.includes('/course') || path.includes('/exam')) {
       activeIndex = 0
@@ -130,24 +150,8 @@ onMounted(async () => {
     } else if (path.includes('/manage')) {
       activeIndex = 6
     }
-    document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
-    console.log(document.querySelectorAll('.navigation-box div'))
-    console.log(document.querySelectorAll('.navigation-box div')[activeIndex])
+    divList[activeIndex].classList.add('active')
   }
-
-  //获取消息栏的通知
-  // const res = await getMessage()
-  // messageContent.value = res.data
-})
-function navigationClick(event) {
-  const navigation = document.querySelectorAll('.navigation-box div')
-  for (let x of navigation) {
-    x.classList.remove('active')
-  }
-  event.target.classList.add('active')
-  const value = event.target.getAttribute('value')
-  console.log(`/manager/functionPage/${value}`)
-  router.push(`/manager/functionPage/${value}`)
 }
 //退出登录
 function signOutClick() {

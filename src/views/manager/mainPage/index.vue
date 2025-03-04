@@ -13,8 +13,8 @@
   </div>
   <div class="module-boxes">
     <div class="module-box">
-      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course')" />
-      <div @click="staticAnalysis('course')">计划表</div>
+      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course/main')" />
+      <div @click="staticAnalysis('course/main')">计划表</div>
     </div>
     <div class="module-box">
       <img src="@/assets/3D/private.png" @click="staticAnalysis('scheduling')" />
@@ -155,7 +155,7 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">工作量 / 周</div>
-            <div class="more-view" @click="() => $router.push('/manager/functionPage/course')">
+            <div class="more-view" @click="() => $router.push('/manager/functionPage/workload')">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
@@ -181,7 +181,7 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">排课</div>
-            <div class="more-view" @click="() => $router.push('/manager/functionPage/course')">
+            <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
@@ -245,7 +245,7 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">反馈</div>
-          <div class="more-view" @click="() => $router.push('/manager/functionPage/course')">
+          <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -776,6 +776,7 @@ const chartOption4 = ref({
 //点击快捷入口
 function staticAnalysis(string) {
   router.push(`/manager/functionPage/${string}`)
+  string = string.split('/')[0]
   let activeIndex = 0
   if (string === 'course' || string === 'exam') {
     activeIndex = 0
@@ -797,8 +798,10 @@ function staticAnalysis(string) {
     if (doc) {
       doc.classList.remove('active')
     }
+    console.log(document.querySelectorAll('.navigation-box div'))
+    console.log(document.querySelectorAll('.navigation-box div')[activeIndex])
     document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
-  }, 80)
+  }, 100)
 }
 </script>
 <style lang="scss" scoped>
