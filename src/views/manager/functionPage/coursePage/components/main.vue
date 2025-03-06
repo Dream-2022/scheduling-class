@@ -256,6 +256,7 @@ const courseClick = (id, string) => {
 <style lang="scss" scoped>
 .course-box {
   background-color: #fff;
+  box-shadow: 0 2px 6px 1px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   margin-top: 15px;
   display: flex;

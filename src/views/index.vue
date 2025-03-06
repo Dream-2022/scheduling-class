@@ -1,99 +1,101 @@
 <template>
-  <div class="banner"></div>
-  <div class="ground">
-    <div class="navigation">
-      <div class="navigation-tran">
-        <div>
-          <img src="@/assets/img/logo.png" class="navigation-logo" alt="logo" />
+  <div class="main-container-all">
+    <div :class="isMainPage"></div>
+    <div class="ground" :class="isMainPage === 'banner1' ? 'ground-no-main' : ''">
+      <div class="navigation" :class="isMainPage === 'banner1' ? '' : 'navigation-main'">
+        <div class="navigation-tran">
+          <div>
+            <img src="@/assets/img/logo.png" class="navigation-logo" alt="logo" />
+          </div>
+          <div class="navigation-title" @click="() => $router.push('/manager/mainPage')"></div>
+          <div
+            class="navigation-box"
+            v-if="router.currentRoute.value.fullPath !== '/manager/mainPage'"
+            @click="navigationClick($event)"
+          >
+            <div value="course/main">计划表</div>
+            <div value="scheduling">排课</div>
+            <div value="schedule">排考</div>
+            <div value="information">学校信息</div>
+            <div value="analysis">统计分析</div>
+            <div value="application">申请处理</div>
+            <div value="manage">系统管理</div>
+          </div>
         </div>
-        <div class="navigation-title" @click="() => $router.push('/manager/mainPage')"></div>
-        <div
-          class="navigation-box"
-          v-if="router.currentRoute.value.fullPath !== '/manager/mainPage'"
-          @click="navigationClick($event)"
-        >
-          <div value="course/main">计划表</div>
-          <div value="scheduling">排课</div>
-          <div value="schedule">排考</div>
-          <div value="information">学校信息</div>
-          <div value="analysis">统计分析</div>
-          <div value="application">申请处理</div>
-          <div value="manage">系统管理</div>
-        </div>
-      </div>
-      <div class="blank-box"></div>
-      <div class="navigation-icon" v-if="userInfo != null">
-        <div style="display: flex">
-          <el-dropdown class="dropdown-class" style="margin-top: 10px">
-            <el-badge :value="1" class="icon-badge">
-              <el-icon class="icon-bell">
-                <Bell />
-              </el-icon>
-            </el-badge>
+        <div class="blank-box"></div>
+        <div class="navigation-icon" v-if="userInfo != null">
+          <div style="display: flex">
+            <el-dropdown class="dropdown-class" style="margin-top: 10px">
+              <el-badge :value="1" class="icon-badge">
+                <el-icon class="icon-bell">
+                  <Bell />
+                </el-icon>
+              </el-badge>
+              <template #dropdown>
+                <div class="my-title" style="margin: 10px 0 0 15px; font-weight: 600">我的消息</div>
+                <el-dropdown-menu style="padding-bottom: 10px">
+                  <el-dropdown-item
+                    v-for="item in messageContent"
+                    :key="item"
+                    style="width: 350px"
+                    @click="messageClick(item.md5)"
+                  >
+                    <div>
+                      <strong>{{ messageContent.apkName }}</strong> 已分析完毕
+                    </div>
+                    <div style="margin-left: auto; color: #757575">去查看 >></div>
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="messageContent.length == 0">
+                    <div style="margin: 0 80px">
+                      <el-empty description="暂无消息" />
+                    </div>
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <span
+              class="iconfont icon-wenhao-xianxingyuankuang"
+              @click="() => $router.push('/userIntroducePage')"
+            ></span>
+            <el-divider direction="vertical" class="divider" />
+          </div>
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <span class="portrait-box">
+                <span class="portrait-nickname">{{ userInfo.name }}</span>
+                <span class="iconfont icon-down1"></span>
+              </span>
+            </span>
             <template #dropdown>
-              <div class="my-title" style="margin: 10px 0 0 15px; font-weight: 600">我的消息</div>
-              <el-dropdown-menu style="padding-bottom: 10px">
-                <el-dropdown-item
-                  v-for="item in messageContent"
-                  :key="item"
-                  style="width: 350px"
-                  @click="messageClick(item.md5)"
+              <div class="avatar">
+                <div class="avatar-box">
+                  <img :src="avatar" alt="头像" class="drop-img" />
+                  <div>{{ userInfo.name }}</div>
+                </div>
+              </div>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="personVisible = true">我的资料</el-dropdown-item>
+                <el-dropdown-item @click="staticAnalysis('userMemberPage')"
+                  >开通会员</el-dropdown-item
                 >
-                  <div>
-                    <strong>{{ messageContent.apkName }}</strong> 已分析完毕
-                  </div>
-                  <div style="margin-left: auto; color: #757575">去查看 >></div>
-                </el-dropdown-item>
-                <el-dropdown-item v-if="messageContent.length == 0">
-                  <div style="margin: 0 80px">
-                    <el-empty description="暂无消息" />
-                  </div>
-                </el-dropdown-item>
+                <el-dropdown-item @click="staticAnalysis('adminManagePage')"
+                  >管理员端</el-dropdown-item
+                >
+                <el-dropdown-item @click="signOutClick"
+                  ><span class="iconfont icon-exit"></span>退出登录</el-dropdown-item
+                >
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <span
-            class="iconfont icon-wenhao-xianxingyuankuang"
-            @click="() => $router.push('/userIntroducePage')"
-          ></span>
-          <el-divider direction="vertical" class="divider" />
         </div>
-        <el-dropdown>
-          <span class="el-dropdown-link">
-            <span class="portrait-box">
-              <span class="portrait-nickname">{{ userInfo.name }}</span>
-              <span class="iconfont icon-down1"></span>
-            </span>
-          </span>
-          <template #dropdown>
-            <div class="avatar">
-              <div class="avatar-box">
-                <img :src="avatar" alt="头像" class="drop-img" />
-                <div>{{ userInfo.name }}</div>
-              </div>
-            </div>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="personVisible = true">我的资料</el-dropdown-item>
-              <el-dropdown-item @click="staticAnalysis('userMemberPage')"
-                >开通会员</el-dropdown-item
-              >
-              <el-dropdown-item @click="staticAnalysis('adminManagePage')"
-                >管理员端</el-dropdown-item
-              >
-              <el-dropdown-item @click="signOutClick"
-                ><span class="iconfont icon-exit"></span>退出登录</el-dropdown-item
-              >
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
       </div>
+      <RouterView></RouterView>
     </div>
-    <RouterView></RouterView>
   </div>
 </template>
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import { ref, onMounted, onUnmounted, getCurrentInstance, watch } from 'vue'
+import { ref, watchEffect, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
@@ -105,6 +107,7 @@ const router = useRouter()
 let myChart = ref(null) // logo 动画
 let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
+let isMainPage = ref('banner1')
 let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
   console.log('首页')
@@ -114,6 +117,16 @@ onMounted(async () => {
   avatar.value = userInfo.value.avatar ? userInfo.value.avatar : defaultAvatar
   let path = router.currentRoute.value.fullPath
   findActive(path)
+})
+// 监听路由变化
+watchEffect(() => {
+  const path = router.currentRoute.value.fullPath
+  findActive(path) //是否显示导航栏
+  if (path === '/manager/mainPage') {
+    isMainPage.value = 'banner1'
+  } else {
+    isMainPage.value = 'banner2'
+  }
 })
 function navigationClick(event) {
   const navigation = document.querySelectorAll('.navigation-box div')
@@ -125,12 +138,7 @@ function navigationClick(event) {
   console.log(`/manager/functionPage/${value}`)
   router.push(`/manager/functionPage/${value}`)
 }
-watch(
-  () => router.currentRoute.value.fullPath,
-  path => {
-    findActive(path)
-  },
-)
+// 是否显示导航栏
 function findActive(path) {
   let divList = document.querySelectorAll('.navigation-box div')
   if (path !== '/manager/mainPage' && divList.length > 0) {
@@ -221,7 +229,13 @@ onUnmounted(() => {
 })
 </script>
 <style scoped lang="scss">
-.banner {
+.main-container-all {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background-color: #f2f6fd;
+}
+.banner1 {
   padding-top: 30px;
   background-image: url('@/assets/img/home-bg.png');
   background-size: cover;
@@ -234,12 +248,26 @@ onUnmounted(() => {
   text-align: center;
 }
 
+.banner2 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 500px;
+  background-image: url('@/assets/img/svg.png');
+  background-size: cover;
+  z-index: 0;
+}
+
 .ground {
   flex-wrap: wrap;
   position: absolute;
   width: 100%;
-  min-height: 100vh;
   top: 0%;
+  min-height: 100vh;
+}
+
+.ground-no-main {
   background-size: cover;
   background: linear-gradient(
     rgba(0, 103, 221, 0.3) 0%,
@@ -248,7 +276,13 @@ onUnmounted(() => {
   );
 }
 
+.navigation-main {
+  background-color: #fff;
+  box-shadow: 0 2px 6px 1px rgba(0, 0, 0, 0.05);
+}
+
 .navigation {
+  order: 1;
   padding: 10px 0 10px 60px;
   display: flex;
   flex-flow: row;
@@ -335,7 +369,7 @@ onUnmounted(() => {
 
   .navigation-icon {
     display: flex;
-    flex: 0.7;
+    flex: 1;
     line-height: 40px;
 
     @media (max-width: 765px) {

@@ -62,7 +62,7 @@ function handleBlur() {
 .course-page {
   width: 90%;
   margin: 60px auto;
-  margin-top: 10px;
+  margin-top: 25px;
 
   .course-content-title {
     background-color: $blue-back;
