@@ -8,11 +8,17 @@
         placeholder="选择"
         clearable
       />
+      <DndProvider :backend="HTML5Backend">
+        <Container />
+      </DndProvider>
     </div>
     <div class="course-section-right">123</div>
   </div>
 </template>
 <script setup>
+import Container from './classComponents/container.vue'
+import { DndProvider } from 'vue3-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 const options = [
   {
     value: 'teacher',

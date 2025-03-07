@@ -34,7 +34,7 @@
     </div>
     <div class="module-box">
       <img src="@/assets/3D/book-search.png" @click="staticAnalysis('application')" />
-      <div @click="staticAnalysis('application')">申请处理</div>
+      <div @click="staticAnalysis('application')">申请和反馈</div>
     </div>
     <div class="module-box">
       <img src="@/assets/3D/2-t.png" @click="staticAnalysis('manage')" />

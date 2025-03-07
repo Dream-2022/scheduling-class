@@ -18,7 +18,7 @@
             <div value="schedule">排考</div>
             <div value="information">学校信息</div>
             <div value="analysis">统计分析</div>
-            <div value="application">申请处理</div>
+            <div value="application">申请和反馈</div>
             <div value="manage">系统管理</div>
           </div>
         </div>
