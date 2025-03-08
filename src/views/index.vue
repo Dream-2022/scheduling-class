@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="blank-box"></div>
-        <div class="navigation-icon" v-if="userInfo != null">
+        <div class="navigation-icon">
           <div style="display: flex">
             <el-dropdown class="dropdown-class" style="margin-top: 10px">
               <el-badge :value="1" class="icon-badge">
@@ -249,7 +249,7 @@ onUnmounted(() => {
 }
 
 .banner2 {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
