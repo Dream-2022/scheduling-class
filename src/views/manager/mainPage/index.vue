@@ -168,7 +168,7 @@
             >
               <div>
                 <el-progress type="circle" :color="customColors" :percentage="item.job" />
-                <div class="teacher-name">{{ item.name }}</div>
+                <div class="teacher-name">{{ item?.name }}</div>
                 <div class="teacher-bottom">
                   <div class="teacher-subject">{{ item.subject }}</div>
                   <div class="teacher-status">{{ item.status }}</div>
@@ -263,7 +263,7 @@
                 >
                   {{ item?.identity }}
                 </div>
-                <div class="feedback-name">{{ item.name }}</div>
+                <div class="feedback-name">{{ item?.name }}</div>
                 <div
                   class="feedback-status"
                   :class="item.status === '已解决' ? 'green-status' : 'red-status'"

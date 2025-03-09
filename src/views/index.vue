@@ -7,10 +7,16 @@
           <div>
             <img src="@/assets/img/logo.png" class="navigation-logo" alt="logo" />
           </div>
-          <div class="navigation-title" @click="() => $router.push('/manager/mainPage')"></div>
+          <div
+            class="navigation-title"
+            @click="() => $router.push(`/${userStore.user.identity.toLowerCase()}/mainPage`)"
+          ></div>
           <div
             class="navigation-box"
-            v-if="router.currentRoute.value.fullPath !== '/manager/mainPage'"
+            v-if="
+              router.currentRoute.value.fullPath !==
+              `/${userStore.user.identity.toLowerCase()}/mainPage`
+            "
             @click="navigationClick($event)"
           >
             <div value="course/main">计划表</div>
@@ -62,7 +68,7 @@
           <el-dropdown>
             <span class="el-dropdown-link">
               <span class="portrait-box">
-                <span class="portrait-nickname">{{ userInfo.name }}</span>
+                <span class="portrait-nickname">{{ userInfo?.name }}</span>
                 <span class="iconfont icon-down1"></span>
               </span>
             </span>
@@ -70,7 +76,7 @@
               <div class="avatar">
                 <div class="avatar-box">
                   <img :src="avatar" alt="头像" class="drop-img" />
-                  <div>{{ userInfo.name }}</div>
+                  <div>{{ userInfo?.name }}</div>
                 </div>
               </div>
               <el-dropdown-menu>
@@ -122,7 +128,11 @@ onMounted(async () => {
 watchEffect(() => {
   const path = router.currentRoute.value.fullPath
   findActive(path) //是否显示导航栏
-  if (path === '/manager/mainPage') {
+  if (
+    path === '/manager/mainPage' ||
+    path === '/teacher/mainPage' ||
+    path === '/student/mainPage'
+  ) {
     isMainPage.value = 'banner1'
   } else {
     isMainPage.value = 'banner2'
@@ -135,13 +145,18 @@ function navigationClick(event) {
   }
   event.target.classList.add('active')
   const value = event.target.getAttribute('value')
-  console.log(`/manager/functionPage/${value}`)
-  router.push(`/manager/functionPage/${value}`)
+  console.log(`/${userStore.user.identity.toLowerCase()}/functionPage/${value}`)
+  router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/${value}`)
 }
 // 是否显示导航栏
 function findActive(path) {
   let divList = document.querySelectorAll('.navigation-box div')
-  if (path !== '/manager/mainPage' && divList.length > 0) {
+  if (
+    path !== '/manager/mainPage' &&
+    path !== '/teacher/mainPage' &&
+    path !== '/student/mainPage' &&
+    divList.length > 0
+  ) {
     let activeIndex = 0
     if (path.includes('/course') || path.includes('/exam')) {
       activeIndex = 0

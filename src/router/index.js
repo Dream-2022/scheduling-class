@@ -41,17 +41,17 @@ const setRouter = async () => {
           },
         ],
       })
-    } else if (identity === 'teacher') {
+    } else if (identity === 'TEACHER') {
       router.addRoute({
         path: '/',
         name: 'home',
-        redirect: '/home/teacher',
+        redirect: '/teacher/mainPage',
         component: () => import('../views/index.vue'),
         children: [
           {
-            path: 'teacher',
-            name: 'teacher',
-            component: () => import('../views/teacher/index.vue'),
+            path: 'teacher/mainPage',
+            name: 'mainPage',
+            component: () => import('../views/teacher/mainPage/index.vue'),
           },
         ],
       })
