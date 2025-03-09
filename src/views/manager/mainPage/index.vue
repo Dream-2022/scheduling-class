@@ -211,7 +211,10 @@
                   <div class="class-right-content">{{ item.class }}</div>
                 </div>
                 <div class="class-right-box">
-                  <div class="class-right-title">未排课程</div>
+                  <div class="class-right-title">
+                    未排课程
+                    <span class="iconfont icon-bangzhu"></span>
+                  </div>
                   <div class="class-right-content">{{ item.noCourse }}</div>
                 </div>
                 <div class="class-right-box">
@@ -687,7 +690,7 @@ const chartOption2 = ref({
 
 const chartOption3 = ref({
   title: {
-    text: `{value|邀请好友}`,
+    text: `{value|近期申请}`,
     subtext: `{titleSize|2 }{value|个}`,
     textStyle: {
       color: '#ed8b31',

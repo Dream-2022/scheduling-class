@@ -50,7 +50,7 @@
       </div>
       <div class="wow fadeInLeft chart2">
         <div class="chart-content">
-          <Chart :option="chartOption2" />
+          <Chart :option="chartOption4" />
         </div>
         <el-dropdown @command="handleCommand2">
           <span class="el-dropdown-link"
@@ -65,46 +65,24 @@
           </template>
         </el-dropdown>
       </div>
-      <div class="wow fadeInLeft chart3">
-        <div class="chart-content">
-          <Chart :option="chartOption3" />
+      <div class="wow fadeInLeft panel">
+        <div v-for="item in panelContents.arr" :key="item">
+          <el-tooltip class="tooltip-box" :content="item.title" placement="bottom">
+            <div class="panel-box">
+              <div class="iconfont" :class="item.class" :style="'color: ' + item.color"></div>
+              <div class="panel-word">{{ item.content }}</div>
+              <div class="panel-number">{{ item.value }}</div>
+              <div class="panel-button">查看</div>
+            </div>
+          </el-tooltip>
         </div>
-        <el-dropdown @command="handleCommand3">
-          <span class="el-dropdown-link"
-            >{{ selectedOption3 }}<span class="iconfont icon-down"></span
-          ></span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <div class="wow fadeInLeft chart4">
-        <div class="chart-content">
-          <Chart :option="chartOption4" />
-        </div>
-        <el-dropdown @command="handleCommand4">
-          <span class="el-dropdown-link"
-            >{{ selectedOption4 }}<span class="iconfont icon-down"></span
-          ></span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
       </div>
       <div class="wow fadeInUp footer1">
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">请假申请</div>
           <div class="more-view" @click="() => $router.push('/manager/functionPage/application')">
-            查看更多<span class="iconfont icon-Rightyou"></span>
+            查看<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
         <div class="application-boxes">
@@ -154,24 +132,58 @@
         <div class="footer2-child1">
           <div class="footer-title">
             <el-divider direction="vertical" />
-            <div class="title-box">工作量 / 周</div>
-            <div class="more-view" @click="() => $router.push('/manager/functionPage/workload')">
-              查看更多<span class="iconfont icon-Rightyou"></span>
-            </div>
+            <div class="title-box">课程安排</div>
           </div>
-          <div class="teacher-boxes">
-            <div
-              class="teacher-box"
-              v-for="item in teacherList.arr"
-              :key="item"
-              @click="analysisClick(item.id)"
-            >
-              <div>
-                <el-progress type="circle" :color="customColors" :percentage="item.job" />
-                <div class="teacher-name">{{ item?.name }}</div>
-                <div class="teacher-bottom">
-                  <div class="teacher-subject">{{ item.subject }}</div>
-                  <div class="teacher-status">{{ item.status }}</div>
+          <div class="class-box">
+            <div class="class-left">
+              <div class="class-left-top">
+                <div class="class-left-title">{{ classX.title }}</div>
+                <div
+                  class="class-left-status"
+                  :class="classX.status === '已发布' ? 'class-status1' : 'class-status2'"
+                >
+                  {{ classX.status }}
+                </div>
+              </div>
+              <div class="class-left-bottom">
+                {{ classX.time }}
+              </div>
+            </div>
+            <div class="class-right">
+              <div class="class-right-box">
+                <div class="class-right-title">课时任务</div>
+                <div class="class-right-content">{{ classX.assign }}</div>
+              </div>
+              <div class="class-right-box">
+                <div class="class-right-title">课程数量</div>
+                <div class="class-right-content">{{ classX.class }}</div>
+              </div>
+              <div class="class-right-box">
+                <div class="class-right-title">
+                  未排课程
+                  <span
+                    class="iconfont"
+                    :style="{
+                      opacity: isHoveredIconfont ? 0.8 : 1,
+                      transform: isHoveredIconfont ? 'scale(0.8)' : 'scale(1)',
+                    }"
+                    :class="['iconfont', isHoveredIconfont ? 'icon-bangzhu' : 'icon-wenhao']"
+                    @mouseenter="isHoveredIconfont = true"
+                    @mouseleave="isHoveredIconfont = false"
+                  ></span>
+                </div>
+                <div class="class-right-content">{{ classX.noCourse }}</div>
+              </div>
+              <div class="class-right-box">
+                <div class="class-right-title">参与教师</div>
+                <div class="class-teacher">
+                  <div v-for="(teacher, index) in classX.teachers" :key="teacher">
+                    <img
+                      src="@/assets/img/cat.jpeg"
+                      class="class-teacher-img"
+                      :style="{ transform: `translateX(${index * -10}px)` }"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -233,15 +245,7 @@
       </div>
     </div>
     <div class="wow fadeInRight right-boxes">
-      <div class="right-box1">
-        <div class="panel-box" v-for="item in panelContents.arr" :key="item">
-          <div class="iconfont" :class="item.class" :style="'color: ' + item.color"></div>
-          <div class="panel-word">{{ item.content }}</div>
-          <div class="panel-number">{{ item.value }}</div>
-          <div class="panel-button">查看</div>
-        </div>
-      </div>
-      <div class="right-box2">
+      <div class="right-box">
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">我的反馈</div>
@@ -281,49 +285,45 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import '@/assets/iconfont/iconfont.css'
 import WOW from 'wow.js'
 import Chart from '@/components/Chart.vue'
-let internalInstance = getCurrentInstance()
-let echarts = internalInstance.appContext.config.globalProperties.$echarts
-
 const userStore = useUserStore()
 const router = useRouter()
 
+let isHoveredIconfont = ref(false) //是否移动到问号处
 let searchValue = ref('') // 搜索内容
 let userInfo = reactive([]) // 用户信息
-const customColors = [
-  { color: '#7ab25f', percentage: 25 },
-  { color: '#547bf1', percentage: 50 },
-  { color: '#ef943f', percentage: 75 },
-  { color: '#f56c6c', percentage: 100 },
-]
 const panelContents = reactive({
   arr: [
     {
-      content: '待处理',
+      content: '待审核',
+      title: '申请',
       value: 12,
       color: '#FFAB91',
       class: 'icon-daichuli',
     },
     {
       content: '待解决',
+      title: '反馈',
       value: 5,
       color: '#6C54F1',
       class: 'icon-daichuli1',
     },
     {
-      content: '待考试',
+      content: '待监考',
+      title: '考试',
       value: '--',
       color: '#ed8b31',
       class: 'icon-zaixiankaoshi',
     },
     {
       content: '已完成',
+      title: '课时',
       value: 23,
       color: '#7ab25f',
       class: 'icon-yiwanchengdingdan',
@@ -371,37 +371,15 @@ let applicationList = reactive([
     applicant: '王五(N219856153)',
   },
 ])
-let teacherList = reactive({
-  arr: [
-    {
-      id: 0,
-      name: '李华',
-      subject: '物理',
-      status: '教授',
-      job: 99,
-    },
-    {
-      id: 1,
-      name: '王五',
-      subject: '数据结构与算法',
-      status: '教授',
-      job: 68,
-    },
-    {
-      id: 2,
-      name: '李华',
-      subject: '软件质量保证与测试',
-      status: '教授',
-      job: 61,
-    },
-    {
-      id: 3,
-      name: '王五',
-      subject: '软件质量保证与测试',
-      status: '教授',
-      job: 40,
-    },
-  ],
+let classX = reactive({
+  id: 0,
+  title: '第一次排课',
+  status: '参与',
+  time: '2025-2-8 15:30',
+  assign: 122,
+  course: 120,
+  class: 3,
+  noCourse: 1,
 })
 let classList = reactive({
   arr: [
@@ -477,8 +455,6 @@ let feedbackList = reactive({
 })
 // charts图标选中
 let selectedOption2 = ref('近一周趋势图')
-let selectedOption3 = ref('近一周趋势图')
-let selectedOption4 = ref('近一周趋势图')
 
 onMounted(async () => {
   const wow = new WOW({})
@@ -519,12 +495,6 @@ async function searchClick() {
 }
 
 async function handleCommand2(command) {
-  console.log(command)
-}
-async function handleCommand3(command) {
-  console.log(command)
-}
-async function handleCommand4(command) {
   console.log(command)
 }
 
@@ -636,94 +606,6 @@ const chartOption1 = ref({
       ],
     },
   ],
-})
-
-const chartOption2 = ref({
-  title: {
-    text: '{value|近期反馈}',
-    subtext: '{value|平均}{titleSize| 1 }{value|次}',
-    textStyle: {
-      color: '#6C54F1',
-      rich: {},
-    },
-  },
-  tooltip: {
-    axisPointer: {
-      type: 'cross',
-      label: {
-        backgroundColor: '#6a7985',
-      },
-    },
-  },
-  xAxis: [
-    {
-      data: [1, 2, 3, 2, 1, 4, 5],
-    },
-  ],
-  series: [
-    {
-      type: 'line',
-      smooth: true,
-      itemStyle: { color: '#6C54F1' },
-      emphasis: { focus: 'series' },
-      symbol: 'none',
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          {
-            offset: 0,
-            color: '#6C54F1',
-          },
-          {
-            offset: 1,
-            color: '#F9F8FE',
-          },
-        ]),
-      },
-      symbolSize: 5,
-      data: [1, 2, 3, 2, 1, 4, 4],
-    },
-  ],
-})
-
-const chartOption3 = ref({
-  title: {
-    text: `{value|邀请好友}`,
-    subtext: `{titleSize|2 }{value|个}`,
-    textStyle: {
-      color: '#ed8b31',
-      rich: {},
-    },
-  },
-  toolbox: {
-    feature: {
-      saveAsImage: {
-        title: '下载该图表',
-      },
-    },
-  },
-  grid: {
-    left: '5%',
-    right: '5%',
-    containLabel: true,
-  },
-  xAxis: {
-    type: 'category',
-    data: [7, 7, 8, 9, 6, 2],
-  },
-  yAxis: {
-    type: 'value',
-  },
-  series: {
-    type: 'bar',
-    data: [8, 5, 2, 3, 6, 8],
-    itemStyle: {
-      color: '#ed8b31',
-      borderRadius: [50, 50, 0, 0],
-    },
-    barGap: '90%',
-    barCategoryGap: '65%' /*多个并排柱子设置柱子之间的间距*/,
-    barMinHeight: 3, // 设置柱状图的最小高度，单位可以是像素或者百分比
-  },
 })
 
 const chartOption4 = ref({
@@ -926,10 +808,10 @@ function staticAnalysis(string) {
   }
 
   .left-boxes {
-    flex: 10;
+    flex: 8;
     display: grid;
     grid-template-areas:
-      'chart1 chart1 chart2 chart2 chart3 chart3 chart4 chart4'
+      'chart1 chart1 chart2 chart2 box box box box'
       'footer1 footer1 footer1 footer2 footer2 footer2 footer2 footer2';
     grid-template-rows: 200px 450px;
     grid-template-columns: repeat(8, 11%);
@@ -942,7 +824,7 @@ function staticAnalysis(string) {
       grid-template-rows: 175px 175px 500px;
       grid-template-areas:
         'chart1 chart1 chart1 chart1 chart2 chart2 chart2 chart2'
-        ' chart3 chart3 chart3 chart3 chart4 chart4 chart4 chart4'
+        'box box box box box box box box'
         'footer1 footer1 footer1 footer1 footer1 footer1 footer1 footer1';
     }
 
@@ -951,11 +833,8 @@ function staticAnalysis(string) {
       grid-template-rows: 175px 175px 500px;
       grid-template-areas:
         'chart1 chart1 chart1 chart1 chart2 chart2 chart2 chart2'
-        ' chart3 chart3 chart3 chart3 chart4 chart4 chart4 chart4'
+        'box box box box box box box box'
         'footer1 footer1 footer1 footer1 footer2 footer2 footer2 footer2';
-    }
-
-    @media (min-width: 1024px) {
     }
 
     div {
@@ -970,8 +849,7 @@ function staticAnalysis(string) {
 
     .chart1,
     .chart2,
-    .chart3,
-    .chart4 {
+    .box {
       border-radius: 10px;
 
       @media (max-width: 765px) {
@@ -1028,26 +906,52 @@ function staticAnalysis(string) {
       grid-area: chart2;
 
       .el-dropdown {
-        border: 1.5px solid #6c54f1;
-        color: #6c54f1;
-      }
-    }
-
-    .chart3 {
-      grid-area: chart3;
-
-      .el-dropdown {
-        border: 1.5px solid #ed8b31;
-        color: #ed8b31;
-      }
-    }
-
-    .chart4 {
-      grid-area: chart4;
-
-      .el-dropdown {
         border: 1.5px solid #7ab25f;
         color: #7ab25f;
+      }
+    }
+
+    .panel {
+      grid-area: box;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 24px 0;
+
+      .panel-box {
+        display: flex;
+        cursor: pointer;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+
+        .panel-button:hover {
+          color: #fff;
+          background-color: $main-blue;
+          box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .iconfont::before {
+          font-size: 40px;
+        }
+        .panel-word {
+          font-size: 14px;
+          color: $word-shallow-color;
+        }
+        .panel-number {
+          font-size: 24px;
+          font-weight: 600;
+        }
+        .panel-button {
+          font-size: 14px;
+          color: $main-blue;
+          border: 1px solid $main-blue;
+          border-radius: 8px;
+          padding: 0px 10px 1px 10px;
+        }
       }
     }
 
@@ -1219,113 +1123,79 @@ function staticAnalysis(string) {
         background-color: #fff;
         box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
-        .teacher-boxes {
+        .class-box {
+          border-radius: 0 0 8px 8px;
           display: flex;
-          justify-content: center;
-          align-items: center;
-          border-radius: 8px;
+          padding: 10px 20px;
 
-          .teacher-box {
-            border-radius: 0 0 8px 8px;
-            width: 25%;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 14px;
+          .class-left {
+            margin-right: auto;
 
-            .teacher-name {
-              font-weight: 600;
+            .class-left-top {
+              margin-bottom: 6px;
+
+              .class-left-title {
+                display: inline-block;
+                font-size: 16px;
+                font-weight: 600;
+                margin-right: 10px;
+              }
+              .class-left-status {
+                display: inline-block;
+                font-size: 12px;
+                padding: 1px 6px;
+                border-radius: 5px;
+                color: #fff;
+              }
+              .class-status1 {
+                background-color: $main-blue;
+              }
+              .class-status2 {
+                background-color: $main-yellow;
+              }
             }
 
-            .teacher-bottom {
-              display: flex;
-              font-size: 12px;
-              padding-top: 5px;
-
-              .teacher-subject {
-                padding: 2.5px 6px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              }
-
-              .teacher-status {
-                color: $word-grey-color;
-                padding: 1px 3px;
-                border: 1.5px solid $word-grey-color;
-                border-radius: 5px;
-              }
+            .class-left-bottom {
+              color: $word-grey-color;
+              font-size: 14px;
+              line-height: 30px;
             }
           }
-        }
 
-        .class-boxes {
-          border-radius: 8px;
-          .class-box {
-            border-radius: 0 0 8px 8px;
+          .class-right {
             display: flex;
-            padding: 10px 20px;
 
-            .class-left {
-              margin-right: auto;
-
-              .class-left-top {
-                margin-bottom: 6px;
-
-                .class-left-title {
-                  display: inline-block;
-                  font-size: 16px;
-                  font-weight: 600;
-                  margin-right: 10px;
-                }
-                .class-left-status {
-                  display: inline-block;
-                  font-size: 12px;
-                  padding: 1px 6px;
-                  border-radius: 5px;
-                  color: #fff;
-                }
-                .class-status1 {
-                  background-color: $main-blue;
-                }
-                .class-status2 {
-                  background-color: $main-yellow;
-                }
-              }
-
-              .class-left-bottom {
+            .class-right-box {
+              margin-left: 20px;
+              .class-right-title {
                 color: $word-grey-color;
                 font-size: 14px;
-                line-height: 30px;
-              }
-            }
+                margin-bottom: 6px;
 
-            .class-right {
-              display: flex;
+                .iconfont {
+                  transition:
+                    opacity 0.3s ease,
+                    transform 0.3s ease;
+                }
 
-              .class-right-box {
-                margin-left: 20px;
-                .class-right-title {
-                  color: $word-grey-color;
+                .iconfont::before {
                   font-size: 14px;
-                  margin-bottom: 6px;
+                  cursor: pointer;
                 }
+              }
 
-                .class-right-content {
-                  line-height: 30px;
-                  font-size: 18px;
-                  font-weight: 600;
-                }
-                .class-teacher {
-                  display: flex;
+              .class-right-content {
+                line-height: 30px;
+                font-size: 18px;
+                font-weight: 600;
+              }
+              .class-teacher {
+                display: flex;
 
-                  .class-teacher-img {
-                    width: 25px;
-                    border-radius: 15px;
-                    border: 2px solid #fff;
-                  }
+                .class-teacher-img {
+                  width: 25px;
+                  border-radius: 15px;
+                  border: 2px solid #fff;
                 }
               }
             }
@@ -1350,9 +1220,9 @@ function staticAnalysis(string) {
     background-color: transparent;
     border-radius: 10px;
 
-    .right-box1,
-    .right-box2 {
+    .right-box {
       border-radius: 10px;
+      height: 100%;
       background-color: #fff;
       box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
@@ -1361,43 +1231,6 @@ function staticAnalysis(string) {
         position: absolute;
         bottom: 0;
         right: 10%;
-      }
-
-      .panel-box {
-        display: flex;
-        cursor: pointer;
-        flex: 1;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-
-        &:hover .panel-button {
-          color: #fff;
-          background-color: $main-blue;
-          box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
-        }
-
-        .iconfont::before {
-          font-size: 34px;
-        }
-        .iconfont:nth-child(1) {
-          color: yellow;
-        }
-        .panel-word {
-          font-size: 12px;
-          color: $word-shallow-color;
-        }
-        .panel-number {
-          font-size: 20px;
-          font-weight: 600;
-        }
-        .panel-button {
-          font-size: 12px;
-          color: $main-blue;
-          border: 1px solid $main-blue;
-          border-radius: 8px;
-          padding: 0.5px 8px;
-        }
       }
 
       .feedback-boxes {
@@ -1471,17 +1304,6 @@ function staticAnalysis(string) {
           }
         }
       }
-    }
-
-    .right-box1 {
-      display: flex;
-      justify-content: center;
-      padding: 15px 0;
-    }
-
-    .right-box2 {
-      margin-top: 2%;
-      height: 100%;
     }
   }
 }
