@@ -8,6 +8,9 @@ export const useUserStore = defineStore('user', () => {
   //     name: '李华',
   //     identity: 'manager',
   //   }
+  const setIsLogin = value => {
+    isLogin.value = value
+  }
   const getIsLogin = () => {
     if (isLogin.value === false) {
       isLogin.value = true
@@ -43,5 +46,6 @@ export const useUserStore = defineStore('user', () => {
     getIsLogin,
     initialize,
     setUserInfo,
+    setIsLogin,
   }
 })

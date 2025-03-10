@@ -239,6 +239,7 @@ const login = async () => {
   const res = await loginAPI(loginData.value.account, loginData.value.password, 'password')
   console.log(res)
   if (res.data.code == 0) {
+    userStore.setIsLogin(false)
     userStore.setUserInfo(
       loginData.value.account,
       res.data.data.authorities[0],
@@ -247,9 +248,10 @@ const login = async () => {
     )
     ElMessage.success(res.data.message)
     localStorage.setItem('user', JSON.stringify(userStore.user))
+    let identify = userStore.user.identity.toLowerCase()
     // webSocketStore.initialize(userStore.user.userMail)
     setTimeout(() => {
-      router.push('/manager/mainPage')
+      router.push(`/${identify}/mainPage`)
     }, 100)
   } else {
     ElMessage.error(res.data.message)

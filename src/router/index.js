@@ -26,21 +26,26 @@ const setRouter = async () => {
   return new Promise(resolve => {
     const userStore = useUserStore()
     let identity = userStore.initialize().identity
-    if (identity === 'student') {
+    console.log(identity)
+    console.log(identity === 'STUDENT')
+    console.log(identity === 'TEACHER')
+    console.log(identity === 'MANAGER')
+    if (identity === 'STUDENT') {
       router.addRoute({
         path: '/',
         name: 'home',
-        redirect: '/home/student',
+        redirect: '/student/mainPage',
         component: () => import('../views/index.vue'),
         children: [
           {
-            path: 'student',
-            name: 'student',
-            component: () => import('../views/student/index.vue'),
+            path: 'student/mainPage',
+            name: 'mainPage',
+            component: () => import('../views/student/mainPage/index.vue'),
           },
         ],
       })
     } else if (identity === 'TEACHER') {
+      console.log('add', 'teacher')
       router.addRoute({
         path: '/',
         name: 'home',
@@ -196,6 +201,7 @@ router.beforeEach(async (to, from, next) => {
     if (userStore.getIsLogin() == false) {
       console.log('登录状态', to.path)
       const res = await setRouter()
+      console.log('res', res)
       if (res === true) {
         if (to.name === 'home') {
           next({ name: 'home' })
