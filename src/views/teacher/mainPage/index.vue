@@ -33,8 +33,8 @@
       <div @click="staticAnalysis('class')">所教班级</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('arrage')" />
-      <div @click="staticAnalysis('arrage')">近日行程</div>
+      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('arrange')" />
+      <div @click="staticAnalysis('arrange')">近日行程</div>
     </div>
     <div class="module-box">
       <img src="@/assets/3D/2-t.png" @click="staticAnalysis('classroom')" />
@@ -652,32 +652,6 @@ const chartOption2 = ref({
 //点击快捷入口
 function staticAnalysis(string) {
   router.push(`/teacher/functionPage/${string}`)
-  string = string.split('/')[0]
-  let activeIndex = 0
-  if (string === 'course' || string === 'exam') {
-    activeIndex = 0
-  } else if (string === 'scheduling') {
-    activeIndex = 1
-  } else if (string === 'schedule') {
-    activeIndex = 2
-  } else if (string === 'information') {
-    activeIndex = 3
-  } else if (string === 'analysis') {
-    activeIndex = 4
-  } else if (string === 'application') {
-    activeIndex = 5
-  } else if (string === 'manage') {
-    activeIndex = 6
-  }
-  setTimeout(() => {
-    let doc = document.querySelector('.navigation-box .active')
-    if (doc) {
-      doc.classList.remove('active')
-    }
-    console.log(document.querySelectorAll('.navigation-box div'))
-    console.log(document.querySelectorAll('.navigation-box div')[activeIndex])
-    document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
-  }, 100)
 }
 </script>
 <style lang="scss" scoped>

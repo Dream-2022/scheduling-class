@@ -156,9 +156,14 @@ const userStore = useUserStore()
 let typeValue = ref('') //身份
 // const webSocketStore = useWebSocketStore()
 const loginData = ref({
-  account: '2022401714',
-  password: '123',
-})
+  account: '0304',
+  password: '666666',
+}) //校园管理者
+//  account: '0305',  //  教师
+//  password: '666666',
+//  account: '2024301714',  //  学生
+//  password: '666666',
+
 const registerData = ref({
   email: '',
   code: '',

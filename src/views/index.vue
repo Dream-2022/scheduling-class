@@ -81,12 +81,6 @@
               </div>
               <el-dropdown-menu>
                 <el-dropdown-item @click="personVisible = true">我的资料</el-dropdown-item>
-                <el-dropdown-item @click="staticAnalysis('userMemberPage')"
-                  >开通会员</el-dropdown-item
-                >
-                <el-dropdown-item @click="staticAnalysis('adminManagePage')"
-                  >管理员端</el-dropdown-item
-                >
                 <el-dropdown-item @click="signOutClick"
                   ><span class="iconfont icon-exit"></span>退出登录</el-dropdown-item
                 >
@@ -113,6 +107,7 @@ import {
 import { useUserStore } from '@/stores/userStore'
 import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -226,7 +221,7 @@ onMounted(async () => {
   let path = router.currentRoute.value.fullPath
   const identity = userStore.user.identity.toLowerCase()
   navigationList.arr =
-    identity === 'admin' ? navigation1 : identity === 'teacher' ? navigation2 : navigation3
+    identity === 'manager' ? navigation1 : identity === 'teacher' ? navigation2 : navigation3
   findActive(path, identity)
 })
 // 监听路由变化
@@ -247,7 +242,6 @@ function navigationClick(event) {
   }
   event.target.classList.add('active')
   const value = event.target.getAttribute('value')
-  console.log(`/${userStore.user.identity.toLowerCase()}/functionPage/${value}`)
   router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/${value}`)
 }
 // 是否显示导航栏
@@ -259,7 +253,7 @@ function findActive(path, identity) {
     }
     if (path !== `/${identity}/mainPage` && divList.length > 0) {
       let activeIndex = 0
-      if (identity === 'admin') {
+      if (identity === 'manager') {
         if (path.includes('/course') || path.includes('/exam')) {
           activeIndex = 0
         } else if (path.includes('/scheduling')) {
@@ -300,6 +294,7 @@ function findActive(path, identity) {
 function signOutClick() {
   localStorage.removeItem('user')
   router.push('/login')
+  ElMessage.success('退出成功，正在为你跳转到登录页面...')
 }
 
 const setChart = () => {

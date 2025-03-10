@@ -779,32 +779,6 @@ const chartOption4 = ref({
 //点击快捷入口
 function staticAnalysis(string) {
   router.push(`/manager/functionPage/${string}`)
-  string = string.split('/')[0]
-  let activeIndex = 0
-  if (string === 'course' || string === 'exam') {
-    activeIndex = 0
-  } else if (string === 'scheduling') {
-    activeIndex = 1
-  } else if (string === 'schedule') {
-    activeIndex = 2
-  } else if (string === 'information') {
-    activeIndex = 3
-  } else if (string === 'analysis') {
-    activeIndex = 4
-  } else if (string === 'application') {
-    activeIndex = 5
-  } else if (string === 'manage') {
-    activeIndex = 6
-  }
-  setTimeout(() => {
-    let doc = document.querySelector('.navigation-box .active')
-    if (doc) {
-      doc.classList.remove('active')
-    }
-    console.log(document.querySelectorAll('.navigation-box div'))
-    console.log(document.querySelectorAll('.navigation-box div')[activeIndex])
-    document.querySelectorAll('.navigation-box div')[activeIndex].classList.add('active')
-  }, 100)
 }
 </script>
 <style lang="scss" scoped>

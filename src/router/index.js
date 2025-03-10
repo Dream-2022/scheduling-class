@@ -89,7 +89,7 @@ const setRouter = async () => {
           },
         ],
       })
-    } else if (identity === 'ADMIN') {
+    } else if (identity === 'MANAGER') {
       router.addRoute({
         path: '/',
         name: 'home',

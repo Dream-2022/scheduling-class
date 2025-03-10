@@ -24,6 +24,9 @@ export const useUserStore = defineStore('user', () => {
       token,
       refreshToken,
     }
+    if (user.value.identity == 'ADMIN') {
+      user.value.identity = 'MANAGER'
+    }
     localStorage.setItem('user', JSON.stringify(user.value))
   }
 
