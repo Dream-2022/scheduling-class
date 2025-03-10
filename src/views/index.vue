@@ -12,20 +12,20 @@
             @click="() => $router.push(`/${userStore.user.identity.toLowerCase()}/mainPage`)"
           ></div>
           <div
-            class="navigation-box"
             v-if="
               router.currentRoute.value.fullPath !==
               `/${userStore.user.identity.toLowerCase()}/mainPage`
             "
-            @click="navigationClick($event)"
+            class="navigation-box"
           >
-            <div value="course/main">计划表</div>
-            <div value="scheduling">排课</div>
-            <div value="schedule">排考</div>
-            <div value="information">学校信息</div>
-            <div value="analysis">统计分析</div>
-            <div value="application">申请和反馈</div>
-            <div value="manage">系统管理</div>
+            <div
+              v-for="item in navigationList.arr"
+              :key="item"
+              :value="item.value"
+              @click="navigationClick($event)"
+            >
+              {{ item.name }}
+            </div>
           </div>
         </div>
         <div class="blank-box"></div>
@@ -101,7 +101,15 @@
 </template>
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
-import { ref, watchEffect, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import {
+  ref,
+  nextTick,
+  reactive,
+  watchEffect,
+  onMounted,
+  onUnmounted,
+  getCurrentInstance,
+} from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
@@ -113,6 +121,100 @@ const router = useRouter()
 let myChart = ref(null) // logo 动画
 let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
+
+let navigationList = reactive({
+  arr: [],
+})
+let navigation1 = [
+  {
+    name: '计划表',
+    value: 'course/main',
+  },
+  {
+    name: '排课',
+    value: 'scheduling',
+  },
+  {
+    name: '排考',
+    value: 'schedule',
+  },
+  {
+    name: '学校信息',
+    value: 'information',
+  },
+  {
+    name: '统计分析',
+    value: 'analysis',
+  },
+  {
+    name: '申请和反馈',
+    value: 'application',
+  },
+  {
+    name: '系统管理',
+    value: 'manage',
+  },
+]
+let navigation2 = [
+  {
+    name: '授课安排',
+    value: 'course',
+  },
+  {
+    name: '监考安排',
+    value: 'exam',
+  },
+  {
+    name: '我的申请',
+    value: 'application',
+  },
+  {
+    name: '我的反馈',
+    value: 'feedback',
+  },
+  {
+    name: '所教班级',
+    value: 'class',
+  },
+  {
+    name: '近日行程',
+    value: 'arrange',
+  },
+  {
+    name: '教室查询',
+    value: 'classroom',
+  },
+]
+let navigation3 = [
+  {
+    name: '计划表',
+    value: 'course/main',
+  },
+  {
+    name: '排课',
+    value: 'scheduling',
+  },
+  {
+    name: '排考',
+    value: 'schedule',
+  },
+  {
+    name: '学校信息',
+    value: 'information',
+  },
+  {
+    name: '统计分析',
+    value: 'analysis',
+  },
+  {
+    name: '申请和反馈',
+    value: 'application',
+  },
+  {
+    name: '系统管理',
+    value: 'manage',
+  },
+]
 let isMainPage = ref('banner1')
 let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
@@ -122,17 +224,17 @@ onMounted(async () => {
   userInfo.value = userStore.user
   avatar.value = userInfo.value.avatar ? userInfo.value.avatar : defaultAvatar
   let path = router.currentRoute.value.fullPath
-  findActive(path)
+  const identity = userStore.user.identity.toLowerCase()
+  navigationList.arr =
+    identity === 'admin' ? navigation1 : identity === 'teacher' ? navigation2 : navigation3
+  findActive(path, identity)
 })
 // 监听路由变化
 watchEffect(() => {
   const path = router.currentRoute.value.fullPath
-  findActive(path) //是否显示导航栏
-  if (
-    path === '/manager/mainPage' ||
-    path === '/teacher/mainPage' ||
-    path === '/student/mainPage'
-  ) {
+  const identity = userStore.user.identity.toLowerCase()
+  findActive(path, identity) //是否显示导航栏
+  if (path === `/${identity}/mainPage`) {
     isMainPage.value = 'banner1'
   } else {
     isMainPage.value = 'banner2'
@@ -149,32 +251,50 @@ function navigationClick(event) {
   router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/${value}`)
 }
 // 是否显示导航栏
-function findActive(path) {
-  let divList = document.querySelectorAll('.navigation-box div')
-  if (
-    path !== '/manager/mainPage' &&
-    path !== '/teacher/mainPage' &&
-    path !== '/student/mainPage' &&
-    divList.length > 0
-  ) {
-    let activeIndex = 0
-    if (path.includes('/course') || path.includes('/exam')) {
-      activeIndex = 0
-    } else if (path.includes('/scheduling')) {
-      activeIndex = 1
-    } else if (path.includes('/schedule')) {
-      activeIndex = 2
-    } else if (path.includes('/information')) {
-      activeIndex = 3
-    } else if (path.includes('/analysis')) {
-      activeIndex = 4
-    } else if (path.includes('/application')) {
-      activeIndex = 5
-    } else if (path.includes('/manage')) {
-      activeIndex = 6
+function findActive(path, identity) {
+  nextTick(() => {
+    let divList = document.querySelectorAll('.navigation-box div')
+    for (let x of divList) {
+      x.classList.remove('active')
     }
-    divList[activeIndex].classList.add('active')
-  }
+    if (path !== `/${identity}/mainPage` && divList.length > 0) {
+      let activeIndex = 0
+      if (identity === 'admin') {
+        if (path.includes('/course') || path.includes('/exam')) {
+          activeIndex = 0
+        } else if (path.includes('/scheduling')) {
+          activeIndex = 1
+        } else if (path.includes('/schedule')) {
+          activeIndex = 2
+        } else if (path.includes('/information')) {
+          activeIndex = 3
+        } else if (path.includes('/analysis')) {
+          activeIndex = 4
+        } else if (path.includes('/application')) {
+          activeIndex = 5
+        } else if (path.includes('/manage')) {
+          activeIndex = 6
+        }
+      } else if (identity === 'teacher') {
+        if (path.includes('/course')) {
+          activeIndex = 0
+        } else if (path.includes('/exam')) {
+          activeIndex = 1
+        } else if (path.includes('/application')) {
+          activeIndex = 2
+        } else if (path.includes('/feedback')) {
+          activeIndex = 3
+        } else if (path.includes('/classroom')) {
+          activeIndex = 6
+        } else if (path.includes('/class')) {
+          activeIndex = 4
+        } else if (path.includes('/arrange')) {
+          activeIndex = 5
+        }
+      }
+      divList[activeIndex].classList.add('active')
+    }
+  })
 }
 //退出登录
 function signOutClick() {
@@ -316,7 +436,7 @@ onUnmounted(() => {
   .navigation-tran {
     height: 40px;
     display: flex;
-    flex: 3;
+    flex: 5;
 
     @media (max-width: 765px) {
       flex: 1;
@@ -363,7 +483,7 @@ onUnmounted(() => {
   }
 
   .blank-box {
-    flex: 1;
+    flex: 0.5;
 
     @media (max-width: 765px) {
       display: none;
@@ -384,7 +504,7 @@ onUnmounted(() => {
 
   .navigation-icon {
     display: flex;
-    flex: 1;
+    flex: 1.5;
     line-height: 40px;
 
     @media (max-width: 765px) {

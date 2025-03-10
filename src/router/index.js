@@ -24,7 +24,6 @@ const router = createRouter({
 
 const setRouter = async () => {
   return new Promise(resolve => {
-    console.log('设置路由')
     const userStore = useUserStore()
     let identity = userStore.initialize().identity
     if (identity === 'student') {
@@ -79,8 +78,8 @@ const setRouter = async () => {
                 component: () => import('../views/teacher/functionPage/classPage/index.vue'),
               },
               {
-                path: 'arrage',
-                component: () => import('../views/teacher/functionPage/arragePage/index.vue'),
+                path: 'arrange',
+                component: () => import('../views/teacher/functionPage/arrangePage/index.vue'),
               },
               {
                 path: 'classroom',

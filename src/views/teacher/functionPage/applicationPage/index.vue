@@ -1,5 +1,5 @@
 <template>
-  <div>ana</div>
+  <div>app</div>
 </template>
 <script setup></script>
 <style scoped></style>
