@@ -21,6 +21,7 @@ import {
   ElTooltip,
   ElTabs,
   ElMenu,
+  ElCarousel,
   ElBreadcrumb,
   ElIcon,
   ElAvatar,
@@ -45,6 +46,7 @@ export default function (app) {
   app.use(ElTooltip)
   app.use(ElTabs)
   app.use(ElMenu)
+  app.use(ElCarousel)
   app.use(ElBreadcrumb)
   app.use(ElIcon)
   app.use(ElAvatar)

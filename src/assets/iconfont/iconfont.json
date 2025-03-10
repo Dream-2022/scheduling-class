@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "2269976",
+      "name": "课程",
+      "font_class": "kecheng",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "5056137",
+      "name": "一对一",
+      "font_class": "banji",
+      "unicode": "e634",
+      "unicode_decimal": 58932
+    },
+    {
+      "icon_id": "39271567",
+      "name": "课时记录",
+      "font_class": "keshijilu",
+      "unicode": "e936",
+      "unicode_decimal": 59702
+    },
+    {
       "icon_id": "577319",
       "name": "问号",
       "font_class": "wenhao",

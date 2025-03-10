@@ -50,7 +50,7 @@
       </div>
       <div class="wow fadeInLeft chart2">
         <div class="chart-content">
-          <Chart :option="chartOption4" />
+          <Chart :option="chartOption2" />
         </div>
         <el-dropdown @command="handleCommand2">
           <span class="el-dropdown-link"
@@ -192,55 +192,38 @@
         <div class="footer2-child2">
           <div class="footer-title">
             <el-divider direction="vertical" />
-            <div class="title-box">排课</div>
+            <div class="title-box">我的反馈</div>
             <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
-          <div class="class-boxes">
-            <div class="class-box" v-for="item in classList.arr" :key="item">
-              <div class="class-left">
-                <div class="class-left-top">
-                  <div class="class-left-title">{{ item.title }}</div>
+          <div class="feedback-boxes">
+            <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
+              <div class="feedback-top">
+                <div class="feedback-content">{{ item.content }}</div>
+                <div class="feedback-class">{{ item.class }}</div>
+              </div>
+              <div class="feedback-bottom">
+                <div class="feedback-bottom-top">
                   <div
-                    class="class-left-status"
-                    :class="item.status === '已发布' ? 'class-status1' : 'class-status2'"
+                    class="feedback-identity"
+                    :class="item?.identity === 'teacher' ? 'teacher-identity' : 'student-identity'"
+                  >
+                    {{ item?.identity }}
+                  </div>
+                  <div class="feedback-name">{{ item?.name }}</div>
+                  <div
+                    class="feedback-status"
+                    :class="item.status === '已解决' ? 'green-status' : 'red-status'"
                   >
                     {{ item.status }}
                   </div>
                 </div>
-                <div class="class-left-bottom">
-                  {{ item.time }}
-                </div>
-              </div>
-              <div class="class-right">
-                <div class="class-right-box">
-                  <div class="class-right-title">课时任务</div>
-                  <div class="class-right-content">{{ item.assign }}</div>
-                </div>
-                <div class="class-right-box">
-                  <div class="class-right-title">课程数量</div>
-                  <div class="class-right-content">{{ item.class }}</div>
-                </div>
-                <div class="class-right-box">
-                  <div class="class-right-title">未排课程</div>
-                  <div class="class-right-content">{{ item.noCourse }}</div>
-                </div>
-                <div class="class-right-box">
-                  <div class="class-right-title">参与教师</div>
-                  <div class="class-teacher">
-                    <div v-for="(teacher, index) in item.teachers" :key="teacher">
-                      <img
-                        src="@/assets/img/cat.jpeg"
-                        class="class-teacher-img"
-                        :style="{ transform: `translateX(${index * -10}px)` }"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <div class="feedback-time">{{ item.time }}</div>
               </div>
             </div>
           </div>
+          <div><img src="@/assets/img/book.png" class="application-img" /></div>
         </div>
       </div>
     </div>
@@ -248,38 +231,38 @@
       <div class="right-box">
         <div class="footer-title">
           <el-divider direction="vertical" />
-          <div class="title-box">我的反馈</div>
+          <div class="title-box">安排</div>
           <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
-        <div class="feedback-boxes">
-          <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
-            <div class="feedback-top">
-              <div class="feedback-content">{{ item.content }}</div>
-              <div class="feedback-class">{{ item.class }}</div>
-            </div>
-            <div class="feedback-bottom">
-              <div class="feedback-bottom-top">
-                <div
-                  class="feedback-identity"
-                  :class="item?.identity === 'teacher' ? 'teacher-identity' : 'student-identity'"
-                >
-                  {{ item?.identity }}
-                </div>
-                <div class="feedback-name">{{ item?.name }}</div>
-                <div
-                  class="feedback-status"
-                  :class="item.status === '已解决' ? 'green-status' : 'red-status'"
-                >
-                  {{ item.status }}
+        <div class="arrage-box">
+          <div>今日暂无课程，明日课程:</div>
+          <div class="arrage-content">
+            <div class="arrage-content-title">2024年10月22日</div>
+            <div class="arrage-content-boxes">
+              <div class="arrage-content-box">
+                <div class="icon-box"><span class="iconfont icon-banji"></span></div>
+                <div>
+                  <span>课时&nbsp;&nbsp;</span> <span class="arrage-content-number">6</span>
                 </div>
               </div>
-              <div class="feedback-time">{{ item.time }}</div>
+              <div class="arrage-content-box">
+                <div class="icon-box"><span class="iconfont icon-kecheng"></span></div>
+                <div>
+                  <span>班级&nbsp;&nbsp;</span> <span class="arrage-content-number">3</span>
+                </div>
+              </div>
+            </div>
+            <div class="arrage-course">
+              <el-carousel direction="vertical" type="card" :autoplay="false">
+                <el-carousel-item v-for="item in 4" :key="item">
+                  <h3 text="2xl" justify="center">{{ item }}</h3>
+                </el-carousel-item>
+              </el-carousel>
             </div>
           </div>
         </div>
-        <div><img src="@/assets/img/book.png" class="application-img" /></div>
       </div>
     </div>
   </div>
@@ -380,56 +363,6 @@ let classX = reactive({
   course: 120,
   class: 3,
   noCourse: 1,
-})
-let classList = reactive({
-  arr: [
-    {
-      id: 0,
-      title: '第一次排课',
-      status: '未发布',
-      time: '2025-2-8 15:30',
-      assign: 122,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-    {
-      id: 0,
-      title: '第一次排课',
-      status: '已发布',
-      time: '2025-2-8 15:30',
-      assign: 122,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-  ],
 })
 let feedbackList = reactive({
   arr: [
@@ -608,7 +541,7 @@ const chartOption1 = ref({
   ],
 })
 
-const chartOption4 = ref({
+const chartOption2 = ref({
   title: {
     text: `{value|教室占用率}`,
     subtext: `{titleSize|61 }{value|%}`,
@@ -813,7 +746,7 @@ function staticAnalysis(string) {
     grid-template-areas:
       'chart1 chart1 chart2 chart2 box box box box'
       'footer1 footer1 footer1 footer2 footer2 footer2 footer2 footer2';
-    grid-template-rows: 200px 450px;
+    grid-template-rows: 160px 450px;
     grid-template-columns: repeat(8, 11%);
     grid-gap: 10px 1.7%;
     margin-right: 10px;
@@ -837,12 +770,11 @@ function staticAnalysis(string) {
         'footer1 footer1 footer1 footer1 footer2 footer2 footer2 footer2';
     }
 
-    div {
-      background-color: #fff;
-    }
     > div {
       box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
     }
+
     .el-dropdown {
       cursor: pointer;
     }
@@ -918,7 +850,7 @@ function staticAnalysis(string) {
       box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-around;
-      padding: 24px 0;
+      padding: 16px 0;
 
       .panel-box {
         display: flex;
@@ -926,7 +858,7 @@ function staticAnalysis(string) {
         flex: 1;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
+        gap: 6px;
 
         .panel-button:hover {
           color: #fff;
@@ -1201,6 +1133,85 @@ function staticAnalysis(string) {
             }
           }
         }
+
+        .application-img {
+          height: 80px;
+          position: absolute;
+          bottom: 0;
+          right: 10%;
+        }
+
+        .feedback-boxes {
+          padding: 10px 10px;
+          font-size: 12px;
+          border-radius: 8px;
+
+          .feedback-box {
+            border-radius: 0 0 8px 8px;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 20px;
+
+            &:hover {
+              background-color: #f3f5f8;
+            }
+
+            .feedback-top {
+              display: flex;
+
+              .feedback-content {
+                font-size: 14px;
+                margin-right: auto;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+
+            .feedback-bottom {
+              display: flex;
+              margin-top: 5px;
+
+              .feedback-bottom-top {
+                margin-right: auto;
+                display: flex;
+                gap: 8px;
+              }
+              .feedback-identity {
+                color: #fff;
+                padding: 0 5px;
+                border-radius: 5px;
+                font-size: 11px;
+              }
+
+              .teacher-identity {
+                background-color: $main-purple;
+              }
+              .student-identity {
+                background-color: $main-blue;
+              }
+
+              .feedback-time {
+                color: $word-grey-color;
+              }
+
+              .feedback-status {
+                padding: 0 5px;
+                font-size: 11px;
+                border-radius: 2px;
+              }
+
+              .red-status {
+                color: $red-word;
+                background-color: $red-back;
+              }
+              .green-status {
+                color: $green-word;
+                background-color: $green-back;
+              }
+            }
+          }
+        }
       }
 
       .footer2-child1 {
@@ -1226,81 +1237,61 @@ function staticAnalysis(string) {
       background-color: #fff;
       box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
-      .application-img {
-        height: 80px;
-        position: absolute;
-        bottom: 0;
-        right: 10%;
-      }
+      .arrage-box {
+        padding: 12px;
+        .arrage-content {
+          background-color: #ebf4ff;
+          padding: 18px 10px;
+          margin-top: 8px;
+          margin-bottom: 8px;
+          border-radius: 10px;
 
-      .feedback-boxes {
-        padding: 10px 10px;
-        font-size: 12px;
-        border-radius: 8px;
-
-        .feedback-box {
-          border-radius: 0 0 8px 8px;
-          cursor: pointer;
-          padding: 5px;
-          line-height: 20px;
-
-          &:hover {
-            background-color: #f3f5f8;
+          .arrage-content-title {
+            font-weight: 600;
+            text-align: center;
           }
 
-          .feedback-top {
+          .arrage-content-boxes {
             display: flex;
+            justify-content: space-around;
 
-            .feedback-content {
-              font-size: 14px;
-              margin-right: auto;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-          }
-
-          .feedback-bottom {
-            display: flex;
-            margin-top: 5px;
-
-            .feedback-bottom-top {
-              margin-right: auto;
+            .arrage-content-box {
+              background-color: #fff;
+              border-radius: 12px;
               display: flex;
-              gap: 8px;
-            }
-            .feedback-identity {
-              color: #fff;
-              padding: 0 5px;
-              border-radius: 5px;
-              font-size: 11px;
-            }
+              padding: 10px 20px;
+              justify-content: center;
+              gap: 10px;
+              margin-top: 10px;
+              margin-bottom: 10px;
+              align-items: center;
 
-            .teacher-identity {
-              background-color: $main-purple;
-            }
-            .student-identity {
-              background-color: $main-blue;
-            }
+              .arrage-content-number {
+                font-weight: 600;
+                font-size: 16px;
+              }
+              .icon-box {
+                background-color: #4282b0;
+                color: #fff;
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
 
-            .feedback-time {
-              color: $word-grey-color;
+              .icon-banji::before {
+                padding-left: 4px;
+                font-size: 25px;
+              }
+              .icon-kecheng::before {
+                font-size: 22px;
+              }
             }
-
-            .feedback-status {
-              padding: 0 5px;
-              font-size: 11px;
-              border-radius: 2px;
-            }
-
-            .red-status {
-              color: $red-word;
-              background-color: $red-back;
-            }
-            .green-status {
-              color: $green-word;
-              background-color: $green-back;
-            }
+          }
+          .arrage-course {
+            margin: 10px auto;
           }
         }
       }
@@ -1343,5 +1334,15 @@ function staticAnalysis(string) {
 :deep(.el-progress-circle) {
   height: 50px !important;
   width: 50px !important;
+}
+:deep(.el-carousel) {
+  height: 170px;
+}
+:deep(.el-carousel__item) {
+  height: 60px;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 10px 15px;
+  box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
 }
 </style>
