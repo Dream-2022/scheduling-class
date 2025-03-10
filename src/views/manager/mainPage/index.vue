@@ -17,11 +17,11 @@
       <div @click="staticAnalysis('course/main')">计划表</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('scheduling')" />
-      <div @click="staticAnalysis('schedule')">排课</div>
+      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('scheduling')" />
+      <div @click="staticAnalysis('scheduling')">排课</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('schedule')" />
+      <img src="@/assets/3D/2-t.png" @click="staticAnalysis('schedule')" />
       <div @click="staticAnalysis('schedule')">排考试</div>
     </div>
     <div class="module-box">
@@ -33,7 +33,7 @@
       <div @click="staticAnalysis('analysis')">统计分析</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('application')" />
+      <img src="@/assets/3D/private.png" @click="staticAnalysis('application')" />
       <div @click="staticAnalysis('application')">申请和反馈</div>
     </div>
     <div class="module-box">

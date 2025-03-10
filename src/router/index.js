@@ -53,6 +53,41 @@ const setRouter = async () => {
             name: 'mainPage',
             component: () => import('../views/teacher/mainPage/index.vue'),
           },
+          {
+            path: 'teacher/functionPage',
+            name: 'functionPage',
+            component: () => import('../views/teacher/functionPage/index.vue'),
+            children: [
+              {
+                path: 'course',
+                component: () => import('../views/teacher/functionPage/coursePage/index.vue'),
+              },
+              {
+                path: 'exam',
+                component: () => import('../views/teacher/functionPage/examPage/index.vue'),
+              },
+              {
+                path: 'application',
+                component: () => import('../views/teacher/functionPage/applicationPage/index.vue'),
+              },
+              {
+                path: 'feedback',
+                component: () => import('../views/teacher/functionPage/feedbackPage/index.vue'),
+              },
+              {
+                path: 'class',
+                component: () => import('../views/teacher/functionPage/classPage/index.vue'),
+              },
+              {
+                path: 'arrage',
+                component: () => import('../views/teacher/functionPage/arragePage/index.vue'),
+              },
+              {
+                path: 'classroom',
+                component: () => import('../views/teacher/functionPage/classroomPage/index.vue'),
+              },
+            ],
+          },
         ],
       })
     } else if (identity === 'ADMIN') {
@@ -70,7 +105,6 @@ const setRouter = async () => {
           {
             path: 'manager/functionPage',
             name: 'functionPage',
-            // redirect: '/functionPage/course',
             component: () => import('../views/manager/functionPage/index.vue'),
             children: [
               {

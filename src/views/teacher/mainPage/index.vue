@@ -13,32 +13,32 @@
   </div>
   <div class="module-boxes">
     <div class="module-box">
-      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course/main')" />
-      <div @click="staticAnalysis('course/main')">授课安排</div>
+      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course')" />
+      <div @click="staticAnalysis('course')">授课安排</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('scheduling')" />
-      <div @click="staticAnalysis('schedule')">监考安排</div>
+      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('exam')" />
+      <div @click="staticAnalysis('exam')">监考安排</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('schedule')" />
-      <div @click="staticAnalysis('schedule')">我的申请</div>
+      <img src="@/assets/3D/private.png" @click="staticAnalysis('application')" />
+      <div @click="staticAnalysis('application')">我的申请</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/0-t.png" @click="staticAnalysis('information')" />
-      <div @click="staticAnalysis('information')">我的反馈</div>
+      <img src="@/assets/3D/0-t.png" @click="staticAnalysis('feedback')" />
+      <div @click="staticAnalysis('feedback')">我的反馈</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/1-t.png" @click="staticAnalysis('analysis')" />
-      <div @click="staticAnalysis('analysis')">所教班级</div>
+      <img src="@/assets/3D/1-t.png" @click="staticAnalysis('class')" />
+      <div @click="staticAnalysis('class')">所教班级</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('application')" />
-      <div @click="staticAnalysis('application')">近日行程</div>
+      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('arrage')" />
+      <div @click="staticAnalysis('arrage')">近日行程</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/2-t.png" @click="staticAnalysis('manage')" />
-      <div @click="staticAnalysis('manage')">教室查询</div>
+      <img src="@/assets/3D/2-t.png" @click="staticAnalysis('classroom')" />
+      <div @click="staticAnalysis('classroom')">教室查询</div>
     </div>
   </div>
   <div class="middle-box">
@@ -58,9 +58,9 @@
           ></span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
+              <el-dropdown-item command="a">近一周趋势</el-dropdown-item>
+              <el-dropdown-item command="b">近两周趋势</el-dropdown-item>
+              <el-dropdown-item command="c">近一月趋势</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -442,7 +442,7 @@ let courselist = reactive({
   ],
 })
 // charts图标选中
-let selectedOption2 = ref('近一周趋势图')
+let selectedOption2 = ref('近一周趋势')
 
 onMounted(async () => {
   const wow = new WOW({})
@@ -651,7 +651,7 @@ const chartOption2 = ref({
 })
 //点击快捷入口
 function staticAnalysis(string) {
-  router.push(`/manager/functionPage/${string}`)
+  router.push(`/teacher/functionPage/${string}`)
   string = string.split('/')[0]
   let activeIndex = 0
   if (string === 'course' || string === 'exam') {
