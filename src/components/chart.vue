@@ -76,7 +76,6 @@ const defaultOption = {
   xAxis: [
     {
       type: 'category',
-      data: [1, 2, 3, 2, 1, 4, 5],
       axisTick: { show: false },
       axisLine: { show: false },
       splitLine: { show: false },
@@ -99,7 +98,6 @@ const defaultOption = {
       color: '#547BF1',
     },
     stack: 'Total',
-    data: [1, 2, 3, 2, 1, 4, 5],
   },
 }
 

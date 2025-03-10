@@ -44,12 +44,12 @@
   <div class="middle-box">
     <div class="left-boxes">
       <div class="wow fadeInLeft pulse chart1">
-        <div class="chart-content">
+        <div class="chart-content1">
           <Chart :option="chartOption1" />
         </div>
       </div>
       <div class="wow fadeInLeft chart2">
-        <div class="chart-content">
+        <div class="chart-content2">
           <Chart :option="chartOption2" />
         </div>
         <el-dropdown @command="handleCommand2">
@@ -256,10 +256,34 @@
             </div>
             <div class="arrage-course">
               <el-carousel direction="vertical" type="card" :autoplay="false">
-                <el-carousel-item v-for="item in 4" :key="item">
-                  <h3 text="2xl" justify="center">{{ item }}</h3>
+                <el-carousel-item v-for="item in courselist.arr" :key="item">
+                  <div class="course-box">
+                    <div class="course-box-top">
+                      <div class="course-title">{{ item.courseName }}</div>
+                      <div class="course-time">{{ item.startTime }}--{{ item.endTime }}</div>
+                    </div>
+                    <div class="course-box-bottom">
+                      <div class="course-room">{{ item.classroom }}</div>
+                      <div class="course-major">{{ item.major }}</div>
+                      <div class="course-class">{{ item.class }}</div>
+                      <div class="course-number">{{ item.classNumber }}</div>
+                    </div>
+                  </div>
                 </el-carousel-item>
               </el-carousel>
+            </div>
+          </div>
+          <div class="arrge-bottom">
+            <div>明日建议:</div>
+            <div class="suggestion">
+              你有两堂连堂课程，分别在第二、三节课，课间休息时间较短,请提前准备好下节课所需的教学资料，避免匆忙。且这两堂课的教室位于教学楼的不同楼层，课间记得合理安排时间前往教室，以免迟到
+            </div>
+            <div class="arrage-bottom-content">
+              <div style="display: flex; justify-content: center">
+                <el-button color="#547bf1" plain>知道了</el-button>
+                <el-button color="#547bf1">提醒我</el-button>
+              </div>
+              <div class="button-word">有事? 去申请调课或换课</div>
             </div>
           </div>
         </div>
@@ -383,6 +407,37 @@ let feedbackList = reactive({
       status: '未解决',
       identity: 'student',
       class: '计科院 软件工程 22.7',
+    },
+  ],
+})
+let courselist = reactive({
+  arr: [
+    {
+      courseName: '数据库设计',
+      classroom: '三教7503',
+      startTime: '8:00',
+      endTime: '9:40',
+      class: '22级4班',
+      classNumber: '50人',
+      major: '软件工程',
+    },
+    {
+      courseName: '计算机网络',
+      classroom: '三教7504',
+      startTime: '14:30',
+      endTime: '15:50',
+      class: '22级3班',
+      classNumber: '50人',
+      major: '软件工程',
+    },
+    {
+      courseName: '计算机网络',
+      classroom: '三教7503',
+      startTime: '14:30',
+      endTime: '15:50',
+      class: '22级2班',
+      classNumber: '50人',
+      major: '软件工程',
     },
   ],
 })
@@ -553,11 +608,17 @@ const chartOption2 = ref({
   tooltip: {
     trigger: 'item',
   },
+  xAxis: [
+    {
+      type: 'category',
+      data: [1, 2, 3, 2, 1, 4, 5],
+    },
+  ],
   series: [
     {
       type: 'pie',
-      radius: [20, 60],
-      center: ['50%', '58%'],
+      radius: [15, 55],
+      center: ['58%', '52%'],
       itemStyle: {
         borderRadius: 8,
         borderWidth: 3,
@@ -793,13 +854,16 @@ function staticAnalysis(string) {
 
       @media (min-width: 1300px) {
       }
-
-      .chart-content {
-        height: 75%;
+      .chart-content1,
+      .chart-content2 {
+        height: 69%;
         width: 94%;
         padding: 0 3%;
         margin-top: 3%;
         border-radius: 10%;
+      }
+      .chart-content1 {
+        height: 80%;
       }
 
       .el-dropdown {
@@ -1234,6 +1298,7 @@ function staticAnalysis(string) {
     .right-box {
       border-radius: 10px;
       height: 100%;
+      position: relative;
       background-color: #fff;
       box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
 
@@ -1241,7 +1306,7 @@ function staticAnalysis(string) {
         padding: 12px;
         .arrage-content {
           background-color: #ebf4ff;
-          padding: 18px 10px;
+          padding: 18px 10px 1px 10px;
           margin-top: 8px;
           margin-bottom: 8px;
           border-radius: 10px;
@@ -1292,6 +1357,79 @@ function staticAnalysis(string) {
           }
           .arrage-course {
             margin: 10px auto;
+
+            .course-box {
+              padding: 8px 15px;
+
+              .course-box-top {
+                margin-bottom: 5px;
+              }
+              .course-box-top,
+              .course-box-bottom {
+                font-size: 12px;
+                display: flex;
+                .course-title {
+                  margin-right: auto;
+                  font-size: 15px;
+                }
+
+                .course-time {
+                  font-size: 14px;
+                  margin-top: 2px;
+                }
+
+                .course-number {
+                  color: $word-grey-color;
+                  padding: 1.5px 3px;
+                }
+
+                .course-room,
+                .course-major {
+                  color: #fff;
+                  padding: 1.5px 5px;
+                  border-radius: 5px;
+                  background-color: $main-blue;
+                  margin-right: 5px;
+                }
+
+                .course-major {
+                  background-color: $blue-back;
+                  color: $main-blue;
+                }
+
+                .course-class {
+                  padding: 1.5px 3px;
+                  color: $word-grey-color;
+                  margin-right: auto;
+                }
+              }
+            }
+          }
+        }
+
+        .suggestion {
+          padding: 5px 0;
+          color: $word-grey-color;
+          font-size: 14px;
+        }
+
+        .arrge-bottom {
+          padding: 10px 0;
+          margin: 0 auto;
+
+          .button-word {
+            font-size: 14px;
+            color: $word-black-color;
+            text-decoration: underline;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+          }
+          .arrage-bottom-content {
+            position: absolute;
+            margin-bottom: 20px;
+            width: calc(100% - 20px);
+            bottom: 0;
           }
         }
       }
@@ -1336,13 +1474,21 @@ function staticAnalysis(string) {
   width: 50px !important;
 }
 :deep(.el-carousel) {
-  height: 170px;
+  max-height: 170px;
 }
 :deep(.el-carousel__item) {
   height: 60px;
   background-color: #fff;
   border-radius: 10px;
-  padding: 10px 15px;
+  box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
+}
+:deep(.el-carousel__item:not(.is-active)) {
+  backdrop-filter: blur(50px);
+  filter: blur(1px);
+  -webkit-backdrop-filter: blur(50px);
+  height: 60px;
+  background-color: #fff;
+  border-radius: 10px;
   box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
 }
 </style>
