@@ -160,12 +160,8 @@ let navigation2 = [
     value: 'exam',
   },
   {
-    name: '我的申请',
+    name: '申请和反馈',
     value: 'application',
-  },
-  {
-    name: '我的反馈',
-    value: 'feedback',
   },
   {
     name: '所教班级',
@@ -276,14 +272,12 @@ function findActive(path, identity) {
           activeIndex = 1
         } else if (path.includes('/application')) {
           activeIndex = 2
-        } else if (path.includes('/feedback')) {
-          activeIndex = 3
         } else if (path.includes('/classroom')) {
-          activeIndex = 6
-        } else if (path.includes('/class')) {
-          activeIndex = 4
-        } else if (path.includes('/arrange')) {
           activeIndex = 5
+        } else if (path.includes('/class')) {
+          activeIndex = 3
+        } else if (path.includes('/arrange')) {
+          activeIndex = 4
         }
       }
       divList[activeIndex].classList.add('active')

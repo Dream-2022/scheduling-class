@@ -201,7 +201,6 @@ router.beforeEach(async (to, from, next) => {
     if (userStore.getIsLogin() == false) {
       console.log('登录状态', to.path)
       const res = await setRouter()
-      console.log('res', res)
       if (res === true) {
         if (to.name === 'home') {
           next({ name: 'home' })

@@ -39,7 +39,7 @@
         </el-table-column>
         <el-table-column label="证明材料" min-width="160">
           <template #default="{ row }">
-            <div class="table-imgs" v-for="img in row?.imgs" :key="img">
+            <div class="table-imgs" v-for="(img, index) in row?.imgs" :key="img">
               <img
                 :src="img"
                 class="table-img"
@@ -96,30 +96,21 @@
           <template #default="{ row }">
             <div>
               <el-button
-                color="#7dc15b"
-                size="small"
-                style="margin-bottom: 10px; color: #fff"
-                @click="safeClick(row.fileMd5)"
-                >安全评分</el-button
-              >
-            </div>
-            <div>
-              <el-button
                 color="#368eec"
                 size="small"
                 @click="staticClick(row.fileMd5)"
                 style="margin-bottom: 10px; color: #fff"
-                >静态报告</el-button
+                >通过</el-button
               >
             </div>
             <div>
               <el-button
-                color="#a372df"
+                color="#f56c6c"
                 plain
                 size="small"
                 style="margin-bottom: 10px"
                 @click="safeClick(row.fileMd5)"
-                >点击下载</el-button
+                >拒绝</el-button
               >
             </div>
           </template>
@@ -130,6 +121,8 @@
 </template>
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
 let applicationList = ref([])
 let feedbackList = ref([])
 let navigationValue = ref(true)
@@ -196,6 +189,11 @@ onMounted(async () => {
     // 申请人信息
     applicant: '王五(N219856153)',
   })
+  if (route.query.value == 'true') {
+    navigationValue.value = true
+  } else if (route.query.value == 'false') {
+    navigationValue.value = false
+  }
 })
 function navigationClick(value) {
   navigationValue.value = value

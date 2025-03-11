@@ -103,7 +103,7 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">请假申请</div>
-          <div class="more-view" @click="() => $router.push('/manager/functionPage/application')">
+          <div class="more-view" @click="staticAnalysis('application', true)">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -248,7 +248,7 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">反馈</div>
-          <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
+          <div class="more-view" @click="staticAnalysis('application', false)">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -777,7 +777,11 @@ const chartOption4 = ref({
   ],
 })
 //点击快捷入口
-function staticAnalysis(string) {
+function staticAnalysis(string, value) {
+  if (value != null) {
+    router.push(`/manager/functionPage/${string}/?value=${value}`)
+    return
+  }
   router.push(`/manager/functionPage/${string}`)
 }
 </script>

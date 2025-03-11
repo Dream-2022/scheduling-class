@@ -21,12 +21,12 @@
       <div @click="staticAnalysis('exam')">监考安排</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/private.png" @click="staticAnalysis('application')" />
+      <img src="@/assets/3D/private.png" @click="staticAnalysis('application', true)" />
       <div @click="staticAnalysis('application')">我的申请</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/0-t.png" @click="staticAnalysis('feedback')" />
-      <div @click="staticAnalysis('feedback')">我的反馈</div>
+      <img src="@/assets/3D/0-t.png" @click="staticAnalysis('application', false)" />
+      <div @click="staticAnalysis('application')">我的反馈</div>
     </div>
     <div class="module-box">
       <img src="@/assets/3D/1-t.png" @click="staticAnalysis('class')" />
@@ -650,7 +650,11 @@ const chartOption2 = ref({
   ],
 })
 //点击快捷入口
-function staticAnalysis(string) {
+function staticAnalysis(string, value) {
+  if (value != null) {
+    router.push(`/teacher/functionPage/${string}/?value=${value}`)
+    return
+  }
   router.push(`/teacher/functionPage/${string}`)
 }
 </script>
