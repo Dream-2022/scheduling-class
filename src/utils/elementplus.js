@@ -8,7 +8,9 @@ import {
   ElBadge,
   ElDivider,
   ElProgress,
+  ElDrawer,
   ElRow,
+  ElCol,
   ElEmpty,
   ElCascader,
   ElMessage,
@@ -25,6 +27,13 @@ import {
   ElBreadcrumb,
   ElIcon,
   ElAvatar,
+  ElRadioGroup,
+  ElRadio,
+  ElSegmented,
+  ElSwitch,
+  ElSelectV2,
+  ElTimePicker,
+  ElDatePicker,
 } from 'element-plus'
 
 export default function (app) {
@@ -33,7 +42,9 @@ export default function (app) {
   app.use(ElBadge)
   app.use(ElDivider)
   app.use(ElProgress)
+  app.use(ElDrawer)
   app.use(ElRow)
+  app.use(ElCol)
   app.use(ElEmpty)
   app.use(ElCascader)
   app.use(ElMessage)
@@ -50,4 +61,11 @@ export default function (app) {
   app.use(ElBreadcrumb)
   app.use(ElIcon)
   app.use(ElAvatar)
+  app.use(ElRadioGroup)
+  app.use(ElRadio)
+  app.use(ElSegmented)
+  app.use(ElSwitch)
+  app.use(ElSelectV2)
+  app.use(ElTimePicker)
+  app.use(ElDatePicker)
 }

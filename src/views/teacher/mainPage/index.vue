@@ -193,7 +193,7 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">我的反馈</div>
-            <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
+            <div class="more-view" @click="staticAnalysis('application', false)">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>

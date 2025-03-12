@@ -41,6 +41,9 @@ importers:
       vue-router:
         specifier: ^4.5.0
         version: 4.5.0(vue@3.5.13(typescript@5.7.3))
+      vue-signature-pad:
+        specifier: ^3.0.2
+        version: 3.0.2(vue@3.5.13(typescript@5.7.3))
       vue3-dnd:
         specifier: ^2.1.0
         version: 2.1.0(vue@3.5.13(typescript@5.7.3))
@@ -1601,6 +1604,9 @@ packages:
     resolution: {integrity: sha512-BhXM0Au22RwUneMPwSCnyhTOizdWoIEPU9sp0Aqa1PnDMR5Wv2FGXYDjuzJEIX+Eo2Rb8xuYe5jrnm5QowQFkw==}
     engines: {node: '>=16.10'}
 
+  merge-images@1.2.0:
+    resolution: {integrity: sha512-hEGvgnTdXr08uzGvEArxRsKpy7WmozM73YaSi4s5IYF4LxrhANpqfHaz9CgBZ5+0+s2NsjPnPdStz3aCc0Yulw==}
+
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
 
@@ -1983,6 +1989,9 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  signature_pad@3.0.0-beta.4:
+    resolution: {integrity: sha512-cOf2NhVuTiuNqe2X/ycEmizvCDXk0DoemhsEpnkcGnA4kS5iJYTCqZ9As7tFBbsch45Q1EdX61833+6sjJ8rrw==}
+
   sirv@3.0.0:
     resolution: {integrity: sha512-BPwJGUeDaDCHihkORDchNyyTvWFhcusy1XMmhEVTQTwGeybFbp8YEmB+njbPnth1FibULBSBVwCQni25XlCUDg==}
     engines: {node: '>=18'}
@@ -2218,6 +2227,12 @@ packages:
 
   vue-router@4.5.0:
     resolution: {integrity: sha512-HDuk+PuH5monfNuY+ct49mNmkCRK4xJAV9Ts4z9UFc4rzdDnxQLyCMGGc8pKhZhHTVzfanpNwB/lwqevcBwI4w==}
+    peerDependencies:
+      vue: ^3.2.0
+
+  vue-signature-pad@3.0.2:
+    resolution: {integrity: sha512-o25o+lROfCmzASS2+fU8ZV801kV+D4/02zkZ+ez3NKeiUmbxW7kwlUf5oKQkvA+l7Ou9xGsGLsirBLch3jyX8A==}
+    engines: {node: '>=12'}
     peerDependencies:
       vue: ^3.2.0
 
@@ -3824,6 +3839,8 @@ snapshots:
 
   meow@12.1.1: {}
 
+  merge-images@1.2.0: {}
+
   merge-stream@2.0.0: {}
 
   micromatch@4.0.8:
@@ -4146,6 +4163,8 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
+  signature_pad@3.0.0-beta.4: {}
+
   sirv@3.0.0:
     dependencies:
       '@polka/url': 1.0.0-next.28
@@ -4350,6 +4369,12 @@ snapshots:
   vue-router@4.5.0(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@vue/devtools-api': 6.6.4
+      vue: 3.5.13(typescript@5.7.3)
+
+  vue-signature-pad@3.0.2(vue@3.5.13(typescript@5.7.3)):
+    dependencies:
+      merge-images: 1.2.0
+      signature_pad: 3.0.0-beta.4
       vue: 3.5.13(typescript@5.7.3)
 
   vue3-dnd@2.1.0(vue@3.5.13(typescript@5.7.3)):

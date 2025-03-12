@@ -39,12 +39,14 @@
         </el-table-column>
         <el-table-column label="证明材料" min-width="160">
           <template #default="{ row }">
-            <div class="table-imgs" v-for="(img, index) in row?.imgs" :key="img">
-              <img
-                :src="img"
-                class="table-img"
-                :style="{ transform: `translateX(${index * -10}px)` }"
-              />
+            <div class="table-imgs">
+              <div v-for="(img, index) in row?.imgs" :key="img">
+                <img
+                  :src="img"
+                  class="table-img"
+                  :style="{ transform: `translateX(${index * -10}px)` }"
+                />
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -133,10 +135,10 @@ onMounted(async () => {
     // 申请时间
     time: '2025-2-8 15:30',
     imgs: [
-      '@/assets/img/logo.png',
-      '@/assets/img/cat.jpeg',
-      '@/assets/img/cat.jpeg',
-      '@/assets/img/cat.jpeg',
+      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
+      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
+      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
+      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
     ],
     // 请假开始时间
     leaveStartTime: '2025-2-10',
@@ -173,7 +175,7 @@ onMounted(async () => {
   applicationList.value.push({
     id: 122,
     title: '外出学习（老吉大）',
-    imgs: ['@/assets/img/book.png', '@/assets/img/cat.jpeg'],
+    imgs: ['@/assets/img/book.png', '../../../../assets/img/cat.jpeg'],
     // 申请时间
     time: '2025-2-8 12:30',
     // 请假开始时间
@@ -280,9 +282,9 @@ function getClass(name) {
       display: flex;
 
       .table-img {
-        width: 80px;
-        border-radius: 40px;
-        border: 2px solid #fff;
+        max-width: 80px;
+        border-radius: 50%;
+        border: 2px solid #d1d1d1;
       }
     }
   }
