@@ -101,14 +101,9 @@
             <div>{{ row.leaveStartTime }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="请假总时长（/天）" min-width="140">
+        <el-table-column label="请假结束日期" min-width="180">
           <template #default="{ row }">
-            <div class="colorLabel">{{ row.leaveDays }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="涉及课程节次" min-width="100">
-          <template #default="{ row }">
-            <div>{{ row.leaveCourseCount }}</div>
+            <div>{{ row.leaveEndTime }}</div>
           </template>
         </el-table-column>
         <el-table-column label="申请日期" min-width="140">
@@ -140,25 +135,22 @@
   <el-drawer v-model="applicationVisible" :show-close="false">
     <template #header="{ close, titleId, titleClass }">
       <h4 :id="titleId" :class="titleClass">申请</h4>
-      <el-button type="danger" @click="close">
-        <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
-      </el-button>
+      <el-button color="#f56c6c" plain :icon="CloseBold" circle @click="close" />
     </template>
     <el-form
-      ref="application.arr"
+      ref="elFormRef"
       style="max-width: 600px"
-      :model="ruleForm"
+      :model="application.arr"
       :rules="rules"
       label-width="auto"
-      class="demo-ruleForm"
       size="default"
       status-icon
     >
       <el-form-item label="请假事由" prop="title">
-        <el-input v-model="application.arr.title" />
+        <el-input placeholder="请输入请假事由" v-model="application.arr.title" type="textarea" />
       </el-form-item>
-      <el-form-item label="请假类型" prop="status">
-        <el-select v-model="application.arr.status" placeholder="Activity zone">
+      <el-form-item label="请假类型" prop="leaveType">
+        <el-select v-model="application.arr.leaveType" placeholder="请选择请假类型">
           <el-option label="公假" value="public" />
           <el-option label="事假" value="matter" />
           <el-option label="病假" value="illness" />
@@ -170,9 +162,9 @@
       </el-form-item>
       <el-form-item label="请假起始时间" required>
         <el-col :span="11">
-          <el-form-item prop="date1">
+          <el-form-item prop="startDate">
             <el-date-picker
-              v-model="application.arr.date1"
+              v-model="application.arr.startDate"
               type="date"
               aria-label="选择日期"
               placeholder="选择日期"
@@ -184,9 +176,9 @@
           <span class="text-gray-500">-</span>
         </el-col>
         <el-col :span="11">
-          <el-form-item prop="date2">
+          <el-form-item prop="startTime">
             <el-time-picker
-              v-model="application.arr.date2"
+              v-model="application.arr.startTime"
               aria-label="选择时间"
               placeholder="选择时间"
               style="width: 100%"
@@ -194,38 +186,82 @@
           </el-form-item>
         </el-col>
       </el-form-item>
-      <el-form-item label="请假天数" prop="count">
-        <el-select-v2
-          v-model="application.arr.leaveDays"
-          placeholder="选择天数"
-          :options="options"
-        />
+      <el-form-item label="请假结束时间" required>
+        <el-col :span="11">
+          <el-form-item prop="endDate">
+            <el-date-picker
+              v-model="application.arr.endDate"
+              type="date"
+              aria-label="选择日期"
+              placeholder="选择日期"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col class="text-center" :span="2">
+          <span class="text-gray-500">-</span>
+        </el-col>
+        <el-col :span="11">
+          <el-form-item prop="endTime">
+            <el-time-picker
+              v-model="application.arr.endTime"
+              aria-label="选择时间"
+              placeholder="选择时间"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
       </el-form-item>
-      <el-form-item label="涉及课程节次" prop="count">
-        <el-select-v2
-          v-model="application.arr.leaveDays"
-          placeholder="选择天数"
-          :options="options"
-        />
+      <el-form-item label="调整举措" prop="leaveReason">
+        <el-segmented v-model="application.arr.leaveReason" :options="leaveReasonOptions" />
       </el-form-item>
-      <el-form-item label="Instant delivery" prop="delivery">
-        <el-switch v-model="application.arr.delivery" />
+      <el-form-item label="申请人签字" prop="signature">
+        <HandwrittenSignature v-model="application.arr.signature" />
       </el-form-item>
-      <el-form-item label="Activity location" prop="location">
-        <el-segmented v-model="application.arr.location" :options="locationOptions" />
-      </el-form-item>
-      <el-form-item label="Resources" prop="resource">
-        <el-radio-group v-model="application.arr.resource">
-          <el-radio value="Sponsorship">Sponsorship</el-radio>
-          <el-radio value="Venue">Venue</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="Activity form" prop="desc">
-        <el-input v-model="application.arr.desc" type="textarea" />
+      <el-form-item label="证明材料" prop="imgs">
+        <el-upload
+          :on-change="handleFileChange"
+          action="#"
+          v-model:file-list="application.arr.imgs"
+          list-type="picture-card"
+          :auto-upload="false"
+        >
+          <el-icon><Plus /></el-icon>
+          <template #file="{ file }">
+            <div>
+              <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+              <span class="el-upload-list__item-actions">
+                <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
+                  <el-icon><zoom-in /></el-icon>
+                </span>
+                <span
+                  v-if="!disabled"
+                  class="el-upload-list__item-delete"
+                  @click="handleDownload(file)"
+                >
+                  <el-icon><Download /></el-icon>
+                </span>
+                <span
+                  v-if="!disabled"
+                  class="el-upload-list__item-delete"
+                  @click="handleRemove(file)"
+                >
+                  <el-icon><Delete /></el-icon>
+                </span>
+              </span>
+            </div>
+          </template>
+        </el-upload>
+        <!-- 预览图 -->
+        <el-dialog v-model="dialogVisible">
+          <img w-full :src="dialogImageUrl" alt="Image" />
+        </el-dialog>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm(application.arr)"> Create </el-button>
-        <el-button @click="resetForm(application.arr)">Reset</el-button>
+        <div class="button-box">
+          <el-button type="primary" @click="submitForm(application.arr)"> 申请 </el-button>
+          <el-button @click="resetForm(application.arr)">取消</el-button>
+        </div>
       </el-form-item>
     </el-form>
   </el-drawer>
@@ -243,33 +279,67 @@
 <script setup>
 import { onMounted, ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
-import { CirclePlusFilled, CircleCloseFilled } from '@element-plus/icons-vue'
+import HandwrittenSignature from '@/components/signature.vue'
+import {
+  Delete,
+  Download,
+  Plus,
+  ZoomIn,
+  CirclePlusFilled,
+  CloseBold,
+  CircleCloseFilled,
+} from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { addApplicationAPI } from '@/apis/application'
 const route = useRoute()
 let applicationList = ref([]) //申请列表
 let feedbackList = ref([]) //反馈列表
 let applicationVisible = ref(false) //申请抽屉
 let feedbackVisible = ref(false) //反馈抽屉
 let navigationValue = ref(true)
-const options = Array.from({ length: 20 }).map((_, idx) => ({
-  value: `${idx + 1}`,
-  label: `${idx + 1}`,
-}))
-const initApplication = {
-  id: 0,
-  title: '',
-  time: '',
-  status: '',
-  imgs: [],
-  leaveStartTime: '',
-  leaveDays: '',
-  leaveCourseCount: '',
-  leaveType: '',
-  leaveReason: '',
-  applicant: '',
-}
+const dialogImageUrl = ref('')
+const dialogVisible = ref(false)
+const disabled = ref(false)
 let application = reactive({
   arr: {},
 })
+let elFormRef = ref()
+//表单规则
+const rules = {
+  title: [{ required: true, message: '请输入请假事由', trigger: 'blur' }],
+  leaveType: [{ required: true, message: '请选择请假类型', trigger: 'blur' }],
+  leaveStartDate: [{ required: true, message: '请选择请假起始日期', trigger: 'blur' }],
+  startDate: [{ required: true, message: '请选择开始日期', trigger: 'change' }],
+  startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
+  endDate: [{ required: true, message: '请选择结束日期', trigger: 'blur' }],
+  endTime: [{ required: true, message: '请选择结束时间', trigger: 'blur' }],
+  leaveReason: [{ required: true, message: '请选择调整举措', trigger: 'blur' }],
+  signature: [{ required: true, message: '请进行申请人签字', trigger: 'blur' }],
+}
+const leaveReasonOptions = [
+  {
+    label: '调课',
+    value: 'adjust',
+  },
+  {
+    label: '换课',
+    value: 'change',
+  },
+]
+const initApplication = {
+  title: '',
+  status: '',
+  imgs: [],
+  leaveStartTime: '',
+  startDate: '',
+  startTime: '',
+  leaveEndDate: '',
+  endDate: '',
+  endTime: '',
+  leaveType: '',
+  signature: '',
+  leaveReason: '',
+}
 onMounted(async () => {
   applicationList.value.push({
     id: 124,
@@ -280,11 +350,11 @@ onMounted(async () => {
     imgs: [
       'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
       'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-      '@/assets/img/cat.jpeg',
-      '@/assets/img/cat.jpeg',
     ],
+    leaveStartTime: '2025-2-11 21:42:7',
     // 请假开始时间
-    leaveStartTime: '2025-2-10',
+    leaveEndTime: '2025-2-13 21:41:7',
+    signature: '',
     // 请假天数
     leaveDays: '2',
     // 请假课程数量
@@ -304,7 +374,9 @@ onMounted(async () => {
     time: '2025-2-8 12:30',
     status: '已拒绝',
     // 请假开始时间
-    leaveStartTime: '2025-2-10',
+    leaveStartTime: '2025-2-10 21:41:7',
+    signature: '',
+    leaveEndTime: '2025-2-10 21:41:7',
     // 请假天数
     leaveDays: '1',
     // 请假课程数量
@@ -324,9 +396,11 @@ onMounted(async () => {
     time: '2025-2-8 12:30',
     status: '已通过',
     // 请假开始时间
-    leaveStartTime: '2025-2-10',
+    leaveStartTime: '2025-2-10 8:10:7',
+    leaveEndTime: '2025-2-10 21:41:7',
     // 请假天数
     leaveDays: '1',
+    signature: '',
     // 请假课程数量
     leaveCourseCount: '2',
     // 请假类型
@@ -341,8 +415,84 @@ onMounted(async () => {
   } else if (route.query.value == 'false') {
     navigationValue.value = false
   }
-  application.arr = initApplication
+  application.arr = { ...initApplication }
 })
+// 提交表单方法
+const submitForm = async () => {
+  elFormRef.value.validate(async valid => {
+    if (valid) {
+      console.log('表单验证通过，提交数据:', application.arr)
+      console.log(application.arr.startDate, application, application.arr.startTime)
+      application.arr.leaveStartTime = mergeDateAndTime(
+        application.arr.startDate,
+        application.arr.startTime,
+      )
+      application.arr.leaveEndTime = mergeDateAndTime(
+        application.arr.endDate,
+        application.arr.endTime,
+      )
+      console.log(application.arr.leaveStartTime)
+      // application.arr.leaveStartTime=
+      await addApplicationAPI(application.arr)
+    } else {
+      ElMessage.error('表单验证失败，请检查输入')
+      return false
+    }
+  })
+}
+function mergeDateAndTime(dateObj, timeObj) {
+  if (!dateObj || !timeObj) return null
+
+  const mergedDate = new Date(dateObj) // 复制日期对象
+  mergedDate.setHours(timeObj.getHours(), timeObj.getMinutes(), timeObj.getSeconds()) // 设置小时、分钟、秒
+
+  return mergedDate
+}
+// 重置表单方法
+const resetForm = () => {
+  application.arr = { ...initApplication }
+  elFormRef.value.resetFields()
+  applicationVisible.value = false
+}
+//删除图片
+const handleRemove = file => {
+  console.log(file.url, JSON.stringify(application.arr.imgs[0]))
+  application.arr.imgs = application.arr.imgs.filter(item => item.url != file.url)
+  ElMessage.success(`删除成功！`)
+  console.log(application.arr.imgs)
+}
+//预览图片
+const handlePictureCardPreview = file => {
+  dialogImageUrl.value = file.url
+  dialogVisible.value = true
+}
+//下载图片
+const handleDownload = file => {
+  if (file.url) {
+    console.log(1)
+    const a = document.createElement('a')
+    a.href = file.url
+    a.download = file.name || 'download'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  } else if (file.content) {
+    const blob = new Blob([file.content], { type: file.raw.type || 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = file.name || 'download.txt'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url) // 释放内存
+  }
+}
+//图片列表变化
+const handleFileChange = file => {
+  application.arr.imgs.push(file)
+  console.log(application.arr.imgs)
+}
 //点击新增申请
 function addApplicationClick() {
   if (navigationValue.value) applicationVisible.value = true
@@ -402,7 +552,7 @@ function navigationClick(value) {
       font-size: 15px;
     }
 
-    width: 95%;
+    width: 98%;
     margin: 20px auto;
     .table-imgs {
       display: flex;
@@ -492,5 +642,38 @@ function navigationClick(value) {
       color: $red;
     }
   }
+}
+
+.el-form {
+  width: 95%;
+  padding: 0 10px;
+
+  .text-center {
+    text-align: center;
+  }
+
+  .button-box {
+    margin-top: 30px;
+    margin-left: 100px;
+    .el-button {
+      margin-right: 20px;
+      padding-left: 40px;
+      padding-right: 40px;
+      border-radius: 10px;
+    }
+  }
+}
+:deep(.el-upload-list__item) {
+  width: 130px;
+  height: 130px;
+}
+:deep(.el-upload--picture-card) {
+  width: 130px;
+  height: 130px;
+}
+:deep(.el-dialog__body img) {
+  width: 98%;
+  height: 98%;
+  border-radius: 10px;
 }
 </style>

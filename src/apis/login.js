@@ -15,6 +15,9 @@ export const loginAPI = (username, password, grant_type) => {
   return http({
     url: '/oauth2/token',
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
     data: {
       username,
       password,

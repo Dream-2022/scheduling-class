@@ -9,10 +9,9 @@ import { showLoading, hideLoading } from '@/utils/loading.js'
 
 const http = axios.create({
   baseURL: 'http://192.168.50.8:80',
-  headers: {
-    // 'Access-Control-Allow-Origin': 'http://192.168.50.32:10010' // 设置允许的源
-    'Content-Type': 'application/x-www-form-urlencoded',
-  },
+  // headers: {
+  //   'Access-Control-Allow-Origin': 'http://192.168.50.32:10010', // 设置允许的源
+  // },
   // timeout: 5000
 })
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';

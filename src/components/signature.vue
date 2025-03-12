@@ -1,126 +1,157 @@
 <template>
   <div class="handwritten-name-wrap">
-    <el-button plain @click="handleClick"> 手写签名 </el-button>
-    <div class="img-wrap">
-      <img :src="imgSrc" alt="" v-if="imgSrc" class="signature" />
+    <el-button color="#547bf1" plain @click="openDialog">手写签名</el-button>
+    <el-button
+      color="#f56c6c"
+      plain
+      v-show="modelValue != ''"
+      @click="clearSignature()"
+      class="fade-button"
+      >清除</el-button
+    >
+    <div class="img-wrap" v-show="modelValue != ''">
+      <img :src="modelValue" alt="签名" v-if="modelValue" class="signature fade-img" />
     </div>
-    <el-dialog v-model="panelVisible" title="个人资料">
+
+    <el-dialog v-model="panelVisible" title="手写签名" width="600px">
       <div class="signWrap">
-        <VueSignaturePad width="500px" height="300px" ref="signaturePad" :options="options.arr" />
+        <VueSignaturePad width="500px" height="300px" ref="signaturePad" :options="options" />
         <footer>
-          <div class="gtnGroup">
+          <div class="btn-group">
             <el-button type="primary" @click="undo">撤销</el-button>
-            <el-button type="primary" style="margin-left: 20px" @click="clear">清屏</el-button>
-            <el-button type="primary" style="margin-left: 20px" @click="save">保存</el-button>
+            <el-button type="primary" @click="clear">清屏</el-button>
+            <el-button type="primary" @click="save">保存</el-button>
           </div>
-          <div class="otherSet">
-            <div class="penTxt">笔刷大小：</div>
-            <div class="circleWrap" :class="{ active: isActive1 }" @click="selSize(1)">
-              <b class="b1"></b>
-            </div>
-            <div class="circleWrap" :class="{ active: isActive2 }" @click="selSize(2)">
-              <b class="b2"></b>
-            </div>
-            <div class="circleWrap" :class="{ active: isActive3 }" @click="selSize(3)">
-              <b class="b3"></b>
+          <div class="brush-settings">
+            <span>笔刷大小：</span>
+            <div
+              v-for="size in brushSizes"
+              :key="size.value"
+              class="circleWrap"
+              :class="{ active: size.value === selectedSize }"
+              @click="selectSize(size.value)"
+            >
+              <b :class="size.class"></b>
             </div>
           </div>
         </footer>
       </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="panelVisible = false">关闭</el-button>
-        </div>
-      </template>
     </el-dialog>
   </div>
 </template>
+
 <script setup>
-import { ref, reactive, watch, nextTick } from 'vue'
-let panelVisible = ref(false)
-let signaturePad = ref()
-let isActive1 = ref(true)
-let isActive2 = ref(false)
-let isActive3 = ref(false)
-let imgSrc = ref()
-let options = reactive({
-  arr: {},
+import { ElMessage } from 'element-plus'
+import { ref, watch, nextTick, defineProps, defineEmits } from 'vue'
+
+// Props: 使用 v-model 绑定签名图片
+defineProps({
+  modelValue: String, // 绑定签名图片数据
 })
+
+const emit = defineEmits(['update:modelValue']) // v-model 绑定数据
+
+const panelVisible = ref(false)
+const signaturePad = ref()
+const selectedSize = ref(1)
+
+const options = ref({
+  penColor: '#000',
+  minWidth: 1,
+  maxWidth: 1,
+})
+
+function clearSignature() {
+  emit('update:modelValue', '')
+}
+// 笔刷大小选项
+const brushSizes = [
+  { value: 1, class: 'b1' },
+  { value: 2, class: 'b2' },
+  { value: 3, class: 'b3' },
+]
+
+// 打开弹窗
+function openDialog() {
+  panelVisible.value = true
+  selectedSize.value = 1 // 默认笔刷大小
+  options.value = { penColor: '#000', minWidth: 1, maxWidth: 1 }
+}
+
+// 监听弹窗打开后，确保 canvas 尺寸
 watch(panelVisible, async newVal => {
   if (newVal) {
     await nextTick()
-    const canvas = document.querySelector('canvas')
+    const canvas = signaturePad.value?.$el?.querySelector('canvas')
     if (canvas) {
       canvas.width = 500
       canvas.height = 300
     }
   }
 })
-//手写签名按钮的点击
-function handleClick() {
-  panelVisible.value = true
-  isActive1.value = true
-  isActive2.value = false
-  isActive3.value = false
-  options.arr = {
-    penColor: '#000',
-    minWidth: 1,
-    maxWidth: 1,
-  }
+
+// 选择笔刷大小
+function selectSize(val) {
+  selectedSize.value = val
+  options.value = { penColor: '#000', minWidth: val, maxWidth: val }
 }
-//撤销
+
+// 撤销签名
 function undo() {
   signaturePad.value.undoSignature()
 }
-//清除
+
+// 清空签名
 function clear() {
   signaturePad.value.clearSignature()
 }
-//保存
+
+// 保存签名
 function save() {
-  console.log(signaturePad.value.saveSignature())
   const data = signaturePad.value.saveSignature().data
-  imgSrc.value = data
-  panelVisible.value = false
-}
-//调节画笔粗细大小
-function selSize(val) {
-  options.arr = {
-    penColor: '#000',
-    minWidth: val,
-    maxWidth: val,
-  }
-  if (val == 1) {
-    isActive1.value = true
-    isActive2.value = false
-    isActive3.value = false
-  } else if (val == 2) {
-    isActive1.value = false
-    isActive2.value = true
-    isActive3.value = false
-  } else if (val == 3) {
-    isActive1.value = false
-    isActive2.value = false
-    isActive3.value = true
+  if (data != null) {
+    emit('update:modelValue', data) // 触发 v-model 更新
+    panelVisible.value = false
+  } else {
+    ElMessage.warning('签名不能为空！')
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .handwritten-name-wrap {
   .img-wrap {
-    width: 100%;
-    height: 164px;
-    margin-top: 2px;
+    width: 250px;
+    border-radius: 10px;
+    height: 150px;
+    margin-top: 10px;
     border: 1px solid #ccc;
 
     .signature {
-      width: 500px;
-      height: 300px;
+      width: 250px;
+      height: 150px;
     }
   }
+  /* 按钮过渡样式 */
+  .fade-button {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
 
+  .fade-button[style*='display: none'] {
+    opacity: 0 !important;
+  }
+
+  /* 图片过渡样式 */
+  .fade-img {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .fade-img[style*='display: none'] {
+    opacity: 0 !important;
+  }
   .signWrap {
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -132,57 +163,32 @@ function selSize(val) {
       object-fit: contain;
     }
 
-    .signName {
-      flex: 1;
-      border-top: 1px solid #ccc;
-    }
-
     footer {
-      height: 40px;
-      border-top: 1px solid #ccc;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
 
-      .gtnGroup {
-        width: 50%;
-        margin-left: 20px;
+      .btn-group {
+        display: flex;
+        gap: 20px;
       }
 
-      .otherSet {
-        width: 50%;
+      .brush-settings {
         display: flex;
         align-items: center;
-
-        .penTxt {
-          width: 70px;
-        }
-
-        .selSize {
-          width: 70px;
-        }
-
-        .el-select__caret {
-          position: absolute;
-          right: -3px;
-        }
-
-        .b1,
-        .b2,
-        .b3 {
-          display: inline-block;
-          background: #000;
-          border-radius: 50%;
-        }
+        gap: 10px;
 
         .circleWrap {
+          width: 18px;
+          height: 18px;
           display: flex;
           justify-content: center;
           align-items: center;
-          width: 18px;
-          height: 18px;
           cursor: pointer;
-          margin-right: 20px;
+          border-radius: 50%;
+          border: 1px dashed transparent;
         }
 
         .active {
@@ -192,25 +198,25 @@ function selSize(val) {
         .b1 {
           width: 4px;
           height: 4px;
+          background: #000;
+          border-radius: 50%;
         }
 
         .b2 {
           width: 6px;
           height: 6px;
+          background: #000;
+          border-radius: 50%;
         }
 
         .b3 {
           width: 8px;
           height: 8px;
+          background: #000;
+          border-radius: 50%;
         }
       }
     }
-  }
-}
-
-.signNameModel {
-  .vxe-modal--content {
-    padding: 0 !important;
   }
 }
 </style>

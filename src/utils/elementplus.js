@@ -4,6 +4,7 @@ import 'element-plus/dist/index.css'
 // 按需引入element组件
 import {
   ElButton,
+  ElUpload,
   ElForm,
   ElBadge,
   ElDivider,
@@ -29,6 +30,7 @@ import {
   ElAvatar,
   ElRadioGroup,
   ElRadio,
+  ElDialog,
   ElSegmented,
   ElSwitch,
   ElSelectV2,
@@ -38,6 +40,7 @@ import {
 
 export default function (app) {
   app.use(ElButton)
+  app.use(ElUpload)
   app.use(ElForm)
   app.use(ElBadge)
   app.use(ElDivider)
@@ -63,6 +66,7 @@ export default function (app) {
   app.use(ElAvatar)
   app.use(ElRadioGroup)
   app.use(ElRadio)
+  app.use(ElDialog)
   app.use(ElSegmented)
   app.use(ElSwitch)
   app.use(ElSelectV2)
