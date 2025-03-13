@@ -64,7 +64,7 @@ http.interceptors.response.use(
     }
     const code = response.code
     switch (code) {
-      case 'A001400':
+      case 'A001302':
         refreshToken()
         break
     }
