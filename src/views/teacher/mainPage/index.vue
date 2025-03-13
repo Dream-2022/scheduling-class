@@ -296,6 +296,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
+// import { getLeaveListAPI } from '@/apis/application'
 import '@/assets/iconfont/iconfont.css'
 import WOW from 'wow.js'
 import Chart from '@/components/Chart.vue'
@@ -452,6 +453,8 @@ onMounted(async () => {
   for (let i = 0; i < applicationList.length; i++) {
     isDisable.arr[i] = true
   }
+  // const leaveList = await getLeaveListAPI()
+  // console.log(leaveList)
 })
 //获取颜色
 function getLabel(content, number) {

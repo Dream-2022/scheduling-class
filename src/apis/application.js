@@ -17,3 +17,9 @@ export const addApplicationAPI = form => {
     },
   })
 }
+export const getLeaveListAPI = () => {
+  return http({
+    url: '/leave/leave-list',
+    method: 'GET',
+  })
+}

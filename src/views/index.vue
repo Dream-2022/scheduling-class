@@ -92,6 +92,144 @@
       <RouterView></RouterView>
     </div>
   </div>
+
+  <el-dialog v-model="personVisible" title="个人资料" width="500">
+    <div class="bindBox">
+      <table class="table">
+        <tr class="tr">
+          <td class="td">头像</td>
+          <td class="td">
+            <img
+              class="iconImg"
+              :src="avatar == '' ? require('@/assets/img/title.png') : avatar"
+              alt=""
+            />
+          </td>
+          <td class="td">
+            <el-button type="small" color="#547BF1" @click="updateClick">更换头像</el-button>
+            <input
+              class="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleAvatarChange"
+            />
+          </td>
+        </tr>
+        <tr class="tr">
+          <td class="td">姓名</td>
+          <td class="td">吴来源</td>
+          <td class="td"></td>
+        </tr>
+        <tr class="tr">
+          <td class="td">{{ userInfo.identity == 'STUDENT' ? '学号' : '工号' }}</td>
+          <td class="td">{{ userInfo.name }}</td>
+          <td class="td"></td>
+        </tr>
+        <tr class="tr">
+          <td class="td">职称</td>
+          <td class="td">副教授</td>
+          <td class="td"></td>
+        </tr>
+        <tr class="tr">
+          <td class="td">所属院系</td>
+          <td class="td">计算机科学与工程学院</td>
+          <td class="td"></td>
+        </tr>
+        <tr class="tr">
+          <td class="td">邮箱</td>
+          <td class="td">21712204141@qq.com</td>
+          <td class="td"></td>
+        </tr>
+        <tr class="tr">
+          <td class="td">{{ userInfo.identity == 'STUDENT' ? '个人' : '教师' }}偏好</td>
+          <td class="td">
+            <div class="preference-box">
+              <div class="preference">
+                <div>偏好课程</div>
+                <div>计算机网络</div>
+              </div>
+              <div class="preference">
+                <div>偏好时间段</div>
+                <div>
+                  <div>周一 1-4 小节</div>
+                  <div>周二 1-4 小节</div>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="td">
+            <div>
+              <el-button type="small" color="#547BF1" @click="preferenceVisible = true"
+                >修改</el-button
+              >
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="personVisible = false">关闭</el-button>
+      </div>
+    </template>
+  </el-dialog>
+  <el-dialog v-model="preferenceVisible" title="修改偏好" width="650">
+    <div>
+      <div class="preference-box" style="margin-left: 10px">
+        <div class="preference">
+          <div>偏好课程</div>
+          <div>
+            <el-select
+              ref="preferenceOption"
+              v-model="preferenceOption"
+              multiple
+              collapse-tags
+              collapse-tags-tooltip
+              :max-collapse-tags="3"
+              style="width: 450px"
+            >
+              <el-option
+                v-for="item in preferenceOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
+        </div>
+        <div class="preference">
+          <div>偏好时间段</div>
+          <div>
+            <div>
+              <el-select
+                ref="timeOption1"
+                v-model="preferenceOption"
+                multiple
+                collapse-tags
+                collapse-tags-tooltip
+                :max-collapse-tags="3"
+                style="width: 450px"
+              >
+                <el-option
+                  v-for="item in preferenceOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </div>
+            <div>周二 1-4 小节</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="preferenceVisible = false">关闭</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
@@ -116,6 +254,27 @@ const router = useRouter()
 let myChart = ref(null) // logo 动画
 let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
+let personVisible = ref(false) // 是否展示个人资料弹窗
+let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
+let preferenceOptions = ref([
+  {
+    value: '选项1',
+    label: '黄金糕',
+  },
+  {
+    value: '选项2',
+    label: '双皮奶',
+  },
+  {
+    value: '选项3',
+    label: '蚵仔煎',
+  },
+  {
+    value: '选项4',
+    label: '龙须面',
+  },
+])
+let preferenceOption = ref('黄金糕')
 
 let navigationList = reactive({
   arr: [],
@@ -220,6 +379,13 @@ onMounted(async () => {
     identity === 'manager' ? navigation1 : identity === 'teacher' ? navigation2 : navigation3
   findActive(path, identity)
 })
+//点击更换头像
+function updateClick() {
+  let fileInput = document.querySelector('.fileInput')
+  if (fileInput) {
+    fileInput.click()
+  }
+}
 // 监听路由变化
 watchEffect(() => {
   const path = router.currentRoute.value.fullPath
@@ -606,6 +772,92 @@ onUnmounted(() => {
 
     .menu-item {
       margin-left: 20px;
+    }
+  }
+}
+.table {
+  border: 1px solid #eceffe;
+  border-radius: 10px;
+  border-collapse: collapse;
+  box-sizing: border-box;
+  width: 100%;
+
+  .tr:last-child {
+    border: 0px;
+  }
+  .tr:nth-child(1) {
+    height: 80px;
+    line-height: 80px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .tr {
+    display: flex;
+    justify-content: space-between;
+    height: 55px;
+    line-height: 55px;
+    border-bottom: 1px solid #eceffe;
+    margin-left: 20px;
+    margin-right: 20px;
+    .iconImg {
+      border-radius: 50px;
+    }
+    .td {
+      flex: 1;
+    }
+
+    .td:nth-child(1) {
+      color: $word-grey-color;
+    }
+    .td:nth-child(2) {
+      display: flex;
+      justify-content: left;
+      flex: 2;
+    }
+
+    .td:nth-child(3) {
+      display: flex;
+      justify-content: right;
+      align-items: center;
+      flex: 0.5;
+    }
+
+    .homeUserInfoAvatar {
+      width: 50px;
+      height: 50px;
+      margin-top: 15px;
+      border-radius: 50%;
+    }
+
+    .fileTd {
+      line-height: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: left;
+    }
+  }
+  .tr:last-child {
+    height: auto;
+  }
+}
+.preference-box {
+  margin-top: 12px;
+  line-height: 30px;
+  display: flex;
+  flex-direction: column;
+
+  .preference {
+    display: flex;
+    margin-bottom: 10px;
+
+    > div:first-child {
+      min-width: 100px;
+      text-align: left;
+      color: $word-grey-color;
+    }
+    > div:nth-child(2) {
+      text-align: left;
+      flex: 1;
     }
   }
 }

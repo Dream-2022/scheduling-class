@@ -10,7 +10,7 @@ import { showLoading, hideLoading } from '@/utils/loading.js'
 const http = axios.create({
   baseURL: 'http://192.168.50.8:80',
   // headers: {
-  //   'Access-Control-Allow-Origin': 'http://192.168.50.32:10010', // 设置允许的源
+  //   Origin: 'http://192.168.50.32:10010', // 设置允许的源
   // },
   // timeout: 5000
 })
@@ -23,8 +23,9 @@ http.interceptors.request.use(
     const userStore = useUserStore()
     const user = userStore.user
     if (user != null) {
-      // console.log(user.shortToken)
-      config.headers.set('Authorization', user.Accesstoken)
+      console.log(user)
+      console.log(user.token)
+      config.headers.set('Authorization', 'Bearer ' + user.token)
     }
     if (config.url === '/goodan-homepage/ai' || config.url === '/apk-info/checkFile') {
       // 如果是登录接口，不显示 loading 效果
