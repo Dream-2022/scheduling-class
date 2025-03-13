@@ -160,7 +160,7 @@
           </td>
           <td class="td">
             <div>
-              <el-button type="small" color="#547BF1" @click="preferenceVisible = true"
+              <el-button type="small" color="#547BF1" @click="revisePreferenceClick"
                 >修改</el-button
               >
             </div>
@@ -174,58 +174,77 @@
       </div>
     </template>
   </el-dialog>
-  <el-dialog v-model="preferenceVisible" title="修改偏好" width="650">
+  <el-dialog v-model="preferenceVisible" title="修改偏好" width="700">
     <div>
       <div class="preference-box" style="margin-left: 10px">
         <div class="preference">
           <div>偏好课程</div>
           <div>
             <el-select
-              ref="preferenceOption"
               v-model="preferenceOption"
               multiple
+              filterable
               collapse-tags
               collapse-tags-tooltip
               :max-collapse-tags="3"
-              style="width: 450px"
+              placeholder="请输入或选择偏好课程"
+              style="width: 520px"
             >
-              <el-option
-                v-for="item in preferenceOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
+              <el-option v-for="item in filteredOptions" :key="item" :label="item" :value="item" />
             </el-select>
           </div>
         </div>
         <div class="preference">
           <div>偏好时间段</div>
-          <div>
-            <div>
-              <el-select
-                ref="timeOption1"
-                v-model="preferenceOption"
-                multiple
-                collapse-tags
-                collapse-tags-tooltip
-                :max-collapse-tags="3"
-                style="width: 450px"
-              >
+          <div class="preference-times">
+            <div class="preference-time" v-for="(item, index) in preferenceTimes.arr" :key="item">
+              <el-select v-model="item.timeOption1" placeholder="选择偏好周几">
                 <el-option
-                  v-for="item in preferenceOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in preferenceTimes1"
+                  :key="item"
+                  :label="item"
+                  :value="item"
                 />
               </el-select>
+              <el-select v-model="item.timeOption2" placeholder="课程开始节次">
+                <el-option
+                  v-for="item in preferenceTimes2"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+              <el-select v-model="item.timeOption3" placeholder="课程结束节次">
+                <el-option
+                  v-for="item in preferenceTimes3"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+              <div>
+                <div
+                  class="preference-time-text"
+                  v-if="timeOption1 != null && timeOption2 != null && timeOption3 != null"
+                >
+                  {{ timeOption1 }} {{ timeOption2 }} - {{ timeOption3 }} 节
+                </div>
+                <el-button type="danger" plain circle @click="deletePreferenceTimeClick(index)">
+                  <el-icon class="el-icon--left"><Delete /></el-icon>
+                </el-button>
+              </div>
             </div>
-            <div>周二 1-4 小节</div>
+            <el-button color="#547bf1" class="el-button-add" @click="addPreferenceTimeClick">
+              添加
+              <el-icon class="el-icon--left"><Plus /></el-icon>
+            </el-button>
           </div>
         </div>
       </div>
     </div>
     <template #footer>
       <div class="dialog-footer">
+        <el-button @click="savePreference" color="#547bf1" plain>保存</el-button>
         <el-button @click="preferenceVisible = false">关闭</el-button>
       </div>
     </template>
@@ -241,11 +260,14 @@ import {
   onMounted,
   onUnmounted,
   getCurrentInstance,
+  computed,
 } from 'vue'
+import { Delete, Plus } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { getCourseAllAPI } from '@/apis/course'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -256,25 +278,17 @@ let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
 let personVisible = ref(false) // 是否展示个人资料弹窗
 let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
-let preferenceOptions = ref([
-  {
-    value: '选项1',
-    label: '黄金糕',
-  },
-  {
-    value: '选项2',
-    label: '双皮奶',
-  },
-  {
-    value: '选项3',
-    label: '蚵仔煎',
-  },
-  {
-    value: '选项4',
-    label: '龙须面',
-  },
-])
-let preferenceOption = ref('黄金糕')
+const preferenceOptions = ref(['黄金糕', '双皮奶', '蚵仔煎', '龙须面'])
+const preferenceOption = ref(['龙须面']) //偏好课程
+const preferenceTimes1 = ['周一', '周二', '周三', '周四', '周五', '周六', '周天']
+const preferenceTimes2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+let preferenceTimes3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+const timeOption1 = ref('周一')
+const timeOption2 = ref()
+const timeOption3 = ref()
+let allCourse = ref([])
+//修改资料时，当前选择的偏好时间
+const preferenceTimes = reactive({ arr: [] })
 
 let navigationList = reactive({
   arr: [],
@@ -368,7 +382,6 @@ let navigation3 = [
 let isMainPage = ref('banner1')
 let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
-  console.log('首页')
   setChart()
   userStore.initialize()
   userInfo.value = userStore.user
@@ -405,6 +418,35 @@ function navigationClick(event) {
   event.target.classList.add('active')
   const value = event.target.getAttribute('value')
   router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/${value}`)
+}
+//修改偏好
+async function revisePreferenceClick() {
+  preferenceVisible.value = true
+  if (userInfo.value.identity != 'STUDENT') {
+    const res = await getCourseAllAPI()
+    console.log(res.data)
+    allCourse.value = res.data
+  }
+}
+//点击添加时间偏好
+function addPreferenceTimeClick() {
+  preferenceTimes.arr.push({
+    timeOption1: '',
+    timeOption2: '',
+    timeOption3: '',
+  })
+}
+function deletePreferenceTimeClick(index) {
+  preferenceTimes.arr.splice(index, 1)
+}
+function savePreference() {
+  preferenceTimes.arr.forEach(item => {
+    if (item.timeOption1 && item.timeOption2 && item.timeOption3) {
+      console.log(item)
+    } else {
+      ElMessage.error('请补全或未填写完整的字段！')
+    }
+  })
 }
 // 是否显示导航栏
 function findActive(path, identity) {
@@ -511,7 +553,10 @@ const setChart = () => {
   }
   myChart.value.setOption(option)
 }
-
+//避免课程重复选择
+const filteredOptions = computed(() => {
+  return preferenceOptions.value.filter(item => !preferenceOption.value.includes(item))
+})
 onUnmounted(() => {
   // 销毁图表实例
   myChart.value.dispose()
@@ -858,6 +903,44 @@ onUnmounted(() => {
     > div:nth-child(2) {
       text-align: left;
       flex: 1;
+    }
+    .preference-times {
+      .preference-time {
+        display: flex;
+        border-radius: 5px;
+        margin-right: 30px;
+        gap: 10px;
+        margin-bottom: 6px;
+
+        &:hover {
+          cursor: pointer;
+          background-color: #fff;
+          .el-button {
+            display: block;
+          }
+        }
+        > div {
+          flex: 1;
+        }
+        > div:last-child {
+          display: flex;
+        }
+        .preference-time-text {
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .el-button {
+          margin-left: 10px;
+          display: none;
+        }
+        .el-icon--left {
+          font-size: 16px;
+          font-weight: 600;
+        }
+      }
+      .el-button-add {
+        height: 30px;
+      }
     }
   }
 }

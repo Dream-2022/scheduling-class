@@ -61,6 +61,12 @@ http.interceptors.response.use(
         router.push('/login')
         break
     }
+    const code = response.code
+    switch (code) {
+      case 'A001400':
+        refreshToken()
+        break
+    }
     return response
   },
   e => {
@@ -79,9 +85,5 @@ const resend = req => {
     data: originalRequest.data,
   })
 }
-const refreshToken = () => {
-  const userStore = useUserStore()
-  userStore.changeToken()
-}
-
+const refreshToken = () => {}
 export default http
