@@ -27,6 +27,23 @@ export const loginAPI = (username, password, grant_type) => {
     },
   })
 }
+//刷新token
+export const tokenAPI = refresh_token => {
+  return http({
+    url: '/oauth2/token',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    data: {
+      refresh_token,
+      grant_type: 'refresh_token',
+      client_id: 'scheduling',
+      client_secret: 'scheduling-secret',
+    },
+  })
+}
+
 //登录
 export const login2API = (email, password, k) => {
   return http({

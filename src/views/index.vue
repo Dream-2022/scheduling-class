@@ -68,7 +68,7 @@
           <el-dropdown>
             <span class="el-dropdown-link">
               <span class="portrait-box">
-                <span class="portrait-nickname">{{ userInfo?.name }}</span>
+                <span class="portrait-nickname">{{ userStore.user?.name }}</span>
                 <span class="iconfont icon-down1"></span>
               </span>
             </span>
@@ -76,7 +76,7 @@
               <div class="avatar">
                 <div class="avatar-box">
                   <img :src="avatar" alt="头像" class="drop-img" />
-                  <div>{{ userInfo?.name }}</div>
+                  <div>{{ userStore.user?.name }}</div>
                 </div>
               </div>
               <el-dropdown-menu>
@@ -106,7 +106,7 @@
             />
           </td>
           <td class="td">
-            <el-button type="small" color="#547BF1" @click="updateClick">更换头像</el-button>
+            <el-button size="small" color="#547BF1" @click="updateClick">更换头像</el-button>
             <input
               class="fileInput"
               type="file"
@@ -122,8 +122,8 @@
           <td class="td"></td>
         </tr>
         <tr class="tr">
-          <td class="td">{{ userInfo.identity == 'STUDENT' ? '学号' : '工号' }}</td>
-          <td class="td">{{ userInfo.name }}</td>
+          <td class="td">{{ userStore.user.identity == 'STUDENT' ? '学号' : '工号' }}</td>
+          <td class="td">{{ userStore.user.name }}</td>
           <td class="td"></td>
         </tr>
         <tr class="tr">
@@ -142,7 +142,7 @@
           <td class="td"></td>
         </tr>
         <tr class="tr">
-          <td class="td">{{ userInfo.identity == 'STUDENT' ? '个人' : '教师' }}偏好</td>
+          <td class="td">{{ userStore.user.identity == 'STUDENT' ? '个人' : '教师' }}偏好</td>
           <td class="td">
             <div class="preference-box">
               <div class="preference">
@@ -160,7 +160,7 @@
           </td>
           <td class="td">
             <div>
-              <el-button type="small" color="#547BF1" @click="revisePreferenceClick"
+              <el-button size="small" color="#547BF1" @click="revisePreferenceClick"
                 >修改</el-button
               >
             </div>
@@ -274,7 +274,6 @@ let echarts = internalInstance.appContext.config.globalProperties.$echarts
 const userStore = useUserStore()
 const router = useRouter()
 let myChart = ref(null) // logo 动画
-let userInfo = ref(null) // 用户信息
 let avatar = ref('') // 用户头像
 let personVisible = ref(false) // 是否展示个人资料弹窗
 let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
@@ -384,8 +383,7 @@ let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
   setChart()
   userStore.initialize()
-  userInfo.value = userStore.user
-  avatar.value = userInfo.value.avatar ? userInfo.value.avatar : defaultAvatar
+  avatar.value = userStore.user.avatar ? userStore.user.avatar : defaultAvatar
   let path = router.currentRoute.value.fullPath
   const identity = userStore.user.identity.toLowerCase()
   navigationList.arr =
@@ -422,7 +420,7 @@ function navigationClick(event) {
 //修改偏好
 async function revisePreferenceClick() {
   preferenceVisible.value = true
-  if (userInfo.value.identity != 'STUDENT') {
+  if (userStore.user.identity != 'STUDENT') {
     const res = await getCourseAllAPI()
     console.log(res.data)
     allCourse.value = res.data

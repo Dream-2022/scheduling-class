@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/userStore'
 import { useRouter } from 'vue-router'
 
+import { tokenAPI } from '@/apis/login'
 import { showLoading, hideLoading } from '@/utils/loading.js'
 
 const http = axios.create({
@@ -85,5 +86,9 @@ const resend = req => {
     data: originalRequest.data,
   })
 }
-const refreshToken = () => {}
+const refreshToken = async () => {
+  const userStore = useUserStore()
+  const res = await tokenAPI()
+  userStore.setToken(res.data.token)
+}
 export default http

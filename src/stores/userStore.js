@@ -40,6 +40,13 @@ export const useUserStore = defineStore('user', () => {
     }
     return user.value
   }
+  //刷新token
+  const setToken = (token, refreshToken) => {
+    user.value.token = token
+    user.value.refreshToken = refreshToken
+    //顺便更新本地缓存
+    localStorage.setItem('user', JSON.stringify(user.value))
+  }
 
   return {
     user,
@@ -47,5 +54,6 @@ export const useUserStore = defineStore('user', () => {
     initialize,
     setUserInfo,
     setIsLogin,
+    setToken,
   }
 })
