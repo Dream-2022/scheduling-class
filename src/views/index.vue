@@ -75,7 +75,13 @@
             <template #dropdown>
               <div class="avatar">
                 <div class="avatar-box">
-                  <img :src="avatar" alt="头像" class="drop-img" />
+                  <img
+                    v-if="userStore.user?.avatar != null"
+                    class="drop-img"
+                    :src="userStore.user?.avatar"
+                    alt="头像"
+                  />
+                  <img class="drop-img" v-else src="@/assets/img/cat.jpeg" alt="头像" />
                   <div>{{ userStore.user?.name }}</div>
                 </div>
               </div>
@@ -100,10 +106,12 @@
           <td class="td">头像</td>
           <td class="td">
             <img
+              v-if="userStore.user?.avatar != null"
               class="iconImg"
-              :src="avatar == '' ? require('@/assets/img/title.png') : avatar"
-              alt=""
+              :src="userStore.user?.avatar"
+              alt="头像"
             />
+            <img class="iconImg" v-else src="@/assets/img/cat.jpeg" alt="头像" />
           </td>
           <td class="td">
             <el-button size="small" color="#547BF1" @click="updateClick">更换头像</el-button>
@@ -118,27 +126,27 @@
         </tr>
         <tr class="tr">
           <td class="td">姓名</td>
-          <td class="td">吴来源</td>
+          <td class="td">{{ userStore.user?.name }}</td>
           <td class="td"></td>
         </tr>
         <tr class="tr">
           <td class="td">{{ userStore.user.identity == 'STUDENT' ? '学号' : '工号' }}</td>
-          <td class="td">{{ userStore.user.name }}</td>
+          <td class="td">{{ userStore.user?.userId }}</td>
           <td class="td"></td>
         </tr>
         <tr class="tr">
           <td class="td">职称</td>
-          <td class="td">副教授</td>
+          <td class="td">{{ userStore.user?.title }}</td>
           <td class="td"></td>
         </tr>
         <tr class="tr">
           <td class="td">所属院系</td>
-          <td class="td">计算机科学与工程学院</td>
+          <td class="td">{{ userStore.user?.department }}</td>
           <td class="td"></td>
         </tr>
         <tr class="tr">
           <td class="td">邮箱</td>
-          <td class="td">21712204141@qq.com</td>
+          <td class="td">{{ userStore.user?.email == null ? '暂无' : userStore.user?.email }}</td>
           <td class="td"></td>
         </tr>
         <tr class="tr">
@@ -147,14 +155,28 @@
             <div class="preference-box">
               <div class="preference">
                 <div>偏好课程</div>
-                <div>计算机网络</div>
+                <div
+                  v-if="
+                    userStore.user.preferredCourses && userStore.user.preferredCourses?.length != 0
+                  "
+                >
+                  <div v-for="item in userStore.user.preferredCourses" :key="item">{{ item }}</div>
+                </div>
+                <div v-else>暂未设置</div>
               </div>
               <div class="preference">
                 <div>偏好时间段</div>
-                <div>
-                  <div>周一 1-4 小节</div>
-                  <div>周二 1-4 小节</div>
+                <div
+                  v-if="
+                    userStore.user.preferredTimeSlots &&
+                    userStore.user.preferredTimeSlots.length != 0
+                  "
+                >
+                  <div v-for="item in userStore.user.preferredTimeSlots" :key="item">
+                    {{ getWeekDay(item.day) }} {{ item.start }} - {{ item.end }} 节
+                  </div>
                 </div>
+                <div v-else>暂未设置</div>
               </div>
             </div>
           </td>
@@ -227,7 +249,8 @@
                   class="preference-time-text"
                   v-if="item.timeOption1 != '' && item.timeOption2 != '' && item.timeOption3 != ''"
                 >
-                  {{ item.timeOption1 }} {{ item.timeOption2 }} - {{ item.timeOption3 }} 节
+                  {{ getWeekDay(item.timeOption1) }} {{ item.timeOption2 }} -
+                  {{ item.timeOption3 }} 节
                 </div>
                 <el-button type="danger" plain circle @click="deletePreferenceTimeClick(index)">
                   <el-icon class="el-icon--left"><Delete /></el-icon>
@@ -264,22 +287,21 @@ import {
 } from 'vue'
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
-import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getCourseAllAPI } from '@/apis/course'
 import { setPreferredCoursesAPI, preferenceTimesAPI } from '@/apis/preference'
+import { editAvatarAPI } from '@/apis/user'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
 const router = useRouter()
 let myChart = ref(null) // logo 动画
-let avatar = ref('') // 用户头像
 let personVisible = ref(false) // 是否展示个人资料弹窗
 let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
 const preferenceOptions = ref([])
-const preferenceOption = ref(['仪器分析综合技能实训']) //偏好课程
+const preferenceOption = ref([]) //偏好课程
 const preferenceTimes1 = [
   { label: '周一', value: 1 },
   { label: '周二', value: 2 },
@@ -292,7 +314,7 @@ const preferenceTimes1 = [
 const preferenceTimes2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 let preferenceTimes3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 //修改资料时，当前选择的偏好时间
-const preferenceTimes = reactive({ arr: [] })
+const preferenceTimes = reactive({ arr: {} })
 
 let navigationList = reactive({
   arr: [],
@@ -388,12 +410,20 @@ let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
   setChart()
   userStore.initialize()
-  avatar.value = userStore.user.avatar ? userStore.user.avatar : defaultAvatar
   let path = router.currentRoute.value.fullPath
   const identity = userStore.user.identity.toLowerCase()
   navigationList.arr =
     identity === 'manager' ? navigation1 : identity === 'teacher' ? navigation2 : navigation3
   findActive(path, identity)
+  //获取已有偏好信息
+  preferenceOption.value = userStore.user.preferredCourses
+  preferenceTimes.arr = userStore.user.preferredTimeSlots.map(item => {
+    return {
+      timeOption1: item.day,
+      timeOption2: item.start,
+      timeOption3: item.end,
+    }
+  })
 })
 //点击更换头像
 function updateClick() {
@@ -402,6 +432,35 @@ function updateClick() {
     fileInput.click()
   }
 }
+//确认修改头像
+const handleAvatarChange = async event => {
+  const file = event.target.files[0]
+
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = async e => {
+      const dataUrl = e.target.result
+      // 将 DataURL 转换为 Blob
+      const byteCharacters = atob(dataUrl.split(',')[1])
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], { type: 'image/jpeg' })
+
+      const timestamp = Date.now()
+      const newFile = new File([blob], `${timestamp}.png`, { type: 'image/jpeg' })
+      let res = await editAvatarAPI(newFile)
+      if (res.data.code == 0) {
+        ElMessage.success('头像上传成功！')
+        userStore.setAvatar(res.data.data)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
 // 监听路由变化
 watchEffect(() => {
   const path = router.currentRoute.value.fullPath
@@ -458,19 +517,32 @@ async function savePreference() {
       return
     }
     if (times == '') {
-      times = item.timeOption1 + ':' + item.timeOption2 + ',' + item.timeOption3
+      times = item.timeOption1 + ':' + item.timeOption2 + '-' + item.timeOption3
     } else {
-      times += ',' + item.timeOption1 + ':' + item.timeOption2 + ',' + item.timeOption3
+      times += ',' + item.timeOption1 + ':' + item.timeOption2 + '-' + item.timeOption3
     }
   })
   if (flag) {
     return
   }
-  const res = await setPreferredCoursesAPI(times)
-  console.log(res.data)
-  let courses = preferenceOption.value.map(item => `${item.se1}:${item.se2}-${item.se3}`).join(',')
-  const res1 = await preferenceTimesAPI(courses)
-  console.log(res1.data)
+  let courses = preferenceOption.value.join(',')
+  const res = await preferenceTimesAPI(times)
+  const res1 = await setPreferredCoursesAPI(courses)
+  if (res.data.code == 0 && res1.data.code == 0) {
+    const newArr = preferenceTimes.arr.map(item => {
+      return {
+        day: item.timeOption1,
+        start: item.timeOption2,
+        end: item.timeOption3,
+      }
+    })
+    userStore.setPreference(preferenceOption.value, newArr)
+    ElMessage.success('修改偏好成功！')
+  } else {
+    ElMessage.error('修改偏好失败，请检查网络！')
+  }
+  preferenceVisible.value = false
+  personVisible.value = false
 }
 // 是否显示导航栏
 function findActive(path, identity) {
@@ -581,6 +653,16 @@ const setChart = () => {
 const filteredOptions = computed(() => {
   return preferenceOptions.value.filter(item => !preferenceOption.value.includes(item))
 })
+//获取是周几
+const getWeekDay = day => {
+  if (day === 1) return '周一'
+  if (day === 2) return '周二'
+  if (day === 3) return '周三'
+  if (day === 4) return '周四'
+  if (day === 5) return '周五'
+  if (day === 6) return '周六'
+  if (day === 7) return '周七'
+}
 onUnmounted(() => {
   // 销毁图表实例
   myChart.value.dispose()
@@ -870,6 +952,7 @@ onUnmounted(() => {
     margin-right: 20px;
     .iconImg {
       border-radius: 50px;
+      width: 80px;
     }
     .td {
       flex: 1;

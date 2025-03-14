@@ -145,6 +145,7 @@ import WOW from 'wow.js'
 import { useUserStore } from '@/stores/userStore.js'
 // import { useWebSocketStore } from '@/stores/webSocketStore.js'
 import { loginAPI, getCodeAPI, registerAPI, login2API } from '@/apis/login'
+import { getUserInfoAPI } from '@/apis/user'
 import { useRouter } from 'vue-router'
 import { Lock, Clock, User } from '@element-plus/icons-vue'
 
@@ -249,6 +250,11 @@ const login = async () => {
     ElMessage.success(res.data.message)
     localStorage.setItem('user', JSON.stringify(userStore.user))
     let identify = userStore.user.identity.toLowerCase()
+
+    //获取用户详细信息
+    const res1 = await getUserInfoAPI()
+    const user = { ...userStore.user, ...res1.data.data }
+    userStore.setUserInfoPreference(user)
     // webSocketStore.initialize(userStore.user.userMail)
     setTimeout(() => {
       router.push(`/${identify}/mainPage`)

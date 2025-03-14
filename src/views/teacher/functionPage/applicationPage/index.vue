@@ -417,7 +417,7 @@ onMounted(async () => {
   }
   application.arr = { ...initApplication }
 })
-// 提交表单方法
+// 提交申请表单
 const submitForm = async () => {
   elFormRef.value.validate(async valid => {
     if (valid) {
@@ -645,7 +645,7 @@ function navigationClick(value) {
 }
 
 .el-form {
-  width: 95%;
+  width: 100%;
   padding: 0 10px;
 
   .text-center {

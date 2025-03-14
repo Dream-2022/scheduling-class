@@ -33,12 +33,30 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('user', JSON.stringify(user.value))
   }
 
+  //设置个人信息
+  const setUserInfoPreference = U => {
+    user.value = U
+    localStorage.setItem('user', JSON.stringify(user.value))
+  }
+
   const initialize = () => {
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       user.value = JSON.parse(savedUser)
     }
     return user.value
+  }
+
+  //修改偏好时间和课程
+  const setPreference = (courses, times) => {
+    user.value.preferredCourses = { ...courses }
+    user.value.preferredTimeSlots = { ...times }
+    localStorage.setItem('user', JSON.stringify(user.value))
+  }
+  //修改头像
+  const setAvatar = avatar => {
+    user.value.avatar = avatar
+    localStorage.setItem('user', JSON.stringify(user.value))
   }
   //刷新token
   const setToken = (token, refreshToken) => {
@@ -52,7 +70,10 @@ export const useUserStore = defineStore('user', () => {
     user,
     getIsLogin,
     initialize,
+    setPreference,
     setUserInfo,
+    setAvatar,
+    setUserInfoPreference,
     setIsLogin,
     setToken,
   }
