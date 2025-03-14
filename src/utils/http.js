@@ -24,8 +24,6 @@ http.interceptors.request.use(
     const userStore = useUserStore()
     const user = userStore.user
     if (user != null) {
-      console.log(user)
-      console.log(user.token)
       config.headers.set('Authorization', 'Bearer ' + user.token)
     }
     if (config.url === '/goodan-homepage/ai' || config.url === '/apk-info/checkFile') {
@@ -87,8 +85,13 @@ const resend = req => {
   })
 }
 const refreshToken = async () => {
+  console.log('登录过期，请重新登录')
   const userStore = useUserStore()
   const res = await tokenAPI()
-  userStore.setToken(res.data.token)
+  if (res.code == 0) {
+    userStore.setToken(res.data.token)
+  } else {
+    userStore.clearInfoAndToken()
+  }
 }
 export default http

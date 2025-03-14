@@ -202,8 +202,8 @@
                 <el-option
                   v-for="item in preferenceTimes1"
                   :key="item"
-                  :label="item"
-                  :value="item"
+                  :label="item.label"
+                  :value="item.value"
                 />
               </el-select>
               <el-select v-model="item.timeOption2" placeholder="课程开始节次">
@@ -225,9 +225,9 @@
               <div>
                 <div
                   class="preference-time-text"
-                  v-if="timeOption1 != null && timeOption2 != null && timeOption3 != null"
+                  v-if="item.timeOption1 != '' && item.timeOption2 != '' && item.timeOption3 != ''"
                 >
-                  {{ timeOption1 }} {{ timeOption2 }} - {{ timeOption3 }} 节
+                  {{ item.timeOption1 }} {{ item.timeOption2 }} - {{ item.timeOption3 }} 节
                 </div>
                 <el-button type="danger" plain circle @click="deletePreferenceTimeClick(index)">
                   <el-icon class="el-icon--left"><Delete /></el-icon>
@@ -268,6 +268,7 @@ import defaultAvatar from '@/assets/img/cat.jpeg' // 导入默认头像
 import { Bell } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getCourseAllAPI } from '@/apis/course'
+import { setPreferredCoursesAPI, preferenceTimesAPI } from '@/apis/preference'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -277,15 +278,19 @@ let myChart = ref(null) // logo 动画
 let avatar = ref('') // 用户头像
 let personVisible = ref(false) // 是否展示个人资料弹窗
 let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
-const preferenceOptions = ref(['黄金糕', '双皮奶', '蚵仔煎', '龙须面'])
-const preferenceOption = ref(['龙须面']) //偏好课程
-const preferenceTimes1 = ['周一', '周二', '周三', '周四', '周五', '周六', '周天']
+const preferenceOptions = ref([])
+const preferenceOption = ref(['仪器分析综合技能实训']) //偏好课程
+const preferenceTimes1 = [
+  { label: '周一', value: 1 },
+  { label: '周二', value: 2 },
+  { label: '周三', value: 3 },
+  { label: '周四', value: 4 },
+  { label: '周五', value: 5 },
+  { label: '周六', value: 6 },
+  { label: '周日', value: 7 },
+]
 const preferenceTimes2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 let preferenceTimes3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-const timeOption1 = ref('周一')
-const timeOption2 = ref()
-const timeOption3 = ref()
-let allCourse = ref([])
 //修改资料时，当前选择的偏好时间
 const preferenceTimes = reactive({ arr: [] })
 
@@ -422,8 +427,7 @@ async function revisePreferenceClick() {
   preferenceVisible.value = true
   if (userStore.user.identity != 'STUDENT') {
     const res = await getCourseAllAPI()
-    console.log(res.data)
-    allCourse.value = res.data
+    preferenceOptions.value = res.data.data
   }
 }
 //点击添加时间偏好
@@ -434,17 +438,39 @@ function addPreferenceTimeClick() {
     timeOption3: '',
   })
 }
+//删除时间偏好
 function deletePreferenceTimeClick(index) {
   preferenceTimes.arr.splice(index, 1)
 }
-function savePreference() {
+//保存偏好设置
+async function savePreference() {
+  let times = ''
+  let flag = false
   preferenceTimes.arr.forEach(item => {
-    if (item.timeOption1 && item.timeOption2 && item.timeOption3) {
-      console.log(item)
-    } else {
+    if (!item.timeOption1 || !item.timeOption2 || !item.timeOption3) {
       ElMessage.error('请补全或未填写完整的字段！')
+      flag = true
+      return
+    }
+    if (item.timeOption2 > item.timeOption3) {
+      ElMessage.error('时间偏好不符合规范！')
+      flag = true
+      return
+    }
+    if (times == '') {
+      times = item.timeOption1 + ':' + item.timeOption2 + ',' + item.timeOption3
+    } else {
+      times += ',' + item.timeOption1 + ':' + item.timeOption2 + ',' + item.timeOption3
     }
   })
+  if (flag) {
+    return
+  }
+  const res = await setPreferredCoursesAPI(times)
+  console.log(res.data)
+  let courses = preferenceOption.value.map(item => `${item.se1}:${item.se2}-${item.se3}`).join(',')
+  const res1 = await preferenceTimesAPI(courses)
+  console.log(res1.data)
 }
 // 是否显示导航栏
 function findActive(path, identity) {

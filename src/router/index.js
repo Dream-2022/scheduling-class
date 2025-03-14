@@ -27,9 +27,6 @@ const setRouter = async () => {
     const userStore = useUserStore()
     let identity = userStore.initialize().identity
     console.log(identity)
-    console.log(identity === 'STUDENT')
-    console.log(identity === 'TEACHER')
-    console.log(identity === 'MANAGER')
     if (identity === 'STUDENT') {
       router.addRoute({
         path: '/',
