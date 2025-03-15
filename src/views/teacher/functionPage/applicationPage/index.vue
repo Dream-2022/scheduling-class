@@ -300,6 +300,7 @@ let navigationValue = ref(true)
 const dialogImageUrl = ref('')
 const dialogVisible = ref(false)
 const disabled = ref(false)
+const applicationDownloadImgs = ref([])
 let application = reactive({
   arr: {},
 })
@@ -421,32 +422,60 @@ onMounted(async () => {
 const submitForm = async () => {
   elFormRef.value.validate(async valid => {
     if (valid) {
-      console.log('表单验证通过，提交数据:', application.arr)
-      console.log(application.arr.startDate, application, application.arr.startTime)
-      application.arr.leaveStartTime = mergeDateAndTime(
+      application.arr.leaveStartTime = mergeDateTime(
         application.arr.startDate,
         application.arr.startTime,
       )
-      application.arr.leaveEndTime = mergeDateAndTime(
-        application.arr.endDate,
-        application.arr.endTime,
-      )
-      console.log(application.arr.leaveStartTime)
-      // application.arr.leaveStartTime=
-      await addApplicationAPI(application.arr)
+      application.arr.leaveEndTime = mergeDateTime(application.arr.endDate, application.arr.endTime)
+      application.arr.imgs = application.arr.imgs.map(item => ({
+        name: item.name,
+        blob: item.raw.slice(0, item.raw.size, item.raw.type),
+      }))
+      console.log(application.arr)
+      console.log([...application.arr.imgs])
+      console.log(applicationDownloadImgs.value)
+
+      application.arr.blob = new File([base64ToBlob(application.arr.signature)], `signature.png`, {
+        type: 'image/jpeg',
+      })
+      application.arr.attachment = []
+      application.arr.imgs.forEach(image => {
+        const newFile = new File([image.blob], image.name, { type: 'image/jpeg' })
+        application.arr.attachment.push(newFile)
+      })
+      console.log(application.arr)
+      const res = await addApplicationAPI(application.arr)
+      console.log(res.data)
     } else {
       ElMessage.error('表单验证失败，请检查输入')
       return false
     }
   })
 }
-function mergeDateAndTime(dateObj, timeObj) {
-  if (!dateObj || !timeObj) return null
-
-  const mergedDate = new Date(dateObj) // 复制日期对象
-  mergedDate.setHours(timeObj.getHours(), timeObj.getMinutes(), timeObj.getSeconds()) // 设置小时、分钟、秒
-
-  return mergedDate
+function base64ToBlob(base64) {
+  const parts = base64.split(';base64,')
+  const mimeType = parts[0].split(':')[1]
+  const raw = window.atob(parts[1])
+  const rawLength = raw.length
+  const array = new Uint8Array(new ArrayBuffer(rawLength))
+  for (let i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i)
+  }
+  return new Blob([array], { type: mimeType })
+}
+//转换日期和时间
+function mergeDateTime(dateStr, timeStr) {
+  const date = new Date(dateStr)
+  const time = new Date(timeStr)
+  // 提取日期部分
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  // 提取时间部分
+  const hours = String(time.getHours()).padStart(2, '0')
+  const minutes = String(time.getMinutes()).padStart(2, '0')
+  const seconds = String(time.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 // 重置表单方法
 const resetForm = () => {
@@ -476,6 +505,8 @@ const handleDownload = file => {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
+    console.log(file.url)
+    applicationDownloadImgs.value.push(file.url)
   } else if (file.content) {
     const blob = new Blob([file.content], { type: file.raw.type || 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -486,6 +517,8 @@ const handleDownload = file => {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url) // 释放内存
+    console.log(file.content)
+    applicationDownloadImgs.value.push(file.content)
   }
 }
 //图片列表变化

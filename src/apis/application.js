@@ -6,14 +6,14 @@ export const addApplicationAPI = form => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    params: {
+    data: {
       leaveStart: form.leaveStartTime,
       leaveEnd: form.leaveEndTime,
       leaveReason: form.leaveReason,
-      attachment: form.imgs,
+      attachment: form.attachment,
       title: form.title,
       leaveType: form.leaveType,
-      signature: form.signature,
+      signature: form.blob,
     },
   })
 }
