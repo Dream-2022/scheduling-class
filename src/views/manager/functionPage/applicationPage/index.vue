@@ -24,6 +24,46 @@
           navigationValue ? '申请' : '反馈'
         }}</strong></el-divider
       >
+      <div class="seach-box">
+        <el-input
+          v-model="teacher"
+          clearable
+          style="height: 32px"
+          placeholder="请输入教师关键词"
+          :prefix-icon="Search"
+        />
+        <el-select v-model="type" clearable placeholder="选择请假类型">
+          <el-option
+            v-for="item in typeApplication"
+            :key="item"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-select v-model="title" clearable placeholder="选择调整举措">
+          <el-option
+            v-for="item in titleApplication"
+            :key="item"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-select v-model="status" clearable placeholder="选择申请状态">
+          <el-option label="全部" value="all" />
+          <el-option label="未审核" value="0" />
+          <el-option label="已通过" value="1" />
+          <el-option label="已拒绝" value="2" />
+        </el-select>
+        <el-button
+          color="#547bf1"
+          plain
+          :icon="Search"
+          style="margin-bottom: 10px"
+          @click="searchClick()"
+        >
+          搜索
+        </el-button>
+      </div>
       <div class="middle-word"></div>
       <el-table
         :data="navigationValue ? applicationList : feedbackList"
@@ -32,17 +72,32 @@
         :header-cell-style="{ 'text-align': 'center' }"
         :cell-style="{ 'text-align': 'center' }"
       >
-        <el-table-column label="序号" :min-width="60" fixed>
-          <template v-slot="{ $index }">
-            <span>{{ $index + 1 }}</span>
+        <el-table-column label="申请人" min-width="120">
+          <template #default="{ row }">
+            <div>{{ row.teacherName }}（{{ row.teacherId }}）</div>
           </template>
         </el-table-column>
-        <el-table-column label="证明材料" min-width="160">
+        <el-table-column label="事由详情" min-width="160">
+          <template #default="{ row }">
+            <div>
+              <strong>{{ row.leaveReason }}</strong>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="请假类型" min-width="90">
+          <template #default="{ row }">
+            <div :class="row.leaveType + '-label'">
+              {{ getLabelByValue(row.leaveType) }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="证明材料" min-width="180">
           <template #default="{ row }">
             <div class="table-imgs">
-              <div v-for="(img, index) in row?.imgs" :key="img">
+              <div v-for="(img, index) in row?.attachment" :key="img">
                 <img
                   :src="img"
+                  @click="handlePictureCardPreview(img)"
                   class="table-img"
                   :style="{ transform: `translateX(${index * -10}px)` }"
                 />
@@ -50,47 +105,47 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="事由详情" min-width="160">
+        <el-table-column label="调整举措" min-width="120">
           <template #default="{ row }">
-            <div>
-              <strong>{{ row.apkName }}</strong>
+            <div :class="row.title + '-label'">
+              {{ getLabelByValue(row.title) }}
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="请假类型" min-width="150">
+
+        <el-table-column label="签名" min-width="180">
           <template #default="{ row }">
-            <div v-html="row.leaveType"></div>
+            <img class="signature-img" :src="row.signature" alt="签名" />
           </template>
         </el-table-column>
-        <el-table-column label="调整举措" min-width="290">
+
+        <el-table-column label="请假时间" min-width="160">
           <template #default="{ row }">
-            <div v-html="row.leaveReason"></div>
+            <div>{{ row.leaveStart }}</div>
+            <div>—</div>
+            <div>{{ row.leaveEnd }}</div>
+          </template> </el-table-column
+        ><el-table-column label="状态" min-width="100">
+          <template #default="{ row }">
+            <div class="label-box">
+              <div
+                :class="
+                  row.status == '0'
+                    ? 'first-label'
+                    : row.status == '1'
+                      ? 'third-label'
+                      : 'second-label'
+                "
+              >
+                {{ row?.status == '0' ? '未处理' : row?.status == '1' ? '已通过' : '已拒绝' }}
+              </div>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column label="申请人姓名" min-width="180">
-          <template #default="{ row }">
-            <div>{{ row.applicant }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="请假起始日期" min-width="180">
-          <template #default="{ row }">
-            <div>{{ row.leaveStartTime }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="请假总时长（/天）" min-width="140">
-          <template #default="{ row }">
-            <div class="colorLabel" :class="getClass(row.secureScore)">{{ row.leaveDays }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="涉及课程节次" min-width="100">
-          <template #default="{ row }">
-            <div>{{ row.leaveCourseCount }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="申请日期" min-width="140">
+        <el-table-column label="申请日期" min-width="160">
           <template #default="{ row }">
             <div style="display: flex; justify-content: center">
-              <div class="first-label">{{ row.time }}</div>
+              <div class="first-label">{{ row.createdAt }}</div>
             </div>
           </template>
         </el-table-column>
@@ -100,10 +155,11 @@
               <el-button
                 color="#368eec"
                 size="small"
-                @click="staticClick(row.fileMd5)"
+                @click="byApplicationClick(row.id, 1)"
                 style="margin-bottom: 10px; color: #fff"
-                >通过</el-button
               >
+                通过
+              </el-button>
             </div>
             <div>
               <el-button
@@ -111,124 +167,107 @@
                 plain
                 size="small"
                 style="margin-bottom: 10px"
-                @click="safeClick(row.fileMd5)"
-                >拒绝</el-button
+                @click="byApplicationClick(row.id, 2)"
               >
+                拒绝
+              </el-button>
             </div>
           </template>
         </el-table-column>
       </el-table>
     </div>
   </div>
+  <!-- 预览图 -->
+  <el-dialog v-model="dialogVisible">
+    <img w-full :src="dialogImageUrl" alt="Image" />
+  </el-dialog>
 </template>
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
+import { getLeaveAllAPI, reviewLeaveAPI } from '@/apis/application'
 const route = useRoute()
 let applicationList = ref([])
 let feedbackList = ref([])
 let navigationValue = ref(true)
+const dialogImageUrl = ref('') //预览图
+const dialogVisible = ref(false) //预览图是否存在
+let teacher = ref(''),
+  type = ref(''),
+  title = ref(''),
+  status = ref('')
+const typeApplication = [
+  { label: '全部', value: 'all' },
+  { label: '公假', value: 'public' },
+  { label: '事假', value: 'matter' },
+  { label: '病假', value: 'illness' },
+  { label: '婚假', value: 'wed' },
+  { label: '产假', value: 'maternity' },
+  { label: '丧假', value: 'funeral' },
+  { label: '其他', value: 'other' },
+]
+const titleApplication = [
+  { label: '全部', value: 'all' },
+  { label: '换课申请', value: 'change' },
+  { label: '代课申请', value: 'place' },
+  { label: '调课申请', value: 'adjust' },
+]
 onMounted(async () => {
-  applicationList.value.push({
-    id: 124,
-    title: '需要实习两天',
-    // 申请时间
-    time: '2025-2-8 15:30',
-    imgs: [
-      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-    ],
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '2',
-    // 请假课程数量
-    leaveCourseCount: '5',
-    // 请假类型
-    leaveType: '公假',
-    // 申请事项
-    leaveReason: '调课申请',
-    // 申请人信息
-    applicant: '赵六(N21452153)',
-  })
-  applicationList.value.push({
-    id: 122,
-    title: '外出学习（老吉大）',
-    imgs: ['@/assets/img/book.png', '@/assets/img/cat.jpeg'],
-    // 申请时间
-    time: '2025-2-8 12:30',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '1',
-    // 请假课程数量
-    leaveCourseCount: '2',
-    // 请假类型
-    leaveType: '事假',
-    // 申请事项
-    leaveReason: '代课申请',
-    // 申请人信息
-    applicant: '王五(N219856153)',
-  })
-  applicationList.value.push({
-    id: 122,
-    title: '外出学习（老吉大）',
-    imgs: ['@/assets/img/book.png', '../../../../assets/img/cat.jpeg'],
-    // 申请时间
-    time: '2025-2-8 12:30',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '1',
-    // 请假课程数量
-    leaveCourseCount: '2',
-    // 请假类型
-    leaveType: '事假',
-    // 申请事项
-    leaveReason: '代课申请',
-    // 申请人信息
-    applicant: '王五(N219856153)',
-  })
+  //获取全部申请列表
+  searchClick()
   if (route.query.value == 'true') {
     navigationValue.value = true
   } else if (route.query.value == 'false') {
     navigationValue.value = false
   }
 })
+//搜索关键词
+async function searchClick() {
+  console.log(teacher.value, type.value, title.value, status.value)
+  const res = await getLeaveAllAPI(teacher.value, type.value, title.value, status.value)
+  console.log(res.data)
+  if (res.data.code == '0') {
+    applicationList.value = res.data.data
+    applicationList.value.forEach((item, index) => {
+      applicationList.value[index].createdAt = item.createdAt.replace('T', ' ')
+      applicationList.value[index].leaveStart = item.leaveStart.replace('T', ' ')
+      applicationList.value[index].leaveEnd = item.leaveEnd.replace('T', ' ')
+    })
+  }
+}
+//审批申请
+async function byApplicationClick(id, status) {
+  console.log(id)
+  const res = await reviewLeaveAPI(id, status)
+  console.log(res.data)
+  if (res.data.code == '0') {
+    if (status === '1') ElMessage.success('已拒绝申请！')
+    else if (status === '2') ElMessage.success('已通过申请！')
+  }
+}
+
+//获取申请类型
+function getLabelByValue(value) {
+  for (let i = 0; i < typeApplication.length; i++) {
+    if (typeApplication[i].value === value) {
+      return typeApplication[i].label
+    }
+  }
+  for (let i = 0; i < titleApplication.length; i++) {
+    if (titleApplication[i].value === value) {
+      return titleApplication[i].label
+    }
+  }
+  return null
+}
 function navigationClick(value) {
   navigationValue.value = value
-}
-//获取标签颜色
-function getClass(name) {
-  if (name == '未知') {
-    return 'greyLabel'
-  } else if (name == '色情') {
-    return 'yellowLabel'
-  } else if (name == '诈骗') {
-    return 'redLabel'
-  } else if (name == '赌博') {
-    return 'purpleLabel'
-  } else if (name == '正常') {
-    return 'greenLabel'
-  } else if (name == '黑灰') {
-    return 'blackLabel'
-  } else if (!Number.isNaN(Number(name))) {
-    if (name < 30) {
-      return 'red'
-    } else if (name < 60) {
-      return 'yellow'
-    } else if (name < 80) {
-      return 'blue'
-    } else if (name <= 100) {
-      return 'green'
-    } else {
-      return 'grey'
-    }
-  } else {
-    return 'greyLabel'
-  }
+} //预览图片
+const handlePictureCardPreview = url => {
+  dialogImageUrl.value = url
+  dialogVisible.value = true
 }
 </script>
 <style lang="scss" scoped>
@@ -245,6 +284,8 @@ function getClass(name) {
 
   .middle-box {
     color: $word-black-color;
+    width: 95%;
+    margin: 20px auto;
 
     .title-box {
       display: flex;
@@ -275,14 +316,18 @@ function getClass(name) {
       margin-bottom: 10px;
       font-size: 15px;
     }
+    .seach-box {
+      display: flex;
+      gap: 10px;
+    }
 
-    width: 95%;
-    margin: 20px auto;
     .table-imgs {
       display: flex;
 
       .table-img {
-        max-width: 80px;
+        cursor: zoom-in;
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
         border: 2px solid #d1d1d1;
       }
@@ -290,64 +335,80 @@ function getClass(name) {
   }
 
   .el-table {
-    .first-label {
-      color: #fff;
-      border-radius: 5px;
-      padding: 0 5px;
-      margin-left: 8px;
+    .label-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      .first-label,
+      .second-label,
+      .third-label {
+        text-align: center;
+        border-radius: 5px;
+        width: 60px;
+        color: $main-yellow;
+        background-color: $yellow-shallow;
+      }
+      .second-label {
+        color: $red-word;
+        background-color: $red-back;
+      }
+      .third-label {
+        color: $green-word;
+        background-color: $green-back;
+      }
     }
 
-    .colorLabel {
-      font-weight: 600;
+    .matter-label {
+      color: $main-blue;
     }
-
-    .purpleLabel {
-      background-color: $purple;
+    .public-label {
+      color: $main-purple;
     }
-
-    .yellowLabel {
-      background-color: $yellow;
+    .illness-label {
+      color: $main-yellow;
     }
-
-    .greenLabel {
-      background-color: $green;
+    .wed-label {
+      color: $pink;
     }
-
-    .blackLabel {
-      background-color: $word-black-color;
-    }
-
-    .greyLabel {
-      background-color: $grey;
-    }
-
-    .redLabel {
-      background-color: $red;
-    }
-
-    .purple {
-      color: $purple;
-    }
-
-    .green {
+    .maternity-label {
       color: $green;
     }
-
-    .black {
-      color: $word-black-color;
+    .funeral-label {
+      color: $deep-color;
+    }
+    .other-label {
+      color: $word-grey-color;
+    }
+    .signature-img {
+      width: 100%;
     }
 
-    .grey {
-      color: $grey;
+    .change-label,
+    .adjust-label,
+    .place-label {
+      font-size: 13px;
+      border-radius: 5px;
+      margin-left: 6%;
+      margin-right: 6px;
+      background-color: $green-back;
+      color: $main-green;
+      border: 1px solid $main-green;
     }
-
-    .yellow {
-      color: $yellow;
+    .change-label {
+      background-color: $purple-back;
+      color: $purple;
+      border: 1px solid $purple;
     }
-
-    .red {
-      color: $red;
+    .place-label {
+      background-color: $blue-back;
+      color: $main-blue;
+      border: 1px solid $main-blue;
     }
   }
+}
+:deep(.el-dialog .el-dialog__body img) {
+  width: 100px;
+  height: 90%;
+  border-radius: 10px;
 }
 </style>

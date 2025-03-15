@@ -83,6 +83,7 @@
                   />
                   <img class="drop-img" v-else src="@/assets/img/cat.jpeg" alt="头像" />
                   <div>{{ userStore.user?.name }}</div>
+                  <div>（{{ userStore.user?.userId }}）</div>
                 </div>
               </div>
               <el-dropdown-menu>

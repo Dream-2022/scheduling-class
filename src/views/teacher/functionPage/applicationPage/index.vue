@@ -38,9 +38,9 @@
         :header-cell-style="{ 'text-align': 'center' }"
         :cell-style="{ 'text-align': 'center' }"
       >
-        <el-table-column label="序号" :min-width="60" fixed>
-          <template v-slot="{ $index }">
-            <span>{{ $index + 1 }}</span>
+        <el-table-column label="申请人" min-width="100">
+          <template #default="{ row }">
+            <div>{{ row.applicant }}</div>
           </template>
         </el-table-column>
         <el-table-column label="证明材料" min-width="160">
@@ -80,10 +80,10 @@
               <div
                 :class="
                   row.status == '未处理'
-                    ? 'first-label'
+                    ? 'third-label'
                     : row.status == '已拒绝'
                       ? 'second-label'
-                      : 'third-label'
+                      : 'first-label'
                 "
               >
                 {{ row?.status }}
@@ -91,22 +91,14 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="申请人姓名" min-width="180">
-          <template #default="{ row }">
-            <div>{{ row.applicant }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="请假起始日期" min-width="180">
+        <el-table-column label="请假时间" min-width="160">
           <template #default="{ row }">
             <div>{{ row.leaveStartTime }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="请假结束日期" min-width="180">
-          <template #default="{ row }">
+            <div>—</div>
             <div>{{ row.leaveEndTime }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="申请日期" min-width="140">
+        <el-table-column label="申请日期" min-width="160">
           <template #default="{ row }">
             <div style="display: flex; justify-content: center">
               <div>{{ row.time }}</div>
@@ -119,13 +111,16 @@
               <el-button
                 color="#368eec"
                 plain
+                size="small"
                 @click="staticClick(row.fileMd5)"
                 style="margin-bottom: 10px"
                 >修改</el-button
               >
             </div>
             <div>
-              <el-button color="#f56c6c" plain @click="safeClick(row.fileMd5)">撤回</el-button>
+              <el-button color="#f56c6c" size="small" plain @click="safeClick(row.fileMd5)"
+                >撤回</el-button
+              >
             </div>
           </template>
         </el-table-column>
@@ -146,18 +141,21 @@
       size="default"
       status-icon
     >
-      <el-form-item label="请假事由" prop="title">
-        <el-input placeholder="请输入请假事由" v-model="application.arr.title" type="textarea" />
+      <el-form-item label="请假事由" prop="leaveReason">
+        <el-input
+          placeholder="请输入请假事由"
+          v-model="application.arr.leaveReason"
+          type="textarea"
+        />
       </el-form-item>
       <el-form-item label="请假类型" prop="leaveType">
         <el-select v-model="application.arr.leaveType" placeholder="请选择请假类型">
-          <el-option label="公假" value="public" />
-          <el-option label="事假" value="matter" />
-          <el-option label="病假" value="illness" />
-          <el-option label="婚假" value="wed" />
-          <el-option label="产假" value="maternity" />
-          <el-option label="丧假" value="funeral" />
-          <el-option label="其他" value="other" />
+          <el-option
+            v-for="item in typeApplication"
+            :key="item"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="请假起始时间" required>
@@ -212,8 +210,8 @@
           </el-form-item>
         </el-col>
       </el-form-item>
-      <el-form-item label="调整举措" prop="leaveReason">
-        <el-segmented v-model="application.arr.leaveReason" :options="leaveReasonOptions" />
+      <el-form-item label="调整举措" prop="title">
+        <el-segmented v-model="application.arr.title" :options="leaveReasonOptions" />
       </el-form-item>
       <el-form-item label="申请人签字" prop="signature">
         <HandwrittenSignature v-model="application.arr.signature" />
@@ -280,6 +278,7 @@
 import { onMounted, ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import HandwrittenSignature from '@/components/signature.vue'
+import { useUserStore } from '@/stores/userStore'
 import {
   Delete,
   Download,
@@ -290,14 +289,15 @@ import {
   CircleCloseFilled,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { addApplicationAPI } from '@/apis/application'
+import { addApplicationAPI, getLeaveAPI } from '@/apis/application'
 const route = useRoute()
+const userStore = useUserStore()
 let applicationList = ref([]) //申请列表
 let feedbackList = ref([]) //反馈列表
 let applicationVisible = ref(false) //申请抽屉
 let feedbackVisible = ref(false) //反馈抽屉
 let navigationValue = ref(true)
-const dialogImageUrl = ref('')
+const dialogImageUrl = ref('') //预览图
 const dialogVisible = ref(false)
 const disabled = ref(false)
 const applicationDownloadImgs = ref([])
@@ -317,6 +317,15 @@ const rules = {
   leaveReason: [{ required: true, message: '请选择调整举措', trigger: 'blur' }],
   signature: [{ required: true, message: '请进行申请人签字', trigger: 'blur' }],
 }
+const typeApplication = [
+  { label: '公假', value: 'public' },
+  { label: '事假', value: 'matter' },
+  { label: '病假', value: 'illness' },
+  { label: '婚假', value: 'wed' },
+  { label: '产假', value: 'maternity' },
+  { label: '丧假', value: 'funeral' },
+  { label: '其他', value: 'other' },
+]
 const leaveReasonOptions = [
   {
     label: '调课',
@@ -325,6 +334,10 @@ const leaveReasonOptions = [
   {
     label: '换课',
     value: 'change',
+  },
+  {
+    label: '代课',
+    value: 'place',
   },
 ]
 const initApplication = {
@@ -342,53 +355,6 @@ const initApplication = {
   leaveReason: '',
 }
 onMounted(async () => {
-  applicationList.value.push({
-    id: 124,
-    title: '需要实习两天',
-    // 申请时间
-    time: '2025-2-8 15:30',
-    status: '未处理',
-    imgs: [
-      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-      'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png',
-    ],
-    leaveStartTime: '2025-2-11 21:42:7',
-    // 请假开始时间
-    leaveEndTime: '2025-2-13 21:41:7',
-    signature: '',
-    // 请假天数
-    leaveDays: '2',
-    // 请假课程数量
-    leaveCourseCount: '5',
-    // 请假类型
-    leaveType: '公假',
-    // 申请事项
-    leaveReason: '调课申请',
-    // 申请人信息
-    applicant: '赵六(N21452153)',
-  })
-  applicationList.value.push({
-    id: 122,
-    title: '外出学习（老吉大）',
-    imgs: ['@/assets/img/book.png', '@/assets/img/cat.jpeg'],
-    // 申请时间
-    time: '2025-2-8 12:30',
-    status: '已拒绝',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10 21:41:7',
-    signature: '',
-    leaveEndTime: '2025-2-10 21:41:7',
-    // 请假天数
-    leaveDays: '1',
-    // 请假课程数量
-    leaveCourseCount: '2',
-    // 请假类型
-    leaveType: '事假',
-    // 申请事项
-    leaveReason: '代课申请',
-    // 申请人信息
-    applicant: '王五(N219856153)',
-  })
   applicationList.value.push({
     id: 122,
     title: '外出学习（老吉大）',
@@ -411,6 +377,10 @@ onMounted(async () => {
     // 申请人信息
     applicant: '王五(N219856153)',
   })
+  console.log(userStore.user)
+  console.log(userStore.user.userId)
+  const res = await getLeaveAPI(userStore.user.userId)
+  console.log(res.data)
   if (route.query.value == 'true') {
     navigationValue.value = true
   } else if (route.query.value == 'false') {
@@ -422,6 +392,7 @@ onMounted(async () => {
 const submitForm = async () => {
   elFormRef.value.validate(async valid => {
     if (valid) {
+      applicationVisible.value = false
       application.arr.leaveStartTime = mergeDateTime(
         application.arr.startDate,
         application.arr.startTime,
@@ -445,7 +416,8 @@ const submitForm = async () => {
       })
       console.log(application.arr)
       const res = await addApplicationAPI(application.arr)
-      console.log(res.data)
+      if (res.data.code == 0) ElMessage.success('提交成功！')
+      else ElMessage.error('提交失败！')
     } else {
       ElMessage.error('表单验证失败，请检查输入')
       return false
@@ -531,6 +503,7 @@ function addApplicationClick() {
   if (navigationValue.value) applicationVisible.value = true
   else feedbackVisible.value = true
 }
+
 function navigationClick(value) {
   navigationValue.value = value
 }
@@ -609,8 +582,8 @@ function navigationClick(value) {
         text-align: center;
         border-radius: 5px;
         width: 60px;
-        color: $word-black-color;
-        background-color: $word-back-color;
+        color: $main-yellow;
+        background-color: $yellow-shallow;
       }
       .second-label {
         color: $red-word;

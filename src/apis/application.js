@@ -17,6 +17,40 @@ export const addApplicationAPI = form => {
     },
   })
 }
+//获取所有请假记录
+export const getLeaveAllAPI = (teacherName, leaveType, title, status) => {
+  return http({
+    url: '/review/leave-all-list',
+    method: 'GET',
+    data: {
+      teacherName,
+      leaveType,
+      title,
+      status,
+    },
+  })
+}
+//审批请假申请
+export const reviewLeaveAPI = (leaveId, status) => {
+  return http({
+    url: '/review/review-leave',
+    method: 'PATCH',
+    data: {
+      leaveId,
+      status,
+    },
+  })
+}
+//获取个人请假记录
+export const getLeaveAPI = status => {
+  return http({
+    url: '/leave/leave-list',
+    method: 'GET',
+    data: {
+      status,
+    },
+  })
+}
 export const getLeaveListAPI = () => {
   return http({
     url: '/leave/leave-list',
