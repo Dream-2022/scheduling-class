@@ -35,7 +35,7 @@
           v-model="teacher"
           clearable
           style="height: 32px; max-width: 350px"
-          :placeholder="'请输入' + (navigationValue ? '教师' : '') + '关键词'"
+          :placeholder="'请输入' + (navigationValue ? '' : '标题') + '关键词'"
           :prefix-icon="Search"
         />
         <el-select v-model="type" v-if="navigationValue" clearable placeholder="选择请假类型">
@@ -78,6 +78,11 @@
         :header-cell-style="{ 'text-align': 'center' }"
         :cell-style="{ 'text-align': 'center' }"
       >
+        <el-table-column v-if="!navigationValue" label="反馈标题" min-width="120">
+          <template #default="{ row }">
+            <div>{{ row.title }}</div>
+          </template>
+        </el-table-column>
         <el-table-column :label="(navigationValue ? '申请' : '反馈') + '人'" min-width="120">
           <div>{{ userStore.user.name }}（{{ userStore.user.userId }}）</div>
         </el-table-column>
@@ -103,7 +108,7 @@
                   :src="img"
                   @click="handlePictureCardPreview(img)"
                   class="table-img"
-                  :style="{ transform: `translateX(${index * -10}px)` }"
+                  :style="{ transform: `translateX(${index * -40}px)` }"
                 />
               </div>
             </div>
@@ -116,7 +121,6 @@
             </div>
           </template>
         </el-table-column>
-
         <el-table-column v-if="navigationValue" label="签名" min-width="180">
           <template #default="{ row }">
             <img class="signature-img" :src="row.signature" alt="签名" />
@@ -170,7 +174,6 @@
                 color="#368eec"
                 size="small"
                 @click="byApplicationClick(row.id, 1)"
-                v-if="navigationValue && row?.status != '1'"
                 style="margin-bottom: 10px; color: #fff"
               >
                 修改
@@ -183,7 +186,6 @@
                 size="small"
                 style="margin-bottom: 10px"
                 @click="byApplicationClick(row.id, 2)"
-                v-if="navigationValue && row?.status != '2'"
               >
                 撤回
               </el-button>
@@ -342,14 +344,22 @@
       size="default"
       status-icon
     >
-      <el-form-item label="反馈详情" prop="leaveReason">
-        <el-input placeholder="请输入反馈详情" v-model="feedback.arr.leaveReason" type="textarea" />
+      <el-form-item label="反馈标题" prop="title">
+        <el-input placeholder="请输入反馈标题" v-model="feedback.arr.title" />
       </el-form-item>
-      <el-form-item label="相关材料" prop="attachment">
+      <el-form-item label="反馈详情" prop="leaveReason">
+        <el-input
+          placeholder="请输入反馈详情"
+          :autosize="{ minRows: 2, maxRows: 6 }"
+          v-model="feedback.arr.leaveReason"
+          type="textarea"
+        />
+      </el-form-item>
+      <el-form-item label="相关材料" prop="imgs">
         <el-upload
           :on-change="handleFileChange"
           action="#"
-          v-model:file-list="feedback.arr.attachment"
+          v-model:file-list="feedback.arr.imgs"
           list-type="picture-card"
           :auto-upload="false"
         >
@@ -390,7 +400,7 @@
   </el-drawer>
   <!-- 预览图 -->
   <el-dialog v-model="dialogVisible">
-    <img w-full :src="dialogImageUrl" alt="Image" />
+    <img w-full class="dialog-img" :src="dialogImageUrl" alt="Image" />
   </el-dialog>
 </template>
 <script setup>
@@ -409,18 +419,19 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { addApplicationAPI, getLeaveAPI } from '@/apis/application'
-import { getFeedbackAPI } from '@/apis/feedback'
+import { addFeedbackAPI, getFeedbackAPI } from '@/apis/feedback'
 const route = useRoute()
 const userStore = useUserStore()
 let applicationList = ref([]) //申请列表
 let feedbackList = ref([]) //反馈列表
 let applicationVisible = ref(false) //申请抽屉
 let feedbackVisible = ref(false) //反馈抽屉
-let navigationValue = ref(true)
+let navigationValue = ref(false)
 const dialogImageUrl = ref('') //预览图
 const dialogVisible = ref(false)
 const disabled = ref(false)
-const applicationDownloadImgs = ref([])
+const applicationDownloadImgs = ref([]),
+  feedbackDownloadImgs = ref([])
 let application = reactive({
   arr: {},
 })
@@ -435,18 +446,19 @@ let teacher = ref(''),
   status = ref('')
 //表单规则
 const rulesApp = {
-  title: [{ required: true, message: '请输入请假事由', trigger: 'blur' }],
+  title: [{ required: true, message: '请选择调整措施', trigger: 'blur' }],
   leaveType: [{ required: true, message: '请选择请假类型', trigger: 'blur' }],
   leaveStartDate: [{ required: true, message: '请选择请假起始日期', trigger: 'blur' }],
   startDate: [{ required: true, message: '请选择开始日期', trigger: 'change' }],
   startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
   endDate: [{ required: true, message: '请选择结束日期', trigger: 'blur' }],
   endTime: [{ required: true, message: '请选择结束时间', trigger: 'blur' }],
-  leaveReason: [{ required: true, message: '请选择调整举措', trigger: 'blur' }],
+  leaveReason: [{ required: true, message: '请输入请假事由', trigger: 'blur' }],
   signature: [{ required: true, message: '请进行申请人签字', trigger: 'blur' }],
 }
 const rulesFeed = {
-  leaveReason: [{ required: true, message: '请选择调整举措', trigger: 'blur' }],
+  title: [{ required: true, message: '请输入反馈标题', trigger: 'blur' }],
+  leaveReason: [{ required: true, message: '请输入反馈详细', trigger: 'blur' }],
 }
 const titleApplication = [
   { label: '全部', value: '' },
@@ -531,11 +543,36 @@ const submitApplicationForm = async () => {
     }
   })
 }
-const submitFeedbackForm = async () => {}
+const submitFeedbackForm = async () => {
+  elFormFeedRef.value.validate(async valid => {
+    if (valid) {
+      feedbackVisible.value = false
+      feedback.arr.imgs = feedback.arr.imgs.map(item => ({
+        name: item.name,
+        blob: item.raw.slice(0, item.raw.size, item.raw.type),
+      }))
+      console.log(feedback.arr)
+      console.log([...feedback.arr.imgs])
+      console.log(feedbackDownloadImgs.value)
+
+      feedback.arr.attachment = []
+      feedback.arr.imgs.forEach(image => {
+        const newFile = new File([image.blob], image.name, { type: 'image/jpeg' })
+        feedback.arr.attachment.push(newFile)
+      })
+      console.log(feedback.arr)
+      const res = await addFeedbackAPI(feedback.arr)
+      console.log(res.data)
+      if (res.data.code == 0) ElMessage.success('提交成功！')
+      else ElMessage.error('提交失败！')
+    } else {
+      ElMessage.error('表单验证失败，请检查输入')
+      return false
+    }
+  })
+}
 async function applicationSearchClick() {
-  console.log(status.value)
   const res = await getLeaveAPI(status.value, type.value, title.value, status.value)
-  console.log(res.data)
   if (res.data.code == '0') {
     applicationList.value = res.data.data
     applicationList.value.forEach((item, index) => {
@@ -546,8 +583,7 @@ async function applicationSearchClick() {
   }
 }
 async function feedbackSearchClick() {
-  console.log(status.value)
-  const res = await getFeedbackAPI(status.value)
+  const res = await getFeedbackAPI(title.value, status.value)
   console.log(res.data)
   if (res.data.code == '0') {
     feedbackList.value = res.data.data
@@ -560,6 +596,7 @@ function searchClick() {
   if (navigationValue.value) {
     applicationSearchClick()
   } else {
+    console.log('feedback')
     feedbackSearchClick()
   }
 }
@@ -601,10 +638,16 @@ const resetFeedbackForm = () => {
 }
 //删除图片
 const handleRemove = file => {
-  console.log(file.url, JSON.stringify(application.arr.imgs[0]))
-  application.arr.imgs = application.arr.imgs.filter(item => item.url != file.url)
+  if (navigationValue.value) {
+    console.log(file.url, JSON.stringify(application.arr.imgs[0]))
+    application.arr.imgs = application.arr.imgs.filter(item => item.url != file.url)
+    console.log(application.arr.imgs)
+  } else {
+    console.log(file.url, JSON.stringify(feedback.arr.imgs[0]))
+    feedback.arr.imgs = feedback.arr.imgs.filter(item => item.url != file.url)
+    console.log(feedback.arr.imgs)
+  }
   ElMessage.success(`删除成功！`)
-  console.log(application.arr.imgs)
 }
 //预览图片
 const handlePictureCardPreview = file => {
@@ -622,7 +665,11 @@ const handleDownload = file => {
     a.click()
     document.body.removeChild(a)
     console.log(file.url)
-    applicationDownloadImgs.value.push(file.url)
+    if (navigationValue.value) {
+      applicationDownloadImgs.value.push(file.url)
+    } else {
+      feedbackDownloadImgs.value.push(file.url)
+    }
   } else if (file.content) {
     const blob = new Blob([file.content], { type: file.raw.type || 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -634,7 +681,11 @@ const handleDownload = file => {
     document.body.removeChild(a)
     URL.revokeObjectURL(url) // 释放内存
     console.log(file.content)
-    applicationDownloadImgs.value.push(file.content)
+    if (navigationValue.value) {
+      applicationDownloadImgs.value.push(file.content)
+    } else {
+      feedbackDownloadImgs.value.push(file.content)
+    }
   }
 }
 //图片列表变化
@@ -722,10 +773,12 @@ function navigationClick(value) {
     }
     .table-imgs {
       display: flex;
+      justify-content: center;
 
       .table-img {
+        cursor: zoom-in;
         max-width: 80px;
-        border-radius: 50%;
+        border-radius: 16px;
         border: 2px solid #d1d1d1;
       }
     }
@@ -831,9 +884,8 @@ function navigationClick(value) {
   width: 130px;
   height: 130px;
 }
-:deep(.el-dialog__body img) {
+.dialog-img {
   width: 98%;
-  height: 98%;
   border-radius: 10px;
 }
 </style>

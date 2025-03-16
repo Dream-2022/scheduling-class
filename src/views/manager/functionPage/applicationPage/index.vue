@@ -203,7 +203,7 @@
   </div>
   <!-- 预览图 -->
   <el-dialog v-model="dialogVisible">
-    <img w-full :src="dialogImageUrl" alt="Image" />
+    <img w-full :src="dialogImageUrl" class="dialog-img" alt="Image" />
   </el-dialog>
 </template>
 <script setup>
@@ -248,19 +248,9 @@ onMounted(async () => {
   } else if (route.query.value == 'false') {
     navigationValue.value = false
   }
-  feedbackList.value.push({
-    id: 122,
-    teacherId: 1,
-    teacherName: '你好',
-    leaveReason: '外出学习（老吉大）',
-    attachment: ['@/assets/img/book.png', '@/assets/img/cat.jpeg'],
-    status: '1',
-    createdAt: '2025-2-10 8:10:7',
-  })
 })
 //搜索关键词
 async function applicationSearchClick() {
-  console.log(teacher.value, type.value, title.value, status.value)
   const res = await getLeaveAllAPI(teacher.value, type.value, title.value, status.value)
   console.log(res.data)
   if (res.data.code == '0') {
@@ -273,9 +263,12 @@ async function applicationSearchClick() {
   }
 }
 async function feedbackSearchClick() {
-  console.log(teacher.value, status.value)
-  const res = await getFeedbackAllAPI(teacher.value)
+  const res = await getFeedbackAllAPI(teacher.value, status.value)
   console.log(res.data)
+  feedbackList.value = res.data.data
+  feedbackList.value.forEach((item, index) => {
+    feedbackList.value[index].createdAt = item.createdAt.replace('T', ' ')
+  })
 }
 //审批申请
 async function byApplicationClick(id, status) {
@@ -375,7 +368,7 @@ const handlePictureCardPreview = url => {
         cursor: zoom-in;
         width: 80px;
         height: 80px;
-        border-radius: 50%;
+        border-radius: 16px;
         border: 2px solid #d1d1d1;
       }
     }
@@ -453,9 +446,8 @@ const handlePictureCardPreview = url => {
     }
   }
 }
-:deep(.el-dialog .el-dialog__body img) {
-  width: 100px;
-  height: 90%;
+.dialog-img {
+  width: 98%;
   border-radius: 10px;
 }
 </style>

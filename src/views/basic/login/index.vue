@@ -15,6 +15,7 @@
               v-model="loginData.account"
               style="width: 300px; height: 50px"
               placeholder="请输入学号"
+              @keypress.enter="login"
               :prefix-icon="User"
             ></el-input>
           </el-form-item>
@@ -24,6 +25,7 @@
               style="width: 300px; height: 50px"
               type="password"
               placeholder="请输入密码"
+              @keypress.enter="login"
               :prefix-icon="Lock"
             ></el-input>
           </el-form-item>
