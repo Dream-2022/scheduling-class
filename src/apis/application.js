@@ -22,7 +22,7 @@ export const getLeaveAllAPI = (teacherName, leaveType, title, status) => {
   return http({
     url: '/review/leave-all-list',
     method: 'GET',
-    data: {
+    params: {
       teacherName,
       leaveType,
       title,

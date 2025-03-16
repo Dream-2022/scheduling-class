@@ -30,6 +30,46 @@
           navigationValue ? '我的申请' : '我的反馈'
         }}</strong></el-divider
       >
+      <div class="search-box">
+        <el-input
+          v-model="teacher"
+          clearable
+          style="height: 32px; max-width: 350px"
+          :placeholder="'请输入' + (navigationValue ? '教师' : '') + '关键词'"
+          :prefix-icon="Search"
+        />
+        <el-select v-model="type" v-if="navigationValue" clearable placeholder="选择请假类型">
+          <el-option
+            v-for="item in typeApplication"
+            :key="item"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-select v-model="title" v-if="navigationValue" clearable placeholder="选择调整举措">
+          <el-option
+            v-for="item in titleApplication"
+            :key="item"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-select v-model="status" clearable placeholder="选择申请状态" style="max-width: 350px">
+          <el-option label="全部" value="" />
+          <el-option :label="navigationValue ? '未审核' : '未读'" value="0" />
+          <el-option :label="navigationValue ? '已批准' : '已读'" value="1" />
+          <el-option v-if="navigationValue" label="已拒绝" value="2" />
+        </el-select>
+        <el-button
+          color="#547bf1"
+          plain
+          :icon="Search"
+          style="margin-bottom: 10px"
+          @click="searchClick()"
+        >
+          搜索
+        </el-button>
+      </div>
       <div class="middle-word"></div>
       <el-table
         :data="navigationValue ? applicationList : feedbackList"
@@ -38,70 +78,88 @@
         :header-cell-style="{ 'text-align': 'center' }"
         :cell-style="{ 'text-align': 'center' }"
       >
-        <el-table-column label="申请人" min-width="100">
+        <el-table-column :label="(navigationValue ? '申请' : '反馈') + '人'" min-width="120">
+          <div>{{ userStore.user.name }}（{{ userStore.user.userId }}）</div>
+        </el-table-column>
+        <el-table-column :label="navigationValue ? '事由详情' : '反馈详情'" min-width="160">
           <template #default="{ row }">
-            <div>{{ row.applicant }}</div>
+            <div>
+              <strong>{{ row.leaveReason }}</strong>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column label="证明材料" min-width="160">
+        <el-table-column v-if="navigationValue" label="请假类型" min-width="90">
           <template #default="{ row }">
-            <div class="table-imgs" v-if="row?.imgs.length != 0">
-              <div v-for="(img, index) in row?.imgs" :key="img">
+            <div :class="row.leaveType + '-label'">
+              {{ getLabelByValue(row.leaveType) }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="证明材料" min-width="180">
+          <template #default="{ row }">
+            <div class="table-imgs">
+              <div v-for="(img, index) in row?.attachment" :key="img">
                 <img
                   :src="img"
+                  @click="handlePictureCardPreview(img)"
                   class="table-img"
                   :style="{ transform: `translateX(${index * -10}px)` }"
                 />
               </div>
             </div>
-            <div v-else>暂无</div>
           </template>
         </el-table-column>
-        <el-table-column label="事由详情" min-width="160">
+        <el-table-column v-if="navigationValue" label="调整举措" min-width="120">
           <template #default="{ row }">
-            <div>
-              <strong>{{ row.title }}</strong>
+            <div :class="row.title + '-label'">
+              {{ getLabelByValue(row.title) }}
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="请假类型" min-width="150">
+
+        <el-table-column v-if="navigationValue" label="签名" min-width="180">
           <template #default="{ row }">
-            <div v-html="row.leaveType"></div>
+            <img class="signature-img" :src="row.signature" alt="签名" />
           </template>
         </el-table-column>
-        <el-table-column label="调整举措" min-width="100">
+
+        <el-table-column v-if="navigationValue" label="请假时间" min-width="160">
           <template #default="{ row }">
-            <div v-html="row.leaveReason"></div>
+            <div>{{ row.leaveStart }}</div>
+            <div>—</div>
+            <div>{{ row.leaveEnd }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="状态" min-width="140">
+        <el-table-column v-if="navigationValue" label="状态" min-width="100">
           <template #default="{ row }">
             <div class="label-box">
               <div
                 :class="
-                  row.status == '未处理'
-                    ? 'third-label'
-                    : row.status == '已拒绝'
-                      ? 'second-label'
-                      : 'first-label'
+                  row.status == '0'
+                    ? 'first-label'
+                    : row.status == '1'
+                      ? 'third-label'
+                      : 'second-label'
                 "
               >
-                {{ row?.status }}
+                {{ row?.status == '0' ? '未处理' : row?.status == '1' ? '已批准' : '已拒绝' }}
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="请假时间" min-width="160">
+        <el-table-column v-if="!navigationValue" label="状态" min-width="100">
           <template #default="{ row }">
-            <div>{{ row.leaveStartTime }}</div>
-            <div>—</div>
-            <div>{{ row.leaveEndTime }}</div>
+            <div class="label-box">
+              <div :class="row.status == '1' ? 'third-label' : 'second-label'">
+                {{ row?.status == '1' ? '已读' : '未读' }}
+              </div>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column label="申请日期" min-width="160">
+        <el-table-column :label="(navigationValue ? '申请' : '反馈') + '日期'" min-width="160">
           <template #default="{ row }">
             <div style="display: flex; justify-content: center">
-              <div>{{ row.time }}</div>
+              <div class="first-label">{{ row.createdAt }}</div>
             </div>
           </template>
         </el-table-column>
@@ -110,17 +168,25 @@
             <div>
               <el-button
                 color="#368eec"
-                plain
                 size="small"
-                @click="staticClick(row.fileMd5)"
-                style="margin-bottom: 10px"
-                >修改</el-button
+                @click="byApplicationClick(row.id, 1)"
+                v-if="navigationValue && row?.status != '1'"
+                style="margin-bottom: 10px; color: #fff"
               >
+                修改
+              </el-button>
             </div>
             <div>
-              <el-button color="#f56c6c" size="small" plain @click="safeClick(row.fileMd5)"
-                >撤回</el-button
+              <el-button
+                color="#f56c6c"
+                plain
+                size="small"
+                style="margin-bottom: 10px"
+                @click="byApplicationClick(row.id, 2)"
+                v-if="navigationValue && row?.status != '2'"
               >
+                撤回
+              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -136,7 +202,7 @@
       ref="elFormRef"
       style="max-width: 600px"
       :model="application.arr"
-      :rules="rules"
+      :rules="rulesApp"
       label-width="auto"
       size="default"
       status-icon
@@ -211,7 +277,10 @@
         </el-col>
       </el-form-item>
       <el-form-item label="调整举措" prop="title">
-        <el-segmented v-model="application.arr.title" :options="leaveReasonOptions" />
+        <el-segmented
+          v-model="application.arr.title"
+          :options="titleApplication.filter(item => item.label != '全部')"
+        />
       </el-form-item>
       <el-form-item label="申请人签字" prop="signature">
         <HandwrittenSignature v-model="application.arr.signature" />
@@ -250,29 +319,79 @@
             </div>
           </template>
         </el-upload>
-        <!-- 预览图 -->
-        <el-dialog v-model="dialogVisible">
-          <img w-full :src="dialogImageUrl" alt="Image" />
-        </el-dialog>
       </el-form-item>
       <el-form-item>
         <div class="button-box">
-          <el-button type="primary" @click="submitForm(application.arr)"> 申请 </el-button>
-          <el-button @click="resetForm(application.arr)">取消</el-button>
+          <el-button type="primary" @click="submitApplicationForm()"> 申请 </el-button>
+          <el-button @click="resetApplicationForm()">取消</el-button>
         </div>
       </el-form-item>
     </el-form>
   </el-drawer>
   <el-drawer v-model="feedbackVisible" :show-close="false">
     <template #header="{ close, titleId, titleClass }">
-      <h4 :id="titleId" :class="titleClass">This is a custom header!</h4>
-      <el-button type="danger" @click="close">
-        <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
-        Close
-      </el-button>
+      <h4 :id="titleId" :class="titleClass">反馈</h4>
+      <el-button color="#f56c6c" plain :icon="CloseBold" circle @click="close" />
     </template>
-    This is drawer content.
+    <el-form
+      ref="elFormFeedRef"
+      style="max-width: 600px"
+      :model="feedback.arr"
+      :rules="rulesFeed"
+      label-width="auto"
+      size="default"
+      status-icon
+    >
+      <el-form-item label="反馈详情" prop="leaveReason">
+        <el-input placeholder="请输入反馈详情" v-model="feedback.arr.leaveReason" type="textarea" />
+      </el-form-item>
+      <el-form-item label="相关材料" prop="attachment">
+        <el-upload
+          :on-change="handleFileChange"
+          action="#"
+          v-model:file-list="feedback.arr.attachment"
+          list-type="picture-card"
+          :auto-upload="false"
+        >
+          <el-icon><Plus /></el-icon>
+          <template #file="{ file }">
+            <div>
+              <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+              <span class="el-upload-list__item-actions">
+                <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
+                  <el-icon><zoom-in /></el-icon>
+                </span>
+                <span
+                  v-if="!disabled"
+                  class="el-upload-list__item-delete"
+                  @click="handleDownload(file)"
+                >
+                  <el-icon><Download /></el-icon>
+                </span>
+                <span
+                  v-if="!disabled"
+                  class="el-upload-list__item-delete"
+                  @click="handleRemove(file)"
+                >
+                  <el-icon><Delete /></el-icon>
+                </span>
+              </span>
+            </div>
+          </template>
+        </el-upload>
+      </el-form-item>
+      <el-form-item>
+        <div class="button-box">
+          <el-button type="primary" @click="submitFeedbackForm()"> 反馈 </el-button>
+          <el-button @click="resetFeedbackForm()">取消</el-button>
+        </div>
+      </el-form-item>
+    </el-form>
   </el-drawer>
+  <!-- 预览图 -->
+  <el-dialog v-model="dialogVisible">
+    <img w-full :src="dialogImageUrl" alt="Image" />
+  </el-dialog>
 </template>
 <script setup>
 import { onMounted, ref, reactive } from 'vue'
@@ -286,10 +405,11 @@ import {
   ZoomIn,
   CirclePlusFilled,
   CloseBold,
-  CircleCloseFilled,
+  Search,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { addApplicationAPI, getLeaveAPI } from '@/apis/application'
+import { getFeedbackAPI } from '@/apis/feedback'
 const route = useRoute()
 const userStore = useUserStore()
 let applicationList = ref([]) //申请列表
@@ -304,9 +424,17 @@ const applicationDownloadImgs = ref([])
 let application = reactive({
   arr: {},
 })
-let elFormRef = ref()
+let feedback = reactive({
+  arr: {},
+})
+let elFormAppRef = ref() //获取表单
+let elFormFeedRef = ref() //获取表单
+let teacher = ref(''),
+  type = ref(''),
+  title = ref(''),
+  status = ref('')
 //表单规则
-const rules = {
+const rulesApp = {
   title: [{ required: true, message: '请输入请假事由', trigger: 'blur' }],
   leaveType: [{ required: true, message: '请选择请假类型', trigger: 'blur' }],
   leaveStartDate: [{ required: true, message: '请选择请假起始日期', trigger: 'blur' }],
@@ -317,6 +445,15 @@ const rules = {
   leaveReason: [{ required: true, message: '请选择调整举措', trigger: 'blur' }],
   signature: [{ required: true, message: '请进行申请人签字', trigger: 'blur' }],
 }
+const rulesFeed = {
+  leaveReason: [{ required: true, message: '请选择调整举措', trigger: 'blur' }],
+}
+const titleApplication = [
+  { label: '全部', value: '' },
+  { label: '换课申请', value: 'change' },
+  { label: '代课申请', value: 'place' },
+  { label: '调课申请', value: 'adjust' },
+]
 const typeApplication = [
   { label: '公假', value: 'public' },
   { label: '事假', value: 'matter' },
@@ -325,20 +462,6 @@ const typeApplication = [
   { label: '产假', value: 'maternity' },
   { label: '丧假', value: 'funeral' },
   { label: '其他', value: 'other' },
-]
-const leaveReasonOptions = [
-  {
-    label: '调课',
-    value: 'adjust',
-  },
-  {
-    label: '换课',
-    value: 'change',
-  },
-  {
-    label: '代课',
-    value: 'place',
-  },
 ]
 const initApplication = {
   title: '',
@@ -354,43 +477,27 @@ const initApplication = {
   signature: '',
   leaveReason: '',
 }
+const initFeedback = {
+  status: '',
+  imgs: [],
+  leaveReason: '',
+}
 onMounted(async () => {
-  applicationList.value.push({
-    id: 122,
-    title: '外出学习（老吉大）',
-    imgs: ['@/assets/img/book.png', '@/assets/img/cat.jpeg'],
-    // 申请时间
-    time: '2025-2-8 12:30',
-    status: '已通过',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10 8:10:7',
-    leaveEndTime: '2025-2-10 21:41:7',
-    // 请假天数
-    leaveDays: '1',
-    signature: '',
-    // 请假课程数量
-    leaveCourseCount: '2',
-    // 请假类型
-    leaveType: '事假',
-    // 申请事项
-    leaveReason: '代课申请',
-    // 申请人信息
-    applicant: '王五(N219856153)',
-  })
-  console.log(userStore.user)
-  console.log(userStore.user.userId)
-  const res = await getLeaveAPI(userStore.user.userId)
-  console.log(res.data)
+  //获取我的申请/反馈列表
+  applicationSearchClick()
+  feedbackSearchClick()
+
   if (route.query.value == 'true') {
     navigationValue.value = true
   } else if (route.query.value == 'false') {
     navigationValue.value = false
   }
   application.arr = { ...initApplication }
+  feedback.arr = { ...initFeedback }
 })
 // 提交申请表单
-const submitForm = async () => {
-  elFormRef.value.validate(async valid => {
+const submitApplicationForm = async () => {
+  elFormAppRef.value.validate(async valid => {
     if (valid) {
       applicationVisible.value = false
       application.arr.leaveStartTime = mergeDateTime(
@@ -424,6 +531,38 @@ const submitForm = async () => {
     }
   })
 }
+const submitFeedbackForm = async () => {}
+async function applicationSearchClick() {
+  console.log(status.value)
+  const res = await getLeaveAPI(status.value, type.value, title.value, status.value)
+  console.log(res.data)
+  if (res.data.code == '0') {
+    applicationList.value = res.data.data
+    applicationList.value.forEach((item, index) => {
+      applicationList.value[index].createdAt = item.createdAt.replace('T', ' ')
+      applicationList.value[index].leaveStart = item.leaveStart.replace('T', ' ')
+      applicationList.value[index].leaveEnd = item.leaveEnd.replace('T', ' ')
+    })
+  }
+}
+async function feedbackSearchClick() {
+  console.log(status.value)
+  const res = await getFeedbackAPI(status.value)
+  console.log(res.data)
+  if (res.data.code == '0') {
+    feedbackList.value = res.data.data
+    feedbackList.value.forEach((item, index) => {
+      feedbackList.value[index].createdAt = item.createdAt.replace('T', ' ')
+    })
+  }
+}
+function searchClick() {
+  if (navigationValue.value) {
+    applicationSearchClick()
+  } else {
+    feedbackSearchClick()
+  }
+}
 function base64ToBlob(base64) {
   const parts = base64.split(';base64,')
   const mimeType = parts[0].split(':')[1]
@@ -450,9 +589,14 @@ function mergeDateTime(dateStr, timeStr) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 // 重置表单方法
-const resetForm = () => {
+const resetApplicationForm = () => {
   application.arr = { ...initApplication }
-  elFormRef.value.resetFields()
+  elFormAppRef.value.resetFields()
+  applicationVisible.value = false
+}
+const resetFeedbackForm = () => {
+  feedback.arr = { ...initFeedback }
+  elFormFeedRef.value.resetFields()
   applicationVisible.value = false
 }
 //删除图片
@@ -503,7 +647,20 @@ function addApplicationClick() {
   if (navigationValue.value) applicationVisible.value = true
   else feedbackVisible.value = true
 }
-
+//获取申请类型
+function getLabelByValue(value) {
+  for (let i = 0; i < typeApplication.length; i++) {
+    if (typeApplication[i].value === value) {
+      return typeApplication[i].label
+    }
+  }
+  for (let i = 0; i < titleApplication.length; i++) {
+    if (titleApplication[i].value === value) {
+      return titleApplication[i].label
+    }
+  }
+  return null
+}
 function navigationClick(value) {
   navigationValue.value = value
 }
@@ -522,6 +679,8 @@ function navigationClick(value) {
 
   .middle-box {
     color: $word-black-color;
+    width: 95%;
+    margin: 20px auto;
 
     .title-box {
       display: flex;
@@ -557,9 +716,10 @@ function navigationClick(value) {
       margin-bottom: 10px;
       font-size: 15px;
     }
-
-    width: 98%;
-    margin: 20px auto;
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
     .table-imgs {
       display: flex;
 
@@ -595,57 +755,51 @@ function navigationClick(value) {
       }
     }
 
-    .colorLabel {
-      font-weight: 600;
-      font-size: 16px;
+    .matter-label {
+      color: $main-blue;
     }
-
-    .purpleLabel {
-      background-color: $purple;
+    .public-label {
+      color: $main-purple;
     }
-
-    .yellowLabel {
-      background-color: $yellow;
+    .illness-label {
+      color: $main-yellow;
     }
-
-    .greenLabel {
-      background-color: $green;
+    .wed-label {
+      color: $pink;
     }
-
-    .blackLabel {
-      background-color: $word-black-color;
-    }
-
-    .greyLabel {
-      background-color: $grey;
-    }
-
-    .redLabel {
-      background-color: $red;
-    }
-
-    .purple {
-      color: $purple;
-    }
-
-    .green {
+    .maternity-label {
       color: $green;
     }
-
-    .black {
-      color: $word-black-color;
+    .funeral-label {
+      color: $deep-color;
+    }
+    .other-label {
+      color: $word-grey-color;
+    }
+    .signature-img {
+      width: 100%;
     }
 
-    .grey {
-      color: $grey;
+    .change-label,
+    .adjust-label,
+    .place-label {
+      font-size: 13px;
+      border-radius: 5px;
+      margin-left: 6%;
+      margin-right: 6px;
+      background-color: $green-back;
+      color: $main-green;
+      border: 1px solid $main-green;
     }
-
-    .yellow {
-      color: $yellow;
+    .change-label {
+      background-color: $purple-back;
+      color: $purple;
+      border: 1px solid $purple;
     }
-
-    .red {
-      color: $red;
+    .place-label {
+      background-color: $blue-back;
+      color: $main-blue;
+      border: 1px solid $main-blue;
     }
   }
 }

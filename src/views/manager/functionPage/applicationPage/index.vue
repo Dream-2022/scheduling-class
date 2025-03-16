@@ -24,15 +24,15 @@
           navigationValue ? '申请' : '反馈'
         }}</strong></el-divider
       >
-      <div class="seach-box">
+      <div class="search-box">
         <el-input
           v-model="teacher"
           clearable
-          style="height: 32px"
-          placeholder="请输入教师关键词"
+          style="height: 32px; max-width: 350px"
+          :placeholder="'请输入' + (navigationValue ? '教师' : '') + '关键词'"
           :prefix-icon="Search"
         />
-        <el-select v-model="type" clearable placeholder="选择请假类型">
+        <el-select v-model="type" v-if="navigationValue" clearable placeholder="选择请假类型">
           <el-option
             v-for="item in typeApplication"
             :key="item"
@@ -40,7 +40,7 @@
             :value="item.value"
           />
         </el-select>
-        <el-select v-model="title" clearable placeholder="选择调整举措">
+        <el-select v-model="title" v-if="navigationValue" clearable placeholder="选择调整举措">
           <el-option
             v-for="item in titleApplication"
             :key="item"
@@ -48,18 +48,18 @@
             :value="item.value"
           />
         </el-select>
-        <el-select v-model="status" clearable placeholder="选择申请状态">
-          <el-option label="全部" value="all" />
-          <el-option label="未审核" value="0" />
-          <el-option label="已通过" value="1" />
-          <el-option label="已拒绝" value="2" />
+        <el-select v-model="status" clearable placeholder="选择申请状态" style="max-width: 350px">
+          <el-option label="全部" value="" />
+          <el-option :label="navigationValue ? '未审核' : '未读'" value="0" />
+          <el-option :label="navigationValue ? '已批准' : '已读'" value="1" />
+          <el-option v-if="navigationValue" label="已拒绝" value="2" />
         </el-select>
         <el-button
           color="#547bf1"
           plain
           :icon="Search"
           style="margin-bottom: 10px"
-          @click="searchClick()"
+          @click="applicationSearchClick()"
         >
           搜索
         </el-button>
@@ -72,19 +72,19 @@
         :header-cell-style="{ 'text-align': 'center' }"
         :cell-style="{ 'text-align': 'center' }"
       >
-        <el-table-column label="申请人" min-width="120">
+        <el-table-column :label="(navigationValue ? '申请' : '反馈') + '人'" min-width="120">
           <template #default="{ row }">
             <div>{{ row.teacherName }}（{{ row.teacherId }}）</div>
           </template>
         </el-table-column>
-        <el-table-column label="事由详情" min-width="160">
+        <el-table-column :label="navigationValue ? '事由详情' : '反馈详情'" min-width="160">
           <template #default="{ row }">
             <div>
               <strong>{{ row.leaveReason }}</strong>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="请假类型" min-width="90">
+        <el-table-column v-if="navigationValue" label="请假类型" min-width="90">
           <template #default="{ row }">
             <div :class="row.leaveType + '-label'">
               {{ getLabelByValue(row.leaveType) }}
@@ -105,7 +105,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="调整举措" min-width="120">
+        <el-table-column v-if="navigationValue" label="调整举措" min-width="120">
           <template #default="{ row }">
             <div :class="row.title + '-label'">
               {{ getLabelByValue(row.title) }}
@@ -113,19 +113,20 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="签名" min-width="180">
+        <el-table-column v-if="navigationValue" label="签名" min-width="180">
           <template #default="{ row }">
             <img class="signature-img" :src="row.signature" alt="签名" />
           </template>
         </el-table-column>
 
-        <el-table-column label="请假时间" min-width="160">
+        <el-table-column v-if="navigationValue" label="请假时间" min-width="160">
           <template #default="{ row }">
             <div>{{ row.leaveStart }}</div>
             <div>—</div>
             <div>{{ row.leaveEnd }}</div>
-          </template> </el-table-column
-        ><el-table-column label="状态" min-width="100">
+          </template>
+        </el-table-column>
+        <el-table-column v-if="navigationValue" label="状态" min-width="100">
           <template #default="{ row }">
             <div class="label-box">
               <div
@@ -137,12 +138,21 @@
                       : 'second-label'
                 "
               >
-                {{ row?.status == '0' ? '未处理' : row?.status == '1' ? '已通过' : '已拒绝' }}
+                {{ row?.status == '0' ? '未处理' : row?.status == '1' ? '已批准' : '已拒绝' }}
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="申请日期" min-width="160">
+        <el-table-column v-if="!navigationValue" label="状态" min-width="100">
+          <template #default="{ row }">
+            <div class="label-box">
+              <div :class="row.status == '1' ? 'third-label' : 'second-label'">
+                {{ row?.status == '1' ? '已读' : '未读' }}
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column :label="(navigationValue ? '申请' : '反馈') + '日期'" min-width="160">
           <template #default="{ row }">
             <div style="display: flex; justify-content: center">
               <div class="first-label">{{ row.createdAt }}</div>
@@ -156,9 +166,22 @@
                 color="#368eec"
                 size="small"
                 @click="byApplicationClick(row.id, 1)"
+                v-if="!navigationValue && row?.status == '0'"
                 style="margin-bottom: 10px; color: #fff"
               >
-                通过
+                已查看
+              </el-button>
+            </div>
+            <div v-if="!navigationValue && row?.status == '1'">--</div>
+            <div>
+              <el-button
+                color="#368eec"
+                size="small"
+                @click="byApplicationClick(row.id, 1)"
+                v-if="navigationValue && row?.status != '1'"
+                style="margin-bottom: 10px; color: #fff"
+              >
+                批准
               </el-button>
             </div>
             <div>
@@ -168,6 +191,7 @@
                 size="small"
                 style="margin-bottom: 10px"
                 @click="byApplicationClick(row.id, 2)"
+                v-if="navigationValue && row?.status != '2'"
               >
                 拒绝
               </el-button>
@@ -188,10 +212,11 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { getLeaveAllAPI, reviewLeaveAPI } from '@/apis/application'
+import { getFeedbackAllAPI } from '@/apis/feedback'
 const route = useRoute()
 let applicationList = ref([])
 let feedbackList = ref([])
-let navigationValue = ref(true)
+let navigationValue = ref(false)
 const dialogImageUrl = ref('') //预览图
 const dialogVisible = ref(false) //预览图是否存在
 let teacher = ref(''),
@@ -199,7 +224,7 @@ let teacher = ref(''),
   title = ref(''),
   status = ref('')
 const typeApplication = [
-  { label: '全部', value: 'all' },
+  { label: '全部', value: '' },
   { label: '公假', value: 'public' },
   { label: '事假', value: 'matter' },
   { label: '病假', value: 'illness' },
@@ -209,22 +234,32 @@ const typeApplication = [
   { label: '其他', value: 'other' },
 ]
 const titleApplication = [
-  { label: '全部', value: 'all' },
+  { label: '全部', value: '' },
   { label: '换课申请', value: 'change' },
   { label: '代课申请', value: 'place' },
   { label: '调课申请', value: 'adjust' },
 ]
 onMounted(async () => {
-  //获取全部申请列表
-  searchClick()
+  //获取全部申请/反馈列表
+  applicationSearchClick()
+  feedbackSearchClick()
   if (route.query.value == 'true') {
     navigationValue.value = true
   } else if (route.query.value == 'false') {
     navigationValue.value = false
   }
+  feedbackList.value.push({
+    id: 122,
+    teacherId: 1,
+    teacherName: '你好',
+    leaveReason: '外出学习（老吉大）',
+    attachment: ['@/assets/img/book.png', '@/assets/img/cat.jpeg'],
+    status: '1',
+    createdAt: '2025-2-10 8:10:7',
+  })
 })
 //搜索关键词
-async function searchClick() {
+async function applicationSearchClick() {
   console.log(teacher.value, type.value, title.value, status.value)
   const res = await getLeaveAllAPI(teacher.value, type.value, title.value, status.value)
   console.log(res.data)
@@ -237,14 +272,25 @@ async function searchClick() {
     })
   }
 }
+async function feedbackSearchClick() {
+  console.log(teacher.value, status.value)
+  const res = await getFeedbackAllAPI(teacher.value)
+  console.log(res.data)
+}
 //审批申请
 async function byApplicationClick(id, status) {
-  console.log(id)
   const res = await reviewLeaveAPI(id, status)
-  console.log(res.data)
   if (res.data.code == '0') {
-    if (status === '1') ElMessage.success('已拒绝申请！')
-    else if (status === '2') ElMessage.success('已通过申请！')
+    if (status == '1') {
+      ElMessage.success('已成功批准申请！')
+    } else if (status == '2') {
+      ElMessage.warning('已成功拒绝申请！')
+    }
+    applicationList.value.forEach((item, index) => {
+      if (item.id === id) {
+        applicationList.value[index].status = status
+      }
+    })
   }
 }
 
@@ -316,13 +362,14 @@ const handlePictureCardPreview = url => {
       margin-bottom: 10px;
       font-size: 15px;
     }
-    .seach-box {
+    .search-box {
       display: flex;
       gap: 10px;
     }
 
     .table-imgs {
       display: flex;
+      justify-content: center;
 
       .table-img {
         cursor: zoom-in;
