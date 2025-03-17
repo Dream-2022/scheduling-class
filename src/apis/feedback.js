@@ -13,7 +13,7 @@ export const getFeedbackAPI = (title, status) => {
   return http({
     url: '/users-feedback/list',
     method: 'GET',
-    data: {
+    params: {
       title,
       status,
     },

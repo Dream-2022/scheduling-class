@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4837259 */
-  src: url('iconfont.woff2?t=1741533026394') format('woff2'),
-       url('iconfont.woff?t=1741533026394') format('woff'),
-       url('iconfont.ttf?t=1741533026394') format('truetype');
+  src: url('iconfont.woff2?t=1742221145934') format('woff2'),
+       url('iconfont.woff?t=1742221145934') format('woff'),
+       url('iconfont.ttf?t=1742221145934') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,50 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-shuzi-:before {
+  content: "\e614";
+}
+
+.icon-shuzi-1:before {
+  content: "\e615";
+}
+
+.icon-shuzi-2:before {
+  content: "\e616";
+}
+
+.icon-shuzi-3:before {
+  content: "\e617";
+}
+
+.icon-shuzi-4:before {
+  content: "\e618";
+}
+
+.icon-shuzi-5:before {
+  content: "\e619";
+}
+
+.icon-shuzi-6:before {
+  content: "\e61a";
+}
+
+.icon-shuzi-7:before {
+  content: "\e61b";
+}
+
+.icon-shuzi-8:before {
+  content: "\e61c";
+}
+
+.icon-dian1:before {
+  content: "\e608";
+}
+
+.icon-icon-gantanhao:before {
+  content: "\e747";
 }
 
 .icon-kecheng:before {

@@ -583,7 +583,7 @@ async function applicationSearchClick() {
   }
 }
 async function feedbackSearchClick() {
-  const res = await getFeedbackAPI(title.value, status.value)
+  const res = await getFeedbackAPI(teacher.value, status.value)
   console.log(res.data)
   if (res.data.code == '0') {
     feedbackList.value = res.data.data
