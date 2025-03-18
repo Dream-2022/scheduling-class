@@ -18,6 +18,10 @@
     <div class="middle-box">
       <div class="title-box">
         <div class="middle-title">排课</div>
+        <div v-if="information.arr?.title == ''" class="plan-title">
+          <div class="plan-title-word">/</div>
+          {{ information.arr?.title }}
+        </div>
       </div>
 
       <RouterView @information="informationValue"></RouterView>
@@ -51,58 +55,64 @@
         <el-form-item label="设置晚课" prop="night">
           <el-switch v-model="information.arr.night" />
         </el-form-item>
-      </el-form>
-      <div class="dialog-box">
         <div class="dialog-title">选择导入步骤（二选一）</div>
         <div class="wow animate__fadeInRight warn-box">
           <span class="iconfont icon-icon-gantanhao"></span>
           选择参照模板一键导入所需表格，或按步骤自由导入所需表格
         </div>
-        <div class="plan-boxes">
-          <div class="plan-box">
-            <div class="plan-title">
-              <span class="iconfont icon-dian1"></span>方案一：一次性导入数据
+        <el-form-item class="plan-boxes" prop="planValue">
+          <el-radio-group v-model="information.arr.planValue">
+            <div class="plan-box">
+              <el-radio :value="1" size="large" border style="height: 130px; width: 450px">
+                <div>
+                  <div class="plan-title">
+                    <span class="iconfont icon-dian1"></span>方案一：一次性导入数据
+                  </div>
+                  <div class="plan-word">
+                    如下载教学计划示例，表格内容有填写说明<br />
+                    按要求导入数据，一次性完成教学计划信息配置，即可自动排课
+                  </div>
+                  <div class="plan-button-box">
+                    <el-button
+                      @click="saveScheduling"
+                      size="small"
+                      color="#547bf1"
+                      :icon="Download"
+                      plain
+                    >
+                      下载教学计划示例
+                    </el-button>
+                    <el-button
+                      @click="saveScheduling"
+                      size="small"
+                      color="#547bf1"
+                      :icon="Promotion"
+                    >
+                      导入教学计划
+                    </el-button>
+                  </div>
+                </div>
+              </el-radio>
             </div>
-            <div class="plan-word">
-              如下载教学计划示例，表格内容有填写说明<br />
-              按要求导入数据，一次性完成教学计划信息配置，即可自动排课
+            <div class="plan-box">
+              <el-radio :value="2" size="large" border style="height: 120px; width: 450px">
+                <div class="plan-title">
+                  <span class="iconfont icon-dian1"></span>方案二：按步骤添加数据
+                </div>
+                <div class="plan-word">
+                  按步骤导入数据，按需进行编辑修改<br />
+                  <span class="iconfont icon-shuzi-"></span>设置学校信息
+                  <span class="iconfont icon-shuzi-2"></span>特殊设置
+                  <span class="iconfont icon-shuzi-4"></span>禁排设置
+                  <span class="iconfont icon-shuzi-1"></span>排课优先级<br />
+                  <span class="iconfont icon-shuzi-5"></span>设置课程教室
+                  <span class="iconfont icon-shuzi-7"></span>排课设置
+                </div>
+              </el-radio>
             </div>
-            <div class="plan-button-box">
-              <el-button
-                @click="saveScheduling"
-                size="small"
-                color="#547bf1"
-                :icon="Download"
-                plain
-              >
-                下载教学计划示例
-              </el-button>
-              <el-button @click="saveScheduling" size="small" color="#547bf1" :icon="Promotion"
-                >导入教学计划</el-button
-              >
-            </div>
-          </div>
-          <div class="plan-box">
-            <div class="plan-title">
-              <span class="iconfont icon-dian1"></span>方案二：按步骤添加数据
-            </div>
-            <div class="plan-word">
-              按步骤导入数据，按需进行编辑修改<br />
-              <span class="iconfont icon-shuzi-"></span>设置学校信息
-              <span class="iconfont icon-shuzi-2"></span>特殊设置
-              <span class="iconfont icon-shuzi-4"></span>禁排设置
-              <span class="iconfont icon-shuzi-1"></span>排课优先级
-              <span class="iconfont icon-shuzi-5"></span>设置课程教室<br />
-              <span class="iconfont icon-shuzi-7"></span>排课设置
-            </div>
-            <div class="plan-button-box">
-              <el-button @click="saveScheduling" size="small" color="#547bf1">
-                下一步<el-icon class="el-icon--right"><Right /></el-icon>
-              </el-button>
-            </div>
-          </div>
-        </div>
-      </div>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
     </div>
     <template #footer>
       <div class="dialog-footer">
@@ -116,7 +126,7 @@
 import { RouterView } from 'vue-router'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Download, Promotion, Right } from '@element-plus/icons-vue'
+import { Download, Promotion } from '@element-plus/icons-vue'
 
 const information = reactive({
   arr: [],
@@ -143,6 +153,7 @@ const rules = {
     { min: 2, max: 20, message: '课表名称长度应在 2 到 20 个字符之间', trigger: 'blur' },
   ],
   cycle: [{ required: true, message: '请选择上课周期', trigger: 'change' }],
+  planValue: [{ required: true, message: '请选择导入方式', trigger: 'change' }],
 }
 //子组件传值
 const informationValue = value => {
@@ -150,7 +161,6 @@ const informationValue = value => {
 }
 //保存排课基本信息
 function saveScheduling() {
-  informationVisible.value = false
   console.log(information.arr)
   elFormRef.value.validate(valid => {
     if (!valid) {
@@ -159,6 +169,7 @@ function saveScheduling() {
     }
     if (valid) {
       ElMessage.success('设置成功！')
+      informationVisible.value = false
     }
   })
 }
@@ -215,6 +226,15 @@ function saveScheduling() {
       .middle-title {
         font-weight: 600;
         font-size: 18px;
+      }
+      .plan-title-word {
+        margin-right: 30px;
+        font-size: 16px;
+      }
+      .plan-title {
+        margin-left: 20px;
+        font-size: 16px;
+        font-weight: 600;
       }
 
       .list {
@@ -319,61 +339,65 @@ function saveScheduling() {
   }
 }
 .el-dialog {
-  .dialog-box {
-    .dialog-title {
-      font-size: 17px;
-      color: #000;
-      border-top: #ccc 1px solid;
-      padding-top: 20px;
-    }
-    .warn-box {
-      background-color: #fff3e0;
-      color: #cd871d;
-      padding: 5px 15px;
-      font-size: 14px;
-      line-height: 24px;
-      width: 92%;
-      margin: 10px auto;
-      border-radius: 5px;
-      border: 1px solid #ffdb9e;
+  .dialog-title {
+    font-size: 17px;
+    color: #000;
+    border-top: #ccc 1px solid;
+    padding-top: 20px;
+  }
+  .warn-box {
+    background-color: #fff3e0;
+    color: #cd871d;
+    padding: 5px 15px;
+    font-size: 14px;
+    line-height: 24px;
+    width: 92%;
+    margin: 10px auto;
+    border-radius: 5px;
+    border: 1px solid #ffdb9e;
 
+    .iconfont::before {
+      font-size: 16px;
+    }
+  }
+
+  .plan-boxes {
+    .plan-box {
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-radius: 8px;
       .iconfont::before {
-        font-size: 16px;
+        font-size: 14px;
+        color: $main-blue;
+        margin-right: 5px;
       }
-    }
-    .plan-boxes {
-      .plan-box {
-        padding: 10px 10px 12px 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        .iconfont::before {
-          font-size: 14px;
-          color: $main-blue;
-          margin-right: 5px;
-        }
 
-        .plan-word {
-          color: $grey;
+      .plan-word {
+        color: $grey;
+        font-size: 12px;
+        line-height: 24px;
+        margin-top: 8px;
+        .iconfont::before {
+          margin-left: 6px;
+          margin-right: 2px;
           font-size: 12px;
-          line-height: 24px;
-          margin-top: 8px;
-          margin-bottom: 8px;
-          .iconfont::before {
-            margin-left: 6px;
-            margin-right: 2px;
-            font-size: 12px;
-          }
-          .iconfont:nth-child(1),
-          .iconfont:nth-child(6) {
-            margin-left: 0px;
-          }
         }
-        .plan-button-box {
-          display: flex;
-          justify-content: flex-end;
+        .iconfont:nth-child(1),
+        .iconfont:nth-child(6) {
+          margin-left: 0px;
         }
+      }
+      .plan-button-box {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
       }
     }
   }
+}
+
+:deep(.el-radio__label) {
+  width: 450px;
+  padding-left: 20px;
 }
 </style>

@@ -123,6 +123,7 @@ onMounted(() => {
   console.log('传值')
   emit('information', false)
 })
+//点击新建课表
 function addTimetable() {
   emit('information', true)
   router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/scheduling/scheduleCourse`)

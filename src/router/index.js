@@ -137,7 +137,24 @@ const setRouter = async () => {
               },
               {
                 path: 'information',
+                redirect: '/manager/functionPage/information/informationList',
                 component: () => import('../views/manager/functionPage/informationPage/index.vue'),
+                children: [
+                  {
+                    path: 'informationList',
+                    component: () =>
+                      import(
+                        '../views/manager/functionPage/informationPage/components/informationList.vue'
+                      ),
+                  },
+                  {
+                    path: 'setInformation',
+                    component: () =>
+                      import(
+                        '../views/manager/functionPage/informationPage/components/setInformation.vue'
+                      ),
+                  },
+                ],
               },
               {
                 path: 'analysis',

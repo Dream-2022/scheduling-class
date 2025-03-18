@@ -103,92 +103,97 @@
   <el-dialog v-model="personVisible" title="个人资料" width="500">
     <div class="bindBox">
       <table class="table">
-        <tr class="tr">
-          <td class="td">头像</td>
-          <td class="td">
-            <img
-              v-if="userStore.user?.avatar != null"
-              class="iconImg"
-              :src="userStore.user?.avatar"
-              alt="头像"
-            />
-            <img class="iconImg" v-else src="@/assets/img/cat.jpeg" alt="头像" />
-          </td>
-          <td class="td">
-            <el-button size="small" color="#547BF1" @click="updateClick">更换头像</el-button>
-            <input
-              class="fileInput"
-              type="file"
-              accept="image/*"
-              style="display: none"
-              @change="handleAvatarChange"
-            />
-          </td>
-        </tr>
-        <tr class="tr">
-          <td class="td">姓名</td>
-          <td class="td">{{ userStore.user?.name }}</td>
-          <td class="td"></td>
-        </tr>
-        <tr class="tr">
-          <td class="td">{{ userStore.user.identity == 'STUDENT' ? '学号' : '工号' }}</td>
-          <td class="td">{{ userStore.user?.userId }}</td>
-          <td class="td"></td>
-        </tr>
-        <tr class="tr">
-          <td class="td">职称</td>
-          <td class="td">{{ userStore.user?.title }}</td>
-          <td class="td"></td>
-        </tr>
-        <tr class="tr">
-          <td class="td">所属院系</td>
-          <td class="td">{{ userStore.user?.department }}</td>
-          <td class="td"></td>
-        </tr>
-        <tr class="tr">
-          <td class="td">邮箱</td>
-          <td class="td">{{ userStore.user?.email == null ? '暂无' : userStore.user?.email }}</td>
-          <td class="td"></td>
-        </tr>
-        <tr class="tr">
-          <td class="td">{{ userStore.user.identity == 'STUDENT' ? '个人' : '教师' }}偏好</td>
-          <td class="td">
-            <div class="preference-box">
-              <div class="preference">
-                <div>偏好课程</div>
-                <div
-                  v-if="
-                    userStore.user.preferredCourses && userStore.user.preferredCourses?.length != 0
-                  "
-                >
-                  <div v-for="item in userStore.user.preferredCourses" :key="item">{{ item }}</div>
-                </div>
-                <div v-else>暂未设置</div>
-              </div>
-              <div class="preference">
-                <div>偏好时间段</div>
-                <div
-                  v-if="
-                    userStore.user.preferredTimeSlots &&
-                    userStore.user.preferredTimeSlots.length != 0
-                  "
-                >
-                  <div v-for="item in userStore.user.preferredTimeSlots" :key="item">
-                    {{ getWeekDay(item.day) }} {{ item.start }} - {{ item.end }} 节
+        <tbody>
+          <tr class="tr">
+            <td class="td">头像</td>
+            <td class="td">
+              <img
+                v-if="userStore.user?.avatar != null"
+                class="iconImg"
+                :src="userStore.user?.avatar"
+                alt="头像"
+              />
+              <img class="iconImg" v-else src="@/assets/img/cat.jpeg" alt="头像" />
+            </td>
+            <td class="td">
+              <el-button size="small" color="#547BF1" @click="updateClick">更换头像</el-button>
+              <input
+                class="fileInput"
+                type="file"
+                accept="image/*"
+                style="display: none"
+                @change="handleAvatarChange"
+              />
+            </td>
+          </tr>
+          <tr class="tr">
+            <td class="td">姓名</td>
+            <td class="td">{{ userStore.user?.name }}</td>
+            <td class="td"></td>
+          </tr>
+          <tr class="tr">
+            <td class="td">{{ userStore.user.identity == 'STUDENT' ? '学号' : '工号' }}</td>
+            <td class="td">{{ userStore.user?.userId }}</td>
+            <td class="td"></td>
+          </tr>
+          <tr class="tr">
+            <td class="td">职称</td>
+            <td class="td">{{ userStore.user?.title }}</td>
+            <td class="td"></td>
+          </tr>
+          <tr class="tr">
+            <td class="td">所属院系</td>
+            <td class="td">{{ userStore.user?.department }}</td>
+            <td class="td"></td>
+          </tr>
+          <tr class="tr">
+            <td class="td">邮箱</td>
+            <td class="td">{{ userStore.user?.email == null ? '暂无' : userStore.user?.email }}</td>
+            <td class="td"></td>
+          </tr>
+          <tr class="tr">
+            <td class="td">{{ userStore.user.identity == 'STUDENT' ? '个人' : '教师' }}偏好</td>
+            <td class="td">
+              <div class="preference-box">
+                <div class="preference">
+                  <div>偏好课程</div>
+                  <div
+                    v-if="
+                      userStore.user.preferredCourses &&
+                      userStore.user.preferredCourses?.length != 0
+                    "
+                  >
+                    <div v-for="item in userStore.user.preferredCourses" :key="item">
+                      {{ item }}
+                    </div>
                   </div>
+                  <div v-else>暂未设置</div>
                 </div>
-                <div v-else>暂未设置</div>
+                <div class="preference">
+                  <div>偏好时间段</div>
+                  <div
+                    v-if="
+                      userStore.user.preferredTimeSlots &&
+                      userStore.user.preferredTimeSlots.length != 0
+                    "
+                  >
+                    <div v-for="item in userStore.user.preferredTimeSlots" :key="item">
+                      {{ getWeekDay(item.day) }} {{ item.start }} - {{ item.end }} 节
+                    </div>
+                  </div>
+                  <div v-else>暂未设置</div>
+                </div>
               </div>
-            </div>
-          </td>
-          <td class="td">
-            <div>
-              <el-button size="small" color="#547BF1" @click="revisePreferenceClick"
-                >修改</el-button
-              >
-            </div>
-          </td>
-        </tr>
+            </td>
+            <td class="td">
+              <div>
+                <el-button size="small" color="#547BF1" @click="revisePreferenceClick"
+                  >修改</el-button
+                >
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
     <template #footer>
@@ -555,19 +560,22 @@ function findActive(path, identity) {
     if (path !== `/${identity}/mainPage` && divList.length > 0) {
       let activeIndex = 0
       if (identity === 'manager') {
-        if (path.includes('/course') || path.includes('/exam')) {
+        if (
+          (path.includes('/course') && path.endsWith('/course')) ||
+          (path.includes('/exam') && path.endsWith('/exam'))
+        ) {
           activeIndex = 0
-        } else if (path.includes('/scheduling')) {
+        } else if (path.includes('/scheduling') && path.endsWith('/scheduling')) {
           activeIndex = 1
-        } else if (path.includes('/schedule')) {
+        } else if (path.includes('/schedule') && path.endsWith('/schedule')) {
           activeIndex = 2
-        } else if (path.includes('/information')) {
+        } else if (path.includes('/information') && path.endsWith('/information')) {
           activeIndex = 3
-        } else if (path.includes('/analysis')) {
+        } else if (path.includes('/analysis') && path.endsWith('/analysis')) {
           activeIndex = 4
-        } else if (path.includes('/application')) {
+        } else if (path.includes('/application') && path.endsWith('/application')) {
           activeIndex = 5
-        } else if (path.includes('/manage')) {
+        } else if (path.includes('/manage') && path.endsWith('/manage')) {
           activeIndex = 6
         }
       } else if (identity === 'teacher') {
