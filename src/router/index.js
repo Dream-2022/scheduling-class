@@ -175,13 +175,13 @@ const setRouter = async () => {
               {
                 path: 'scheduling',
                 component: () => import('../views/manager/functionPage/schedulingPage/index.vue'),
-                redirect: '/manager/functionPage/scheduling/courseList',
+                redirect: '/manager/functionPage/scheduling/schedulingList',
                 children: [
                   {
-                    path: 'courseList',
+                    path: 'schedulingList',
                     component: () =>
                       import(
-                        '../views/manager/functionPage/schedulingPage/components/courseList.vue'
+                        '../views/manager/functionPage/schedulingPage/components/schedulingList.vue'
                       ),
                   },
                   {

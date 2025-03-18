@@ -560,22 +560,19 @@ function findActive(path, identity) {
     if (path !== `/${identity}/mainPage` && divList.length > 0) {
       let activeIndex = 0
       if (identity === 'manager') {
-        if (
-          (path.includes('/course') && path.endsWith('/course')) ||
-          (path.includes('/exam') && path.endsWith('/exam'))
-        ) {
+        if (path.includes('/course') || path.includes('/exam')) {
           activeIndex = 0
-        } else if (path.includes('/scheduling') && path.endsWith('/scheduling')) {
+        } else if (path.includes('/scheduling')) {
           activeIndex = 1
-        } else if (path.includes('/schedule') && path.endsWith('/schedule')) {
+        } else if (path.includes('/schedule')) {
           activeIndex = 2
-        } else if (path.includes('/information') && path.endsWith('/information')) {
+        } else if (path.includes('/information')) {
           activeIndex = 3
-        } else if (path.includes('/analysis') && path.endsWith('/analysis')) {
+        } else if (path.includes('/analysis')) {
           activeIndex = 4
-        } else if (path.includes('/application') && path.endsWith('/application')) {
+        } else if (path.includes('/application')) {
           activeIndex = 5
-        } else if (path.includes('/manage') && path.endsWith('/manage')) {
+        } else if (path.includes('/manage')) {
           activeIndex = 6
         }
       } else if (identity === 'teacher') {
