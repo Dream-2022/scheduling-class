@@ -137,7 +137,7 @@ const setRouter = async () => {
               },
               {
                 path: 'information',
-                redirect: '/manager/functionPage/information/informationList',
+                redirect: '/manager/functionPage/information/setInformation',
                 component: () => import('../views/manager/functionPage/informationPage/index.vue'),
                 children: [
                   {

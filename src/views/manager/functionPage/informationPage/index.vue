@@ -32,10 +32,9 @@
 
     .title-box {
       display: flex;
-      border-bottom: 1px solid #ccc;
       padding-bottom: 6px;
       line-height: 30px;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
 
       .middle-title {
         font-weight: 600;
