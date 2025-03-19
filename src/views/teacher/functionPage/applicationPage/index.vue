@@ -201,7 +201,7 @@
       <el-button color="#f56c6c" plain :icon="CloseBold" circle @click="close" />
     </template>
     <el-form
-      ref="elFormRef"
+      ref="elFormAppRef"
       style="max-width: 600px"
       :model="application.arr"
       :rules="rulesApp"

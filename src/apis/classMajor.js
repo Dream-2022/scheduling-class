@@ -1,4 +1,16 @@
 import http from '@/utils/http.js'
+//层次查询
+export const getsearchAPI = (departmentsName, majorsName, classesName) => {
+  return http({
+    url: '/engine/search-department-majors-class',
+    method: 'GET',
+    params: {
+      departmentsName,
+      majorsName,
+      classesName,
+    },
+  })
+}
 export const getDepartmentsAPI = departmentsName => {
   return http({
     url: '/engine/search-departments',
