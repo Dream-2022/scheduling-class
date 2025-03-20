@@ -357,12 +357,8 @@ let navigation1 = [
 ]
 let navigation2 = [
   {
-    name: '授课安排',
-    value: 'course',
-  },
-  {
-    name: '监考安排',
-    value: 'exam',
+    name: '计划表',
+    value: 'course/main',
   },
   {
     name: '申请和反馈',
@@ -578,16 +574,14 @@ function findActive(path, identity) {
       } else if (identity === 'teacher') {
         if (path.includes('/course')) {
           activeIndex = 0
-        } else if (path.includes('/exam')) {
-          activeIndex = 1
         } else if (path.includes('/application')) {
-          activeIndex = 2
+          activeIndex = 1
         } else if (path.includes('/classroom')) {
-          activeIndex = 5
-        } else if (path.includes('/class')) {
-          activeIndex = 3
-        } else if (path.includes('/arrange')) {
           activeIndex = 4
+        } else if (path.includes('/class')) {
+          activeIndex = 2
+        } else if (path.includes('/arrange')) {
+          activeIndex = 3
         }
       }
       divList[activeIndex].classList.add('active')

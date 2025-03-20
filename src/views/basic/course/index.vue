@@ -24,14 +24,22 @@
   </div>
 </template>
 <script setup>
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import router from '@/router'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
+const route = useRoute()
 let active = ref([true, false])
 let isSearching = ref(false)
 let searchQuery = ref('')
 
+onMounted(() => {
+  if (route.query.value == 'true') {
+    setActive(0)
+  } else if (route.query.value == 'false') {
+    setActive(1)
+  }
+})
 function setActive(index) {
   active.value = [false, false]
   active.value[index] = true
@@ -39,9 +47,9 @@ function setActive(index) {
   searchQuery.value = ''
   isSearching.value = false
   let path = router.currentRoute.value.fullPath
-  if (path !== '/manager/functionPage/course/main') {
+  if (path !== '/teacher/functionPage/course/main') {
     //可以在这里做一些处理（未保存）
-    router.push(`/manager/functionPage/course/main`)
+    router.push(`/teacher/functionPage/course/main`)
   }
 }
 

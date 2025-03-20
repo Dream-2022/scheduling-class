@@ -13,11 +13,11 @@
   </div>
   <div class="module-boxes">
     <div class="module-box">
-      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course')" />
+      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course/main', true)" />
       <div @click="staticAnalysis('course')">授课安排</div>
     </div>
     <div class="module-box">
-      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('exam')" />
+      <img src="@/assets/3D/book-search.png" @click="staticAnalysis('course/main', false)" />
       <div @click="staticAnalysis('exam')">监考安排</div>
     </div>
     <div class="module-box">
@@ -81,7 +81,7 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">请假申请</div>
-          <div class="more-view" @click="() => $router.push('/manager/functionPage/application')">
+          <div class="more-view" @click="() => $router.push('/teacher/functionPage/application')">
             查看<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -232,7 +232,7 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">安排</div>
-          <div class="more-view" @click="() => $router.push('/manager/functionPage/course/main')">
+          <div class="more-view" @click="() => $router.push('/teacher/functionPage/course/main')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
@@ -482,7 +482,7 @@ async function searchClick() {
     ElMessage.warning('输入内容不能为空！')
     return
   }
-  router.push(`/function/manager/${searchValue.value}`)
+  router.push(`/function/teacher/${searchValue.value}`)
 }
 
 async function handleCommand2(command) {

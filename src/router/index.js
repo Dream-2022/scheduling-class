@@ -61,7 +61,23 @@ const setRouter = async () => {
             children: [
               {
                 path: 'course',
-                component: () => import('../views/teacher/functionPage/coursePage/index.vue'),
+                component: () => import('../views/basic/course/index.vue'),
+                redirect: '/main',
+                props: true,
+                children: [
+                  {
+                    path: 'main',
+                    component: () => import('../views/basic/course/components/main.vue'),
+                  },
+                  {
+                    path: ':id/class',
+                    component: () => import('../views/basic/course/components/class.vue'),
+                  },
+                  {
+                    path: ':id/exam',
+                    component: () => import('../views/basic/course/components/exam.vue'),
+                  },
+                ],
               },
               {
                 path: 'exam',
@@ -110,24 +126,21 @@ const setRouter = async () => {
             children: [
               {
                 path: 'course',
-                component: () => import('../views/manager/functionPage/coursePage/index.vue'),
+                component: () => import('../views/basic/course/index.vue'),
                 redirect: '/main',
                 props: true,
                 children: [
                   {
                     path: 'main',
-                    component: () =>
-                      import('../views/manager/functionPage/coursePage/components/main.vue'),
+                    component: () => import('../views/basic/course/components/main.vue'),
                   },
                   {
                     path: ':id/class',
-                    component: () =>
-                      import('../views/manager/functionPage/coursePage/components/class.vue'),
+                    component: () => import('../views/basic/course/components/class.vue'),
                   },
                   {
                     path: ':id/exam',
-                    component: () =>
-                      import('../views/manager/functionPage/coursePage/components/exam.vue'),
+                    component: () => import('../views/basic/course/components/exam.vue'),
                   },
                 ],
               },
