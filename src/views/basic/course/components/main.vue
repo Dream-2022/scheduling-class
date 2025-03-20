@@ -29,6 +29,10 @@
             </div>
             <div class="class-right-box">
               <div class="class-right-title">课程数量</div>
+              <div class="class-right-content">{{ item.course }}</div>
+            </div>
+            <div class="class-right-box">
+              <div class="class-right-title">参与班级</div>
               <div class="class-right-content">{{ item.class }}</div>
             </div>
             <div class="class-right-box">
@@ -36,7 +40,7 @@
               <div class="class-right-content">{{ item.noCourse }}</div>
             </div>
             <div class="class-right-box">
-              <div class="class-right-title">参与教师</div>
+              <div class="class-right-title">排课负责人</div>
               <div class="class-teacher">
                 <div v-for="(teacher, index) in item.teachers" :key="teacher">
                   <img
@@ -91,11 +95,11 @@
         <div class="course-box-middle">
           <div class="class-right">
             <div class="class-right-box">
-              <div class="class-right-title">课时任务</div>
-              <div class="class-right-content">{{ item.assign }}</div>
+              <div class="class-right-title">课程数量</div>
+              <div class="class-right-content">{{ item.course }}</div>
             </div>
             <div class="class-right-box">
-              <div class="class-right-title">课程数量</div>
+              <div class="class-right-title">参与班级</div>
               <div class="class-right-content">{{ item.class }}</div>
             </div>
             <div class="class-right-box">
@@ -103,7 +107,7 @@
               <div class="class-right-content">{{ item.noCourse }}</div>
             </div>
             <div class="class-right-box">
-              <div class="class-right-title">参与教师</div>
+              <div class="class-right-title">排考负责人</div>
               <div class="class-teacher">
                 <div v-for="(teacher, index) in item.teachers" :key="teacher">
                   <img
@@ -137,7 +141,9 @@
 <script setup>
 import { reactive, defineProps } from 'vue'
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/userStore'
 import router from '@/router'
+const userStore = useUserStore()
 let classList = reactive({
   arr: [
     {
@@ -146,6 +152,7 @@ let classList = reactive({
       status: '未发布',
       time: '2025-2-8 15:30',
       assign: 122,
+      course: 54,
       class: 23,
       noCourse: 1,
       teachers: [
@@ -169,6 +176,7 @@ let classList = reactive({
       status: '已发布',
       time: '2025-2-8 15:30',
       assign: 122,
+      course: 54,
       class: 23,
       noCourse: 1,
       teachers: [
@@ -195,7 +203,7 @@ let examList = reactive({
       title: '第一次考试',
       status: '未发布',
       time: '2025-2-8 15:30',
-      assign: 122,
+      course: 54,
       class: 23,
       noCourse: 1,
       teachers: [
@@ -217,6 +225,7 @@ let examList = reactive({
       id: 1,
       title: '第一次排课',
       status: '已发布',
+      course: 54,
       time: '2025-2-8 15:30',
       assign: 122,
       class: 23,
@@ -250,7 +259,8 @@ function editCourse(type, id) {
   console.log('编辑', type, id)
 }
 const courseClick = (id, string) => {
-  router.push(`/manager/functionPage/course/${id}/${string}`)
+  const identity = userStore.user.identity.toLowerCase()
+  router.push(`/${identity}/functionPage/course/${id}/${string}`)
 }
 </script>
 <style lang="scss" scoped>

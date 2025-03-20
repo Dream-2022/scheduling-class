@@ -5,7 +5,7 @@
         style="width: 280px"
         filterable
         :options="options"
-        placeholder="选择"
+        placeholder="选择视角"
         clearable
       />
       <DndProvider :backend="HTML5Backend">
