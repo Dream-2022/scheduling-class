@@ -11,7 +11,11 @@
         </el-tab-pane>
         <el-tab-pane label="课程信息" name="2">Config</el-tab-pane>
         <el-tab-pane label="教师学生信息" name="3">
-          <TeacherInformation></TeacherInformation>
+          <TeacherInformation
+            @titleValue="getDialogTitle"
+            @dialogVisible="getDialogVisible"
+            ref="childRef"
+          ></TeacherInformation>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -47,7 +51,12 @@
 import { ref } from 'vue'
 import MajorInformation from './components/majorInformation.vue'
 import TeacherInformation from './components/teacherInformation.vue'
-import { importClassesAPI } from '@/apis/classMajor'
+import {
+  importClassesAPI,
+  importMajorsAPI,
+  importTeachersAPI,
+  importCoursesAPI,
+} from '@/apis/classMajor'
 import {
   UploadFilled,
   // DeleteLocation,
@@ -55,7 +64,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-let activeName = ref('1')
+let activeName = ref('3')
 const fileX = ref(null)
 let dialogTitle = ref('')
 let dialogVisible = ref(false)
@@ -64,6 +73,7 @@ function getDialogTitle(value) {
   dialogTitle.value = value
 }
 function getDialogVisible(value) {
+  console.log('getDialogVisible', dialogVisible.value)
   dialogVisible.value = value
 }
 //上传文件相关
@@ -100,8 +110,19 @@ async function uploadDataClick() {
     ElMessage.error('请先选择文件！')
     return
   }
-  const res = await importClassesAPI(fileX.value.raw)
-  console.log(res.data)
+  if (dialogTitle.value == '班级') {
+    const res = await importClassesAPI(fileX.value.raw)
+    console.log(res.data)
+  } else if (dialogTitle.value == '专业') {
+    const res = await importMajorsAPI(fileX.value.raw)
+    console.log(res.data)
+  } else if (dialogTitle.value == '教师' || dialogTitle.value == '学生') {
+    const res = await importTeachersAPI(fileX.value.raw)
+    console.log(res.data)
+  } else if (dialogTitle.value == '课程') {
+    const res = await importCoursesAPI(fileX.value.raw)
+    console.log(res.data)
+  }
   ElMessage.success(dialogTitle.value + '数据导入成功！')
   dialogVisible.value = false
   if (dialogTitle.value == '班级' || dialogTitle.value == '专业') {
@@ -110,10 +131,9 @@ async function uploadDataClick() {
   }
 }
 
-//
 function handleClick(tab, event) {
   console.log(tab, event, '需要判断是否保存了')
-  ElMessageBox.confirm('是否保存暂定更改?', 'Warning', {
+  ElMessageBox.confirm('是否保存暂定更改?', '提醒', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',

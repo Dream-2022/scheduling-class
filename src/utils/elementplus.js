@@ -8,6 +8,7 @@ import {
   ElForm,
   ElBadge,
   ElDivider,
+  ElPagination,
   ElProgress,
   ElDrawer,
   ElRow,
@@ -44,6 +45,7 @@ export default function (app) {
   app.use(ElForm)
   app.use(ElBadge)
   app.use(ElDivider)
+  app.use(ElPagination)
   app.use(ElProgress)
   app.use(ElDrawer)
   app.use(ElRow)

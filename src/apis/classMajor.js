@@ -78,3 +78,16 @@ export const importTeachersAPI = usersData => {
     },
   })
 }
+//导入课程数据(没写好)
+export const importCoursesAPI = usersData => {
+  return http({
+    url: '/admin/import-users-data',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    data: {
+      usersData,
+    },
+  })
+}

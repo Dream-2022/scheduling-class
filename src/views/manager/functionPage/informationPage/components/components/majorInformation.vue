@@ -305,9 +305,9 @@ function academyDeleteClick() {
 function academyActiveClick() {
   console.log('启用学院')
 }
-//批量添加
+//保存设置
 function saveEssentialClick() {
-  console.log('添加学院')
+  console.log('保存设置')
 }
 function addMajorOrClassClick(title) {
   emit('titleValue', title)
