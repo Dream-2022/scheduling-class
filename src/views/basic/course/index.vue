@@ -26,9 +26,11 @@
 <script setup>
 import { RouterView, useRoute } from 'vue-router'
 import router from '@/router'
+import { useUserStore } from '@/stores/userStore'
 import { ref, nextTick, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 const route = useRoute()
+const userStore = useUserStore()
 let active = ref([true, false])
 let isSearching = ref(false)
 let searchQuery = ref('')
@@ -47,9 +49,10 @@ function setActive(index) {
   searchQuery.value = ''
   isSearching.value = false
   let path = router.currentRoute.value.fullPath
-  if (path !== '/teacher/functionPage/course/main') {
-    //可以在这里做一些处理（未保存）
-    router.push(`/teacher/functionPage/course/main`)
+  const identity = userStore.user.identity
+  if (path !== `/${identity}/functionPage/course/main`) {
+    //可以在这里做一些处理（未保存时的处理）
+    router.push(`/${identity}/functionPage/course/main`)
   }
 }
 
