@@ -278,6 +278,30 @@
       </div>
     </template>
   </el-dialog>
+  <!-- 智能小助手 -->
+  <el-backtop :right="100" visibility-height="0" @click="aiVisible = true" :bottom="100">
+    <span class="iconfont icon-jiqiren"></span>
+  </el-backtop>
+  <el-drawer v-model="aiVisible" title="小来助手！" direction="ltr" size="400px">
+    <div class="chat-container">
+      <div class="chat-title">新聊天</div>
+      <div class="chat-history">
+        <div v-for="(message, index) in chatHistory" :key="index">
+          <div class="chat-message">
+            <div class="message-avatar" v-if="message.sender != 'bot'">
+              <span class="iconfont icon-jiqiren"></span>
+            </div>
+            <img v-else src="@/assets/img/cat.jpeg" class="avatar" alt="" />
+            <div :class="['message-word', message.sender]">{{ message.text }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <el-input v-model="userInput" placeholder="请输入消息..." @keyup.enter="sendMessage" />
+        <el-button type="primary" color="#547bf1" @click="sendMessage">发送</el-button>
+      </div>
+    </div>
+  </el-drawer>
 </template>
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
@@ -303,6 +327,7 @@ let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
 const router = useRouter()
+const aiVisible = ref(true) // 智能小助手
 let myChart = ref(null) // logo 动画
 let personVisible = ref(false) // 是否展示个人资料弹窗
 let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
@@ -427,6 +452,20 @@ onMounted(async () => {
     }
   })
 })
+
+const userInput = ref('') //用户输入
+const chatHistory = ref([{ sender: 'bot', text: '你好！我是小来助手，有什么可以帮您的？' }])
+
+const sendMessage = () => {
+  if (!userInput.value.trim()) return
+  chatHistory.value.push({ sender: 'user', text: userInput.value })
+  userInput.value = ''
+
+  // 模拟 AI 回复
+  setTimeout(() => {
+    chatHistory.value.push({ sender: 'bot', text: '收到你的消息，我会尽快回复！' })
+  }, 1000)
+}
 //点击更换头像
 function updateClick() {
   let fileInput = document.querySelector('.fileInput')
@@ -437,7 +476,6 @@ function updateClick() {
 //确认修改头像
 const handleAvatarChange = async event => {
   const file = event.target.files[0]
-
   if (file) {
     const reader = new FileReader()
     reader.onload = async e => {
@@ -1049,6 +1087,87 @@ onUnmounted(() => {
         height: 30px;
       }
     }
+  }
+}
+
+.el-backtop {
+  box-shadow: 0 2px 6px 1px rgba(184, 209, 255, 0.5);
+  width: 70px;
+  height: 70px;
+  .icon-jiqiren::before {
+    font-size: 35px;
+  }
+}
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .chat-title {
+    padding: 20px;
+    background-color: $main-blue;
+    color: white;
+    border-radius: 30px 30px 0 0;
+  }
+  .chat-history {
+    flex: 1;
+    overflow-y: auto;
+    padding-top: 10px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+
+    .chat-message {
+      padding: 8px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      max-width: 70%;
+      display: flex;
+      align-items: flex-start;
+      .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: $main-blue;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+      .message-word {
+        border-radius: 5px;
+        padding: 5px 8px 5px 8px;
+        margin-left: 5px;
+        max-width: 184px;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+      .user {
+        align-self: flex-end;
+        background-color: $main-blue;
+        color: white;
+      }
+    }
+  }
+
+  .bot {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    color: black;
+  }
+
+  .chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding-bottom: 18px;
   }
 }
 </style>

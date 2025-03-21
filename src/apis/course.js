@@ -5,3 +5,17 @@ export const getCourseAllAPI = () => {
     method: 'GET',
   })
 }
+
+//获取排课表
+export const getCourseSchedulingAPI = (taskName, academicTerm, taskStatus, createdByName) => {
+  return http({
+    url: '/schedule/get-task-list',
+    method: 'GET',
+    params: {
+      taskName,
+      academicTerm,
+      taskStatus,
+      createdByName,
+    },
+  })
+}

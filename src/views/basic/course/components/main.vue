@@ -3,41 +3,66 @@
     <div class="course-boxes">
       <div
         class="course-box"
-        v-for="item in classList.arr"
+        v-for="item in courseList.arr"
         :key="item"
         @click="courseClick(item.id, 'class')"
       >
         <div class="course-box-left">
           <div>
             <div class="title">
-              <div class="left-title">{{ item.title }}</div>
+              <div class="left-title">{{ item.taskName }}</div>
               <div
                 class="publish"
-                :class="item.status === '已发布' ? 'class-status1' : 'class-status2'"
+                :class="
+                  item.taskStatus == '0'
+                    ? 'status0'
+                    : item.taskStatus == '1'
+                      ? 'status1'
+                      : item.taskStatus == '2'
+                        ? 'status2'
+                        : item.taskStatus == '3'
+                          ? 'status3'
+                          : 'status4'
+                "
               >
-                {{ item.status }}
+                {{
+                  item.taskStatus == '0'
+                    ? '待执行'
+                    : item.taskStatus == '1'
+                      ? '进行中'
+                      : item.taskStatus == '2'
+                        ? '已完成'
+                        : item.taskStatus == '3'
+                          ? '失败'
+                          : '进行中'
+                }}
               </div>
             </div>
-            <div class="time">{{ item.time }}</div>
+            <div class="time">{{ item.createdAt }}</div>
           </div>
         </div>
         <div class="course-box-middle">
           <div class="class-right">
             <div class="class-right-box">
               <div class="class-right-title">课时任务</div>
-              <div class="class-right-content">{{ item.assign }}</div>
+              <div class="class-right-content">{{ item.totalClassHours }}</div>
             </div>
             <div class="class-right-box">
               <div class="class-right-title">课程数量</div>
-              <div class="class-right-content">{{ item.course }}</div>
+              <div class="class-right-content">{{ item.totalCourseSize }}</div>
             </div>
             <div class="class-right-box">
               <div class="class-right-title">参与班级</div>
-              <div class="class-right-content">{{ item.class }}</div>
+              <div class="class-right-content">{{ item.totalClassSize }}</div>
             </div>
             <div class="class-right-box">
-              <div class="class-right-title">未排课程</div>
-              <div class="class-right-content">{{ item.noCourse }}</div>
+              <div style="display: flex">
+                <div class="class-right-title">未排课程</div>
+                <span class="iconfont icon-bangzhu"></span>
+              </div>
+              <div class="class-right-content">
+                {{ item.totalCourseSize - item.successCourseSize }}
+              </div>
             </div>
             <div class="class-right-box">
               <div class="class-right-title">排课负责人</div>
@@ -139,12 +164,13 @@
   </div>
 </template>
 <script setup>
-import { reactive, defineProps } from 'vue'
+import { reactive, defineProps, onMounted } from 'vue'
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
+import { getCourseSchedulingAPI } from '@/apis/course.js'
 import router from '@/router'
 const userStore = useUserStore()
-let classList = reactive({
+let courseList = reactive({
   arr: [
     {
       id: 0,
@@ -247,7 +273,14 @@ let examList = reactive({
     },
   ],
 })
-
+onMounted(async () => {
+  const res = await getCourseSchedulingAPI()
+  console.log(res.data)
+  courseList.arr = res.data.data
+  for (let i = 0; i < courseList.arr.length; i++) {
+    courseList.arr[i].createdAt = courseList.arr[i].createdAt.replace('T', ' ')
+  }
+})
 defineProps({
   activeMessage: Array,
 })
@@ -290,6 +323,21 @@ const courseClick = (id, string) => {
       .class-status2 {
         color: $main-yellow;
       }
+      .status0 {
+        color: $word-grey-color;
+      }
+      .status1 {
+        color: $main-yellow;
+      }
+      .status2 {
+        color: $purple;
+      }
+      .status3 {
+        color: $red;
+      }
+      .status4 {
+        color: $main-green;
+      }
     }
     .time {
       color: $word-shallow-color;
@@ -304,6 +352,10 @@ const courseClick = (id, string) => {
 
       .class-right-box {
         margin-left: 20px;
+        .iconfont::before {
+          font-size: 13px;
+          margin-left: 5px;
+        }
         .class-right-title {
           color: $word-grey-color;
           font-size: 14px;

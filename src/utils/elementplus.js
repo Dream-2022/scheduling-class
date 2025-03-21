@@ -35,6 +35,7 @@ import {
   ElSegmented,
   ElSwitch,
   ElSelectV2,
+  ElBacktop,
   ElTimePicker,
   ElDatePicker,
 } from 'element-plus'
@@ -72,6 +73,7 @@ export default function (app) {
   app.use(ElSegmented)
   app.use(ElSwitch)
   app.use(ElSelectV2)
+  app.use(ElBacktop)
   app.use(ElTimePicker)
   app.use(ElDatePicker)
 }
