@@ -245,7 +245,7 @@ const login = async () => {
     userStore.setIsLogin(false)
     userStore.setUserInfo(
       loginData.value.account,
-      res.data.data.authorities[0],
+      res.data.data.authorities[0] == undefined ? 'STUDENT' : res.data.data.authorities[0],
       res.data.data.access_token,
       res.data.data.refresh_token,
     )

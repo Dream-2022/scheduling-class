@@ -1,5 +1,5 @@
 <template>
-  <div>feed</div>
+  <div>exam</div>
 </template>
 <script setup></script>
 <style scoped></style>

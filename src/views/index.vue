@@ -279,26 +279,55 @@
     </template>
   </el-dialog>
   <!-- 智能小助手 -->
-  <el-backtop :right="100" visibility-height="0" @click="aiVisible = true" :bottom="100">
+  <el-backtop :right="100" :visibility-height="0" @click="aiVisible = true" :bottom="100">
     <span class="iconfont icon-jiqiren"></span>
   </el-backtop>
   <el-drawer v-model="aiVisible" title="小来助手！" direction="ltr" size="400px">
-    <div class="chat-container">
-      <div class="chat-title">新聊天</div>
-      <div class="chat-history">
-        <div v-for="(message, index) in chatHistory" :key="index">
-          <div class="chat-message">
-            <div class="message-avatar" v-if="message.sender != 'bot'">
-              <span class="iconfont icon-jiqiren"></span>
-            </div>
-            <img v-else src="@/assets/img/cat.jpeg" class="avatar" alt="" />
-            <div :class="['message-word', message.sender]">{{ message.text }}</div>
+    <div class="container">
+      <div class="record-container">
+        <div class="record-title">
+          <div class="record-main">聊天记录</div>
+          <div class="record-count">14</div>
+        </div>
+        <div class="record-listes">
+          <div class="record-list">
+            <div class="list-title">title</div>
+            <div class="list-content">8541684168</div>
+          </div>
+          <div class="record-list">
+            <div class="list-title">title</div>
+            <div class="list-content">8541684168</div>
           </div>
         </div>
       </div>
-      <div class="chat-input">
-        <el-input v-model="userInput" placeholder="请输入消息..." @keyup.enter="sendMessage" />
-        <el-button type="primary" color="#547bf1" @click="sendMessage">发送</el-button>
+      <div class="chat-container">
+        <div class="chat-title">新聊天</div>
+        <div class="chat-history">
+          <div v-for="(message, index) in chatHistory" :key="index">
+            <div class="chat-message">
+              <div class="message-avatar" v-if="message.sender != 'bot'">
+                <span class="iconfont icon-jiqiren"></span>
+              </div>
+              <img v-else src="@/assets/img/cat.jpeg" class="avatar" alt="" />
+              <div :class="['message-word', message.sender]">{{ message.text }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <el-input
+            v-model="userInput"
+            placeholder="请输入消息..."
+            :suffix-icon="Microphone"
+            @keyup.enter="sendMessage"
+          />
+          <el-button
+            type="primary"
+            color="#547bf1"
+            @click="sendMessage"
+            :icon="Promotion"
+            circle
+          ></el-button>
+        </div>
       </div>
     </div>
   </el-drawer>
@@ -315,7 +344,7 @@ import {
   getCurrentInstance,
   computed,
 } from 'vue'
-import { Delete, Plus } from '@element-plus/icons-vue'
+import { Delete, Plus, Promotion, Microphone } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 import { Bell } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -327,7 +356,7 @@ let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
 const router = useRouter()
-const aiVisible = ref(true) // 智能小助手
+const aiVisible = ref(false) // 智能小助手
 let myChart = ref(null) // logo 动画
 let personVisible = ref(false) // 是否展示个人资料弹窗
 let preferenceVisible = ref(false) // 是否展示修改偏好弹窗
@@ -444,13 +473,15 @@ onMounted(async () => {
   findActive(path, identity)
   //获取已有偏好信息
   preferenceOption.value = userStore.user.preferredCourses
-  preferenceTimes.arr = userStore.user.preferredTimeSlots.map(item => {
-    return {
-      timeOption1: item.day,
-      timeOption2: item.start,
-      timeOption3: item.end,
-    }
-  })
+  preferenceTimes.arr = userStore.user.preferredTimeSlots
+    ? userStore.user.preferredTimeSlots.map(item => {
+        return {
+          timeOption1: item.day,
+          timeOption2: item.start,
+          timeOption3: item.end,
+        }
+      })
+    : []
 })
 
 const userInput = ref('') //用户输入
@@ -1098,76 +1129,136 @@ onUnmounted(() => {
     font-size: 35px;
   }
 }
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-
-  .chat-title {
-    padding: 20px;
-    background-color: $main-blue;
-    color: white;
-    border-radius: 30px 30px 0 0;
+.el-overlay {
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
-  .chat-history {
-    flex: 1;
-    overflow-y: auto;
-    padding-top: 10px;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-
-    .chat-message {
-      padding: 8px;
-      border-radius: 5px;
-      margin-bottom: 5px;
-      max-width: 70%;
+  .record-container {
+    flex: 2;
+    margin-bottom: 20px;
+    .record-title {
       display: flex;
-      align-items: flex-start;
-      .message-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: $main-blue;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      line-height: 22px;
+      margin-bottom: 10px;
+      .record-main {
+        font-weight: 600;
       }
-      .avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+      .record-count {
+        font-size: 14px;
+        border-radius: 8px;
+        margin-left: 10px;
+        padding-left: 5px;
+        padding-right: 5px;
+        background-color: $blue-back;
       }
-      .message-word {
-        border-radius: 5px;
-        padding: 5px 8px 5px 8px;
-        margin-left: 5px;
-        max-width: 184px;
-        word-wrap: break-word;
-        white-space: pre-wrap;
+    }
+    .record-listes {
+      .record-list {
+        cursor: pointer;
+        padding: 15px 10px;
+        border-top: 1px solid #ccc;
+
+        .list-title {
+          color: $title-color;
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+        .list-content {
+          font-size: 14px;
+          color: $word-grey-color;
+        }
       }
-      .user {
-        align-self: flex-end;
-        background-color: $main-blue;
-        color: white;
+      .record-list:first-child {
+        border: none;
       }
     }
   }
-
-  .bot {
-    align-self: flex-start;
-    background-color: #f1f1f1;
-    color: black;
-  }
-
-  .chat-input {
+  .chat-container {
     display: flex;
-    gap: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-top: none;
-    border-radius: 0 0 10px 10px;
-    padding-bottom: 18px;
+    flex-direction: column;
+    flex: 6;
+
+    .chat-title {
+      padding: 20px;
+      background-color: $main-blue;
+      color: white;
+      border-radius: 30px 30px 0 0;
+    }
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding-top: 10px;
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+
+      .chat-message {
+        padding: 8px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        max-width: 70%;
+        display: flex;
+        align-items: flex-start;
+        .message-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: $main-blue;
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+        }
+        .message-word {
+          border-radius: 5px;
+          padding: 5px 8px 5px 8px;
+          margin-left: 5px;
+          max-width: 184px;
+          word-wrap: break-word;
+          white-space: pre-wrap;
+        }
+        .user {
+          align-self: flex-end;
+          background-color: $main-blue;
+          color: white;
+        }
+      }
+    }
+
+    .bot {
+      align-self: flex-start;
+      background-color: #f1f1f1;
+      color: black;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      padding-bottom: 18px;
+    }
   }
+}
+:deep(.el-drawer__header) {
+  margin: 0 !important;
+}
+
+:deep(.el-input__suffix) {
+  cursor: pointer;
+}
+:deep(.el-input__suffix:hover) {
+  color: $main-blue;
+}
+:deep(.el-input__suffix .el-input__icon) {
+  font-size: 18px;
 }
 </style>

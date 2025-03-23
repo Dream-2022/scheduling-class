@@ -39,10 +39,48 @@ const setRouter = async () => {
             name: 'mainPage',
             component: () => import('../views/student/mainPage/index.vue'),
           },
+          {
+            path: 'student/functionPage',
+            name: 'functionPage',
+            component: () => import('../views/student/functionPage/index.vue'),
+            children: [
+              {
+                path: 'course',
+                component: () => import('../views/basic/course/index.vue'),
+                redirect: '/main',
+                props: true,
+                children: [
+                  {
+                    path: 'main',
+                    component: () => import('../views/basic/course/components/main.vue'),
+                  },
+                  {
+                    path: ':id/class',
+                    component: () => import('../views/basic/course/components/class.vue'),
+                  },
+                  {
+                    path: ':id/exam',
+                    component: () => import('../views/basic/course/components/exam.vue'),
+                  },
+                ],
+              },
+              {
+                path: 'exam',
+                component: () => import('../views/student/functionPage/examPage/index.vue'),
+              },
+              {
+                path: 'feedback',
+                component: () => import('../views/basic/feedbackPage/index.vue'),
+              },
+              {
+                path: 'arrange',
+                component: () => import('../views/student/functionPage/arrangePage/index.vue'),
+              },
+            ],
+          },
         ],
       })
     } else if (identity === 'TEACHER') {
-      console.log('add', 'teacher')
       router.addRoute({
         path: '/',
         name: 'home',
@@ -89,7 +127,7 @@ const setRouter = async () => {
               },
               {
                 path: 'feedback',
-                component: () => import('../views/teacher/functionPage/feedbackPage/index.vue'),
+                component: () => import('../views/basic/feedbackPage/index.vue'),
               },
               {
                 path: 'class',
