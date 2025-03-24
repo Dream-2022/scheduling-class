@@ -1,6 +1,8 @@
 <template>
   <div ref="cardRef" class="course-card" :style="{ opacity }">
-    {{ text }}
+    <div class="course-name">{{ courseName }}</div>
+    <div class="course-classroom">@{{ classroomName }}</div>
+    <div>{{ teacherName }}</div>
   </div>
 </template>
 
@@ -10,20 +12,27 @@ import { useDrag } from 'vue3-dnd'
 import { toRefs } from '@vueuse/core'
 
 const props = defineProps({
-  id: Number,
-  text: String,
-  index: Number,
-  day: Number,
-  time: Number,
+  courseId: Number,
+  courseName: String,
+  teacherId: Number,
+  teacherName: String,
+  classroomId: Number,
+  classroomName: String,
+  dayOfWeek: Number,
+  week: Number,
+  timeStart: Number,
+  timeEnd: Number,
   moveCourse: Function,
 })
+
+const mapTimeToSession = time => Math.floor(time / 2) // 8节课转4大节
 
 const [collect, drag] = useDrag({
   type: 'course',
   item: () => ({
-    id: props.id,
-    day: props.day,
-    time: props.time,
+    courseId: props.courseId,
+    dayOfWeek: props.dayOfWeek,
+    timeStart: mapTimeToSession(props.timeStart), // 确保拖拽时用的是大节
   }),
   collect: monitor => ({
     isDragging: monitor.isDragging(),
@@ -36,8 +45,7 @@ const opacity = computed(() => (unref(isDragging) ? 0.5 : 1))
 const cardRef = ref(null)
 drag(cardRef)
 </script>
-
-<style scoped>
+<style lang="scss" scoped>
 .course-card {
   padding: 10px;
   background-color: #fff;
@@ -45,5 +53,12 @@ drag(cardRef)
   border-radius: 5px;
   text-align: center;
   cursor: move;
+  > div {
+    line-height: 25px;
+  }
+  .course-name,
+  .course-classroom {
+    font-weight: bold;
+  }
 }
 </style>

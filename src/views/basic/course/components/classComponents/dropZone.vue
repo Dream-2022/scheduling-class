@@ -12,18 +12,21 @@ const props = defineProps({
   day: Number,
   time: Number,
   moveCourse: Function,
+  isDraggable: Boolean,
 })
 
 const [, drop] = useDrop({
   accept: 'course',
   drop: item => {
-    props.moveCourse({
-      id: item.id,
-      dragDay: item.day,
-      dragTime: item.time,
-      hoverDay: props.day,
-      hoverTime: props.time,
-    })
+    if (props.isDraggable) {
+      props.moveCourse({
+        courseId: item.courseId,
+        dragDay: item.dayOfWeek,
+        dragTime: item.timeStart,
+        hoverDay: props.day,
+        hoverTime: props.time,
+      })
+    }
   },
 })
 
@@ -36,6 +39,7 @@ drop(dropRef)
   position: relative;
   display: flex;
   gap: 10px;
+  height: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: center;

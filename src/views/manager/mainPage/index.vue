@@ -289,7 +289,6 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import '@/assets/iconfont/iconfont.css'
-import WOW from 'wow.js'
 import Chart from '@/components/Chart.vue'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
@@ -484,8 +483,6 @@ let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
 
 onMounted(async () => {
-  const wow = new WOW({})
-  wow.init()
   userStore.initialize()
   userInfo.push(...[userStore.user])
   for (let i = 0; i < applicationList.length; i++) {

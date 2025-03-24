@@ -5,7 +5,7 @@
         class="course-box"
         v-for="item in courseList.arr"
         :key="item"
-        @click="courseClick(item.id, 'class')"
+        @click="courseClick(item.scheduleTaskId, 'class')"
       >
         <div class="course-box-left">
           <div>
@@ -67,13 +67,7 @@
             <div class="class-right-box">
               <div class="class-right-title">排课负责人</div>
               <div class="class-teacher">
-                <div v-for="(teacher, index) in item.teachers" :key="teacher">
-                  <img
-                    src="@/assets/img/cat.jpeg"
-                    class="class-teacher-img"
-                    :style="{ transform: `translateX(${index * -10}px)` }"
-                  />
-                </div>
+                <div>{{ item.createdByName }}</div>
               </div>
             </div>
           </div>
@@ -369,6 +363,8 @@ const courseClick = (id, string) => {
         }
         .class-teacher {
           display: flex;
+          line-height: 30px;
+          font-size: 14px;
 
           .class-teacher-img {
             width: 25px;

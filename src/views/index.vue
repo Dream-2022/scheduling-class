@@ -305,10 +305,18 @@
         <div class="chat-history">
           <div v-for="(message, index) in chatHistory" :key="index">
             <div class="chat-message">
-              <div class="message-avatar" v-if="message.sender != 'bot'">
+              <div v-if="message.sender != 'bot'">
+                <img
+                  class="avatar"
+                  v-if="userStore.user?.avatar"
+                  :src="userStore.user?.avatar"
+                  alt="头像"
+                />
+                <img class="avatar" v-else src="@/assets/img/cat.jpeg" alt="头像" />
+              </div>
+              <div v-else class="message-avatar">
                 <span class="iconfont icon-jiqiren"></span>
               </div>
-              <img v-else src="@/assets/img/cat.jpeg" class="avatar" alt="" />
               <div :class="['message-word', message.sender]">{{ message.text }}</div>
             </div>
           </div>
@@ -351,6 +359,9 @@ import { ElMessage } from 'element-plus'
 import { getCourseAllAPI } from '@/apis/course'
 import { setPreferredCoursesAPI, preferenceTimesAPI } from '@/apis/preference'
 import { editAvatarAPI } from '@/apis/user'
+import '@/assets/iconfont/iconfont.css'
+
+import WOW from 'wow.js'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -464,6 +475,8 @@ let navigation3 = [
 let isMainPage = ref('banner1')
 let messageContent = ref([]) // 消息栏的通知
 onMounted(async () => {
+  const wow = new WOW({})
+  wow.init()
   setChart()
   userStore.initialize()
   let path = router.currentRoute.value.fullPath
