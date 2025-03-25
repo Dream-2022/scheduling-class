@@ -162,7 +162,8 @@ import { reactive, defineProps, onMounted } from 'vue'
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 import { getCourseSchedulingAPI } from '@/apis/course.js'
-import router from '@/router'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const userStore = useUserStore()
 let courseList = reactive({
   arr: [
@@ -287,6 +288,8 @@ function editCourse(type, id) {
 }
 const courseClick = (id, string) => {
   const identity = userStore.user.identity.toLowerCase()
+  console.log(identity)
+  console.log(`/${identity}/functionPage/course/${id}/${string}`)
   router.push(`/${identity}/functionPage/course/${id}/${string}`)
 }
 </script>

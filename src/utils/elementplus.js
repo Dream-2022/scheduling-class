@@ -37,7 +37,9 @@ import {
   ElSelectV2,
   ElBacktop,
   ElTimePicker,
+  ElCalendar,
   ElDatePicker,
+  ElTimeline,
 } from 'element-plus'
 
 export default function (app) {
@@ -75,5 +77,7 @@ export default function (app) {
   app.use(ElSelectV2)
   app.use(ElBacktop)
   app.use(ElTimePicker)
+  app.use(ElCalendar)
   app.use(ElDatePicker)
+  app.use(ElTimeline)
 }

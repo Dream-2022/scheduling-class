@@ -2,7 +2,10 @@
   <div ref="cardRef" class="course-card" :style="{ opacity }">
     <div class="course-name">{{ courseName }}</div>
     <div class="course-classroom">@{{ classroomName }}</div>
-    <div>{{ teacherName }}</div>
+    <div class="course-teacher" v-if="identity == 'student'">{{ teacherName }}</div>
+    <div class="course-teacher" v-if="identity == 'teacher'">
+      {{ teachingClassName }}
+    </div>
   </div>
 </template>
 
@@ -10,30 +13,31 @@
 import { ref, computed, unref } from 'vue'
 import { useDrag } from 'vue3-dnd'
 import { toRefs } from '@vueuse/core'
-
 const props = defineProps({
-  courseId: Number,
+  courseId: String,
   courseName: String,
-  teacherId: Number,
+  teacherId: String,
   teacherName: String,
-  classroomId: Number,
+  classroomId: String,
   classroomName: String,
+  teachingClassId: String,
+  teachingClassName: String,
   dayOfWeek: Number,
-  week: Number,
+  week: String,
   timeStart: Number,
-  timeEnd: Number,
+  identity: String,
   moveCourse: Function,
 })
 
-const mapTimeToSession = time => Math.floor(time / 2) // 8节课转4大节
+const dragItem = computed(() => ({
+  courseId: props.courseId,
+  dayOfWeek: props.dayOfWeek,
+  timeStart: props.timeStart, // 确保拖拽时用的是大节
+}))
 
 const [collect, drag] = useDrag({
   type: 'course',
-  item: () => ({
-    courseId: props.courseId,
-    dayOfWeek: props.dayOfWeek,
-    timeStart: mapTimeToSession(props.timeStart), // 确保拖拽时用的是大节
-  }),
+  item: () => ({ ...dragItem.value }), // 确保获取的是最新的值
   collect: monitor => ({
     isDragging: monitor.isDragging(),
   }),
@@ -47,7 +51,7 @@ drag(cardRef)
 </script>
 <style lang="scss" scoped>
 .course-card {
-  padding: 10px;
+  padding: 5px;
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -59,6 +63,9 @@ drag(cardRef)
   .course-name,
   .course-classroom {
     font-weight: bold;
+  }
+  .course-teacher {
+    margin-top: 10px;
   }
 }
 </style>
