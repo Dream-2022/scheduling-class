@@ -1,18 +1,22 @@
 <template>
-  <div ref="cardRef" class="course-card" :style="{ opacity }">
+  <div ref="cardRef" class="course-card" :style="{ backgroundColor: courseColor, opacity }">
     <div class="course-name">{{ courseName }}</div>
-    <div class="course-classroom">@{{ classroomName }}</div>
-    <div class="course-teacher" v-if="identity == 'student'">{{ teacherName }}</div>
-    <div class="course-teacher" v-if="identity == 'teacher'">
+    <div class="course-classroom">@ {{ classroomName }}</div>
+    <div class="course-teacher" v-if="props.identity == 'student'">{{ teacherName }}</div>
+    <div class="course-teacher" v-if="props.identity == 'teacher'">
       {{ teachingClassName }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, unref } from 'vue'
+import { ref, computed, unref, inject, onMounted } from 'vue'
 import { useDrag } from 'vue3-dnd'
 import { toRefs } from '@vueuse/core'
+onMounted(() => {
+  console.log(props.identity)
+  console.log(props.classroomId)
+})
 const props = defineProps({
   courseId: String,
   courseName: String,
@@ -29,6 +33,11 @@ const props = defineProps({
   moveCourse: Function,
 })
 
+const opacity = computed(() => (unref(isDragging) ? 0.5 : 1))
+
+const cardRef = ref(null)
+const getColor = inject('getColor') // 通过 provide/inject 获取颜色函数
+const courseColor = computed(() => getColor(props.teachingClassId)) // 获取当前课程颜色
 const dragItem = computed(() => ({
   courseId: props.courseId,
   dayOfWeek: props.dayOfWeek,
@@ -42,29 +51,29 @@ const [collect, drag] = useDrag({
     isDragging: monitor.isDragging(),
   }),
 })
-
 const { isDragging } = toRefs(collect)
-const opacity = computed(() => (unref(isDragging) ? 0.5 : 1))
-
-const cardRef = ref(null)
 drag(cardRef)
 </script>
 <style lang="scss" scoped>
 .course-card {
   padding: 5px;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  color: #fff;
+  box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e2e2;
   border-radius: 5px;
-  text-align: center;
+  text-align: left;
   cursor: move;
   > div {
-    line-height: 25px;
+    word-break: break-all;
+    line-height: 22px;
   }
   .course-name,
   .course-classroom {
     font-weight: bold;
+    margin-bottom: 5px;
   }
   .course-teacher {
+    font-size: 12px;
     margin-top: 10px;
   }
 }

@@ -35,6 +35,7 @@
                   :teachingClassName="course.teachingClassName"
                   :dayOfWeek="colIndex"
                   :timeStart="rowIndex"
+                  :identity="userStore.user.identity.toLowerCase()"
                   :move-course="moveCourse"
                 />
               </DropZone>
@@ -47,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, toRefs, defineProps, onMounted } from 'vue'
+import { ref, toRefs, provide, defineProps, onMounted } from 'vue'
 import CourseCard from './CourseCard.vue'
 import DropZone from './DropZone.vue'
 import { setTimetableAPI } from '@/apis/timetable'
@@ -149,6 +150,36 @@ onMounted(async () => {
   courses.value = res1.data.data
 })
 
+// 颜色映射
+const courseColors = ref({})
+
+const colors = [
+  '#e78891',
+  '#ff9c6e',
+  '#7cb305',
+  '#F8BBD0',
+  '#E1BEE7',
+  '#C5CAE9',
+  '#9ad5dd',
+  '#b1e2b3',
+  '#f5d471',
+  '#FFAB91',
+]
+const getColor = id => {
+  console.log('id', id)
+  let num = 0
+  for (let i = 0; i < id.length; i++) {
+    num += id.charCodeAt(i)
+  }
+  num = num % colors.length
+  console.log('num', num)
+  courseColors.value[id] = colors[num]
+
+  return courseColors.value[id]
+}
+
+// 提供颜色函数
+provide('getColor', getColor)
 // 获取当前大节课程
 const getCourses = (day, time) => {
   return courses.value
