@@ -514,11 +514,12 @@ const chartOption2 = ref({
 })
 //点击快捷入口
 function staticAnalysis(string, value) {
+  console.log(`/student/functionPage/${string}`)
   if (value != null) {
-    router.push(`/teacher/functionPage/${string}/?value=${value}`)
+    router.push(`/student/functionPage/${string}/?value=${value}`)
     return
   }
-  router.push(`/teacher/functionPage/${string}`)
+  router.push(`/student/functionPage/${string}`)
 }
 </script>
 <style lang="scss" scoped>

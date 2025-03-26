@@ -13,10 +13,6 @@
 import { ref, computed, unref, inject, onMounted } from 'vue'
 import { useDrag } from 'vue3-dnd'
 import { toRefs } from '@vueuse/core'
-onMounted(() => {
-  console.log(props.identity)
-  console.log(props.classroomId)
-})
 const props = defineProps({
   courseId: String,
   courseName: String,
@@ -37,13 +33,21 @@ const opacity = computed(() => (unref(isDragging) ? 0.5 : 1))
 
 const cardRef = ref(null)
 const getColor = inject('getColor') // 通过 provide/inject 获取颜色函数
-const courseColor = computed(() => getColor(props.teachingClassId)) // 获取当前课程颜色
+let courseColor = ref('') // 获取当前课程颜色
 const dragItem = computed(() => ({
   courseId: props.courseId,
   dayOfWeek: props.dayOfWeek,
   timeStart: props.timeStart, // 确保拖拽时用的是大节
 }))
-
+onMounted(() => {
+  let idStr
+  if (props.identity == 'student') {
+    idStr = props.courseId
+  } else {
+    idStr = props.teachingClassId
+  }
+  courseColor.value = getColor(idStr)
+})
 const [collect, drag] = useDrag({
   type: 'course',
   item: () => ({ ...dragItem.value }), // 确保获取的是最新的值
@@ -56,7 +60,9 @@ drag(cardRef)
 </script>
 <style lang="scss" scoped>
 .course-card {
-  padding: 5px;
+  height: 90%;
+  width: 90%;
+  padding: 6px;
   color: #fff;
   box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e2e2;

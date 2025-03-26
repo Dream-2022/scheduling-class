@@ -37,6 +37,8 @@
                   :timeStart="rowIndex"
                   :identity="userStore.user.identity.toLowerCase()"
                   :move-course="moveCourse"
+                  :timeEnd="course.timeEnd"
+                  :isDraggable="isDraggable"
                 />
               </DropZone>
             </td>
@@ -51,9 +53,12 @@
 import { ref, toRefs, provide, defineProps, onMounted } from 'vue'
 import CourseCard from './CourseCard.vue'
 import DropZone from './DropZone.vue'
-import { setTimetableAPI } from '@/apis/timetable'
+// import { setTimetableAPI } from '@/apis/timetable'
 import { useUserStore } from '@/stores/userStore'
 const userStore = useUserStore()
+onMounted(() => {
+  console.log(userStore.user)
+})
 const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天']
 const timeSlots = [
   { id: 1, time1: '08:00', time2: '08:45' },
@@ -70,93 +75,91 @@ const props = defineProps({
 })
 // 从 props 中解构出 isDraggable
 const { isDraggable } = toRefs(props)
-// 课程数据
-// const courses = ref([
-//   {
-//     courseId: '1',
-//     courseName: '大学英语',
-//     teacherId: '1',
-//     teacherName: 'Brown',
-//     classroomId: 'ZHL3-303',
-//     classroomName: '1003',
-//     dayOfWeek: 4,
-//     week: 1,
-//     timeStart: 4,
-//   },
-//   {
-//     courseId: '1',
-//     courseName: '大学英语',
-//     teacherId: '1',
-//     teacherName: 'Brown',
-//     classroomId: 'ZHL3-303',
-//     classroomName: '1003',
-//     dayOfWeek: 4,
-//     week: 1,
-//     timeStart: 5,
-//   },
-//   {
-//     courseId: '2',
-//     courseName: '数学',
-//     teacherId: '2',
-//     teacherName: 'qq',
-//     classroomId: '32',
-//     classroomName: '1103',
-//     dayOfWeek: 4,
-//     week: 2,
-//     timeStart: 0,
-//   },
-//   {
-//     courseId: '2',
-//     courseName: '数学',
-//     teacherId: '2',
-//     teacherName: 'qq',
-//     classroomId: '32',
-//     classroomName: '1103',
-//     dayOfWeek: 4,
-//     week: 2,
-//     timeStart: 1,
-//   },
-//   {
-//     courseId: '3',
-//     courseName: '英语',
-//     teacherId: '3',
-//     teacherName: '李',
-//     classroomId: '456',
-//     classroomName: '1203',
-//     dayOfWeek: 5,
-//     week: 5,
-//     timeStart: 6,
-//   },
-//   {
-//     courseId: '3',
-//     courseName: '英语',
-//     teacherId: '3',
-//     teacherName: '李',
-//     classroomId: '456',
-//     classroomName: '1203',
-//     dayOfWeek: 5,
-//     week: 5,
-//     timeStart: 7,
-//   },
-// ])
-const courses = ref([])
-onMounted(async () => {
-  //获取课程数据
-  const res1 = await setTimetableAPI()
-  console.log(res1.data)
-  if (res1.data.code === 'B000001') {
-    console.log('系统繁忙')
-  }
-  courses.value = res1.data.data
-})
+
+// const courses = ref([])
+//课程数据
+const courses = ref([
+  {
+    courseId: '1',
+    courseName: '大学英语',
+    teacherId: '1',
+    teacherName: 'Brown',
+    classroomId: 'ZHL3-303',
+    classroomName: '1003',
+    dayOfWeek: 4,
+    week: 1,
+    timeStart: 4,
+    teachingClassId: '243432',
+  },
+  {
+    courseId: '1',
+    courseName: '大学英语',
+    teacherId: '1',
+    teacherName: 'Brown',
+    classroomId: 'ZHL3-303',
+    classroomName: '1003',
+    dayOfWeek: 4,
+    week: 1,
+    timeStart: 5,
+    teachingClassId: '797987',
+  },
+  {
+    courseId: '2',
+    courseName: '数学',
+    teacherId: '2',
+    teacherName: 'qq',
+    classroomId: '32',
+    classroomName: '1103',
+    dayOfWeek: 4,
+    week: 2,
+    timeStart: 0,
+    teachingClassId: '7894555',
+  },
+  {
+    courseId: '2',
+    courseName: '数学',
+    teacherId: '2',
+    teacherName: 'qq',
+    classroomId: '32',
+    classroomName: '1103',
+    dayOfWeek: 4,
+    week: 2,
+    timeStart: 1,
+    teachingClassId: '77777',
+  },
+  {
+    courseId: '3',
+    courseName: '英语',
+    teacherId: '3',
+    teacherName: '李',
+    classroomId: '456',
+    classroomName: '1203',
+    dayOfWeek: 5,
+    week: 5,
+    timeStart: 6,
+    teachingClassId: '91445',
+  },
+  {
+    courseId: '3',
+    courseName: '英语',
+    teacherId: '3',
+    teacherName: '李',
+    classroomId: '456',
+    classroomName: '1203',
+    dayOfWeek: 5,
+    week: 5,
+    timeStart: 7,
+    teachingClassId: '794451',
+  },
+])
 
 // 颜色映射
 const courseColors = ref({})
 
 const colors = [
   '#e78891',
-  '#ff9c6e',
-  '#7cb305',
+  '#f3a885',
+  '#a2d13c',
   '#F8BBD0',
   '#E1BEE7',
   '#C5CAE9',
@@ -164,6 +167,7 @@ const colors = [
   '#b1e2b3',
   '#f5d471',
   '#FFAB91',
+  '#b6bbff',
 ]
 const getColor = id => {
   console.log('id', id)
@@ -181,13 +185,51 @@ const getColor = id => {
 // 提供颜色函数
 provide('getColor', getColor)
 // 获取当前大节课程
+// const getCourses = (day, time) => {
+//   return courses.value
+//     .filter(course => course.dayOfWeek === day && course.timeStart === time)
+//     .map(course => ({
+//       ...course,
+//       identity: userStore.user.identify,
+//     }))
+// }
 const getCourses = (day, time) => {
-  return courses.value
-    .filter(course => course.dayOfWeek === day && course.timeStart === time)
-    .map(course => ({
-      ...course,
-      identity: userStore.user.identify,
-    }))
+  let filteredCourses = courses.value.filter(course => course.dayOfWeek === day)
+
+  if (!isDraggable.value) {
+    // 课表连续模式：合并相邻的相同课程
+    let mergedCourses = []
+    let seenCourses = new Set()
+
+    for (let i = 0; i < filteredCourses.length; i++) {
+      let course = filteredCourses[i]
+      let key = `${course.courseId}-${course.dayOfWeek}`
+
+      // 如果这个课程已经处理过了，则跳过
+      if (seenCourses.has(key)) continue
+
+      // 获取该课程的连续时段
+      let consecutiveSlots = filteredCourses.filter(
+        c => c.courseId === course.courseId && c.dayOfWeek === course.dayOfWeek,
+      )
+
+      let minTimeStart = Math.min(...consecutiveSlots.map(c => c.timeStart))
+      let maxTimeStart = Math.max(...consecutiveSlots.map(c => c.timeStart))
+
+      mergedCourses.push({
+        ...course,
+        timeStart: minTimeStart,
+        timeEnd: maxTimeStart, // 记录最后的时间段，用于计算合并块
+      })
+
+      seenCourses.add(key)
+    }
+
+    return mergedCourses.filter(c => c.timeStart === time) // 只返回起始时间匹配的课程
+  } else {
+    // 课表可拖拽模式：正常返回所有课程
+    return filteredCourses.filter(course => course.timeStart === time)
+  }
 }
 
 // 拖拽移动课程
@@ -222,8 +264,9 @@ const moveCourse = ({ courseId, dragDay, dragTime, hoverDay, hoverTime }) => {
 table {
   border-spacing: 0;
   border-radius: 10px;
-  // border: 1px solid #ccc;
+  width: 100%;
   overflow: hidden;
+  table-layout: fixed;
 
   th {
     background-color: #f2f5ff;
@@ -253,10 +296,13 @@ table {
     border-left: none;
   }
   td {
-    width: 12.9%;
+    width: calc(100% / 7 - 56px);
+    .time-slot {
+      width: 56px;
+    }
   }
-  td.time-slot {
-    width: 56px;
+  .cell {
+    margin: 10px;
   }
   .time-slot {
     width: 56px;
