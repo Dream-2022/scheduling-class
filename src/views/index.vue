@@ -286,17 +286,13 @@
     <div class="container">
       <div class="record-container">
         <div class="record-title">
-          <div class="record-main">聊天记录</div>
+          <div class="record-main">历史对话</div>
           <div class="record-count">14</div>
         </div>
         <div class="record-listes">
-          <div class="record-list">
-            <div class="list-title">title</div>
-            <div class="list-content">8541684168</div>
-          </div>
-          <div class="record-list">
-            <div class="list-title">title</div>
-            <div class="list-content">8541684168</div>
+          <div class="record-list" v-for="item in reversedAndLimitedList" :key="item">
+            <div class="icon-liaotian iconfont"></div>
+            <div class="list-title">{{ item }}</div>
           </div>
         </div>
       </div>
@@ -317,7 +313,7 @@
               <div v-else class="message-avatar">
                 <span class="iconfont icon-jiqiren"></span>
               </div>
-              <div :class="['message-word', message.sender]">{{ message.text }}</div>
+              <div :class="['message-word', message.sender]" v-html="message.text"></div>
             </div>
           </div>
         </div>
@@ -359,6 +355,7 @@ import { ElMessage } from 'element-plus'
 import { getCourseAllAPI } from '@/apis/course'
 import { setPreferredCoursesAPI, preferenceTimesAPI } from '@/apis/preference'
 import { editAvatarAPI } from '@/apis/user'
+import { getAIAPI } from '@/apis/ai.js'
 import '@/assets/iconfont/iconfont.css'
 
 import WOW from 'wow.js'
@@ -382,6 +379,7 @@ const preferenceTimes1 = [
   { label: '周六', value: 6 },
   { label: '周日', value: 7 },
 ]
+const recordList = ref([]) //对话的历史记录
 const preferenceTimes2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 let preferenceTimes3 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 //修改资料时，当前选择的偏好时间
@@ -495,20 +493,54 @@ onMounted(async () => {
         }
       })
     : []
+  //根据身份获取历史对话数据
+  if (userStore.user.identity === 'STUDENT') {
+    recordList.value = ['如何处理提交的申请', '排课过程有特殊要求的课程如何处理', '如何查看课表']
+  } else if (userStore.user.identity === 'TEACHER') {
+    recordList.value = ['请假流程介绍', '如何对发布的课表进行反馈', '怎么修改偏好教授的课程']
+  } else {
+    recordList.value = ['如何查看课表', '上课建议', '如何查看学校信息']
+  }
 })
-
+let reversedAndLimitedList = computed(() => {
+  return recordList.value.slice().reverse().slice(0, 3)
+})
 const userInput = ref('') //用户输入
 const chatHistory = ref([{ sender: 'bot', text: '你好！我是小来助手，有什么可以帮您的？' }])
 
-const sendMessage = () => {
-  if (!userInput.value.trim()) return
+const sendMessage = async () => {
+  if (!userInput.value.trim()) {
+    ElMessage.warning('请输入消息！')
+    return
+  }
   chatHistory.value.push({ sender: 'user', text: userInput.value })
+  let content = userInput.value
   userInput.value = ''
-
-  // 模拟 AI 回复
-  setTimeout(() => {
-    chatHistory.value.push({ sender: 'bot', text: '收到你的消息，我会尽快回复！' })
-  }, 1000)
+  const res = await getAIAPI(content)
+  // 添加 AI 消息的占位符
+  chatHistory.value.push({ sender: 'bot', text: '' })
+  let aiMessage = res.data
+  let index = 0
+  let currentText = ''
+  const aiMessageIndex = chatHistory.value.length - 1
+  console.log(chatHistory.value)
+  function typeNextCharacter() {
+    if (index < aiMessage.length) {
+      // 处理 HTML 标签和换行符
+      const nextChar = aiMessage[index++]
+      currentText += nextChar
+      // 替换换行符为 <br> 标签
+      console.log(aiMessageIndex, chatHistory.value[aiMessageIndex], currentText)
+      chatHistory.value[aiMessageIndex].text = formatText(currentText)
+      setTimeout(typeNextCharacter, 15) // 逐字打印速度
+    }
+  }
+  typeNextCharacter()
+}
+// 解析 HTML 内容的函数
+function formatText(text) {
+  // 将 \n 替换为 <br> 标签
+  return text.replace(/\n/g, '<br>')
 }
 //点击更换头像
 function updateClick() {
@@ -1169,18 +1201,26 @@ onUnmounted(() => {
     }
     .record-listes {
       .record-list {
+        display: flex;
         cursor: pointer;
         padding: 15px 10px;
         border-top: 1px solid #ccc;
 
         .list-title {
-          color: $title-color;
-          font-size: 16px;
-          margin-bottom: 10px;
+          font-size: 15px;
         }
         .list-content {
           font-size: 14px;
           color: $word-grey-color;
+        }
+        .iconfont::before {
+          font-size: 20px;
+          margin-right: 5px;
+        }
+        &:hover {
+          .iconfont {
+            color: $title-color;
+          }
         }
       }
       .record-list:first-child {

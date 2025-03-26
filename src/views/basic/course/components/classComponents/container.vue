@@ -102,15 +102,7 @@ import DropZone from './DropZone.vue'
 import { setTimetableAPI } from '@/apis/timetable'
 import { useUserStore } from '@/stores/userStore'
 const userStore = useUserStore()
-onMounted(async () => {
-  //获取课程数据
-  const res1 = await setTimetableAPI()
-  console.log(res1.data)
-  if (res1.data.code === 'B000001') {
-    console.log('系统繁忙')
-  }
-  courses.value = res1.data.data
-})
+
 const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天']
 const timeSlots = [
   { id: 1, time1: '08:00', time2: '08:45' },
@@ -127,12 +119,8 @@ const props = defineProps({
 })
 // 从 props 中解构出 isDraggable
 const { isDraggable } = toRefs(props)
-
-// 课程数据
-const courses = ref([])
-
-// 颜色映射
-const courseColors = ref({})
+const courses = ref([]) // 课程数据
+const courseColors = ref({}) // 颜色映射
 
 const colors = [
   '#e78891',
@@ -147,6 +135,24 @@ const colors = [
   '#FFAB91',
   '#b6bbff',
 ]
+
+onMounted(async () => {
+  //获取课程数据
+  //如果是管理员（需要提供年级、专业）
+  let res1
+  if (userStore.user.identity === 'MANATER') {
+    res1 = await setTimetableAPI()
+    console.log('1', res1.data)
+  } else {
+    //如果是教师和学生
+    res1 = await setTimetableAPI()
+    console.log('2', res1.data)
+  }
+  if (res1.data.code === 'B000001') {
+    console.log('系统繁忙')
+  }
+  courses.value = res1.data.data
+})
 const getColor = id => {
   console.log('id', id)
   let num = 0

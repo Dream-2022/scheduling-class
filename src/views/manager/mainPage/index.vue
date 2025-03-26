@@ -290,6 +290,7 @@ import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import '@/assets/iconfont/iconfont.css'
 import Chart from '@/components/Chart.vue'
+import { getRoomRateAPI, getFeedbackSizeAPI } from '@/apis/mainPage'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -488,6 +489,13 @@ onMounted(async () => {
   for (let i = 0; i < applicationList.length; i++) {
     isDisable.arr[i] = true
   }
+  //获取当前教室占用率
+  const res1 = await getRoomRateAPI(7)
+  console.log(res1.data)
+  //获取当前反馈记录数
+
+  const res2 = await getFeedbackSizeAPI(7)
+  console.log(res2.data)
 })
 //获取颜色
 function getLabel(content, number) {
