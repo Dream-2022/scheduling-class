@@ -139,20 +139,22 @@ const colors = [
 onMounted(async () => {
   //获取课程数据
   //如果是管理员（需要提供年级、专业）
-  let res1
   if (userStore.user.identity === 'MANATER') {
-    res1 = await setTimetableAPI()
-    console.log('1', res1.data)
+    userGetCourses()
   } else {
     //如果是教师和学生
-    res1 = await setTimetableAPI()
-    console.log('2', res1.data)
+    userGetCourses()
   }
+})
+//获取课程
+async function userGetCourses() {
+  const res1 = await setTimetableAPI()
+  console.log('2', res1.data)
   if (res1.data.code === 'B000001') {
     console.log('系统繁忙')
   }
-  courses.value = res1.data.data
-})
+  // courses.value = res1.data.data
+}
 const getColor = id => {
   console.log('id', id)
   let num = 0

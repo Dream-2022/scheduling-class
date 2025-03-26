@@ -3,16 +3,20 @@
     <div class="course-section-left">
       <div class="section-top">
         <el-cascader
-          style="width: 280px; margin-right: auto"
+          :options="angleOptions"
+          placeholder="选择查看视角"
           filterable
-          :options="options"
-          placeholder="选择视角"
+          :props="option"
+          style="width: 400px; margin-right: 10px"
           clearable
+          @change="handleChange"
         />
-        <el-button color="#368eec" @click="toggleDraggable">
+        <el-button color="#547bf1" @click="searchClick" plain :icon="Search"> 查看 </el-button>
+
+        <el-button style="margin-left: auto" color="#547bf1" @click="toggleDraggable">
           {{ isDraggable ? '取消编辑' : '编辑课表' }}
         </el-button>
-        <el-button color="#368eec" v-if="isDraggable" @click="saveEditClick"> 保存编辑 </el-button>
+        <el-button color="#547bf1" v-if="isDraggable" @click="saveEditClick"> 保存编辑 </el-button>
       </div>
       <DndProvider :backend="HTML5Backend">
         <Container :isDraggable="isDraggable" />
@@ -85,150 +89,17 @@ import { ref, onMounted } from 'vue'
 import Container from './classComponents/container.vue'
 import { DndProvider } from 'vue3-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-const options = [
-  {
-    value: 'teacher',
-    label: '教师视角',
-    children: [
-      {
-        value: '123',
-        label: '计算机学院',
-        children: [
-          {
-            value: '123',
-            label: '计算机科学与技术',
-            children: [
-              {
-                value: '797',
-                label: '吴来源',
-              },
-              {
-                value: '456',
-                label: '李好',
-              },
-            ],
-          },
-          {
-            value: '456',
-            label: '软件工程',
-            children: [
-              {
-                value: '4658',
-                label: '张三',
-              },
-              {
-                value: '222',
-                label: '李四',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        value: '456',
-        label: '经济管理学院',
-        children: [
-          {
-            value: '123',
-            label: '计算机科学与技术',
-            children: [
-              {
-                value: '797',
-                label: '1',
-              },
-              {
-                value: '456',
-                label: '2',
-              },
-            ],
-          },
-          {
-            value: '456',
-            label: '软件工程',
-            children: [
-              {
-                value: '4658',
-                label: '张三',
-              },
-              {
-                value: '222',
-                label: '李四',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'class',
-    label: '班级视角',
-    children: [
-      {
-        value: '21432',
-        label: '旅游学院',
-        children: [
-          {
-            value: '123',
-            label: '22级1班',
-          },
-          {
-            value: '456',
-            label: '22级2班',
-          },
-        ],
-      },
-      {
-        value: '464654',
-        label: '外国语学院',
-        children: [
-          {
-            value: '123',
-            label: '23级1班',
-          },
-          {
-            value: '456',
-            label: '23级2班',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'class',
-    label: '年级视角',
-    children: [
-      {
-        value: '21432',
-        label: '旅游学院',
-        children: [
-          {
-            value: '123',
-            label: '22级',
-          },
-          {
-            value: '456',
-            label: '23级',
-          },
-        ],
-      },
-      {
-        value: '464654',
-        label: '外国语学院',
-        children: [
-          {
-            value: '123',
-            label: '23级',
-          },
-          {
-            value: '456',
-            label: '24级',
-          },
-        ],
-      },
-    ],
-  },
-]
+import { ElMessage } from 'element-plus'
+import {
+  getMajorsAPI,
+  getClassesAPI,
+  getDepartmentsAPI,
+  getsearchAPI,
+  getGradesAPI,
+} from '@/apis/classMajor'
+import { getTeacherAndStudentAPI } from '@/apis/person'
+import { Search } from '@element-plus/icons-vue'
+
 // 每日课程数量数据
 let signData = ref([
   {
@@ -267,14 +138,125 @@ const dayActivities = [
     timestamp: '14:30',
   },
 ]
+//选择框选项
+const angleOptions = ref([
+  {
+    value: '0',
+    label: '教师视角', //学院，教师
+  },
+  {
+    value: '1',
+    label: '班级视角', //学院，专业，班级
+  },
+  {
+    value: '2',
+    label: '年级视角', //学院、专业，年级
+  },
+])
 let calendarDate = ref(new Date()) //当前日期
 const isDraggable = ref(true) //是否可以编辑
 const calendarString = ref('') //当前日期字符串
-
+let selectedArr = null //选中的内容
+let option = ref()
 const calendar = ref()
-onMounted(() => {
-  initializeCalendar()
+onMounted(async () => {
+  initializeCalendar() // 初始化日历
+  //获取选择框的学院信息
+  await getOptions()
+  option.value = {
+    lazy: true,
+    async lazyLoad(node, resolve) {
+      const selectedPath = node.pathValues
+      //教师视角，获取教师
+      if (selectedPath[0] == '0') {
+        console.log(selectedPath[1], selectedPath)
+        const res = await getTeacherAndStudentAPI('', '', selectedPath[1], '', 1, 100)
+        console.log(res.data)
+        const nodes = res.data.data.records.map(item => ({
+          value: item.name,
+          label: item.name,
+          leaf: true,
+        }))
+        resolve(nodes)
+      } else {
+        //获取专业
+        if (selectedPath.length == 2) {
+          const res = await getMajorsAPI(selectedPath[1])
+          console.log(res.data)
+          const nodes = res.data.data.map(item => ({
+            value: item.name,
+            label: item.name,
+            leaf: selectedPath[0] == '2' ? false : true,
+          }))
+          resolve(nodes)
+        }
+        //说明是班级视角
+        else if (selectedPath[0] == '1') {
+          const res = await getClassesAPI(selectedPath[1], selectedPath[2])
+          console.log(res.data)
+          const nodes = res.data.data.map(item => ({
+            value: item.name,
+            label: item.name,
+            leaf: false,
+          }))
+          resolve(nodes)
+          //说明是年级视角
+        } else if (selectedPath[0] == '2') {
+          const res = await getGradesAPI(selectedPath[2])
+          console.log(res.data)
+          const nodes = res.data.data.map(item => ({
+            value: item,
+            label: item.toString() + '级',
+            leaf: true,
+          }))
+
+          resolve(nodes)
+        }
+      }
+    },
+  }
 })
+//获取学院信息,设置option
+async function getOptions() {
+  const res = await getDepartmentsAPI()
+  console.log(res.data)
+  const nodes = res.data.data.map(item => ({
+    value: item.name,
+    label: item.name,
+  }))
+  for (let i = 0; i < angleOptions.value.length; i++) {
+    angleOptions.value[i].children = nodes
+  }
+  console.log(angleOptions.value)
+  //获取
+}
+//处理选择框的变化，并记录值
+const handleChange = async value => {
+  selectedArr = [...value]
+  console.log(value)
+}
+//点击搜索
+async function searchClick() {
+  console.log(selectedArr)
+  if (selectedArr == null) {
+    ElMessage.warning('请选择查看视角')
+    return
+  }
+  const res = await getsearchAPI(
+    selectedArr[0],
+    selectedArr[1] == undefined ? '' : selectedArr[1],
+    selectedArr[2] == undefined ? '' : selectedArr[2],
+  )
+  console.log(res.data)
+  // academyList.arr = res.data.data
+  // console.log(academyList.arr)
+  // if (selectedArr[1] != undefined) {
+  //   academyList.arr[0].active = true
+  //   if (selectedArr[2] != undefined && 'classList' in academyList.arr[0].majorList[0]) {
+  //     academyList.arr[0].majorList[0].active = true
+  //   }
+  // }
+}
 // 初始化日历
 function initializeCalendar() {
   const year = calendarDate.value.getFullYear()

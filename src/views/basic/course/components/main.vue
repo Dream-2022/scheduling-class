@@ -166,56 +166,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const userStore = useUserStore()
 let courseList = reactive({
-  arr: [
-    {
-      id: 0,
-      title: '第一次排课',
-      status: '未发布',
-      time: '2025-2-8 15:30',
-      assign: 122,
-      course: 54,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: '第一次排课',
-      status: '已发布',
-      time: '2025-2-8 15:30',
-      assign: 122,
-      course: 54,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-  ],
+  arr: [],
 })
 let examList = reactive({
   arr: [

@@ -11,6 +11,7 @@ export const getsearchAPI = (departmentsName, majorsName, classesName) => {
     },
   })
 }
+//获取学院
 export const getDepartmentsAPI = departmentsName => {
   return http({
     url: '/engine/search-departments',
@@ -20,6 +21,7 @@ export const getDepartmentsAPI = departmentsName => {
     },
   })
 }
+//获取专业
 export const getMajorsAPI = departmentsName => {
   return http({
     url: '/engine/search-majors',
@@ -29,6 +31,18 @@ export const getMajorsAPI = departmentsName => {
     },
   })
 }
+//获取年级
+export const getGradesAPI = majorsName => {
+  return http({
+    url: '/engine/search-grade',
+    method: 'GET',
+    params: {
+      majorsName,
+    },
+  })
+}
+
+//获取班级
 export const getClassesAPI = (departmentsName, majorsName) => {
   return http({
     url: '/engine/search-classes',

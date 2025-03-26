@@ -2,7 +2,7 @@
   <div ref="chartContainer" :style="style"></div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed } from 'vue'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 import { merge } from 'lodash' // 使用 lodash.merge 来深度合并配置
@@ -101,13 +101,17 @@ const defaultOption = {
   },
 }
 
-// 合并默认配置和父组件传入的配置
-const mergedOption = merge({}, defaultOption, props.option)
+// 使用计算属性来动态合并配置
+const mergedOption = computed(() => {
+  return merge({}, defaultOption, props.option)
+})
 
 watch(
   () => props.option,
   () => {
-    renderChart()
+    if (chartInstance) {
+      chartInstance.setOption(mergedOption.value)
+    }
   },
   { deep: true },
 )
@@ -117,7 +121,7 @@ function renderChart() {
     chartInstance.dispose()
   }
   chartInstance = echarts.init(chartContainer.value)
-  chartInstance.setOption(mergedOption) // 使用合并后的配置
+  chartInstance.setOption(mergedOption.value) // 使用合并后的配置
 }
 
 // 窗口大小变化时，调整图表大小
@@ -136,6 +140,7 @@ onBeforeUnmount(() => {
   if (chartInstance) {
     chartInstance.dispose()
   }
+  window.removeEventListener('resize', resizeChart)
 })
 </script>
 

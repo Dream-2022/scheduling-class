@@ -482,21 +482,32 @@ let feedbackList = reactive({
 let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
-
+const rateValue = ref('10') //图四的占用率
 onMounted(async () => {
   userStore.initialize()
   userInfo.push(...[userStore.user])
   for (let i = 0; i < applicationList.length; i++) {
     isDisable.arr[i] = true
   }
-  //获取当前教室占用率
-  const res1 = await getRoomRateAPI(7)
-  console.log(res1.data)
   //获取当前反馈记录数
-
   const res2 = await getFeedbackSizeAPI(7)
-  console.log(res2.data)
+  chartOption2.value.xAxis[0].data = extractDataData(res2.data.data, 'time')
+  chartOption2.value.series[0].data = extractDataData(res2.data.data, 'data')
+  //获取当前教室占用率
+  const res4 = await getRoomRateAPI(7)
+  console.log(res4.data)
+  const v1 = res4.data.data[0].value,
+    v2 = res4.data.data[1].value
+  rateValue.value = ((v1 / (v1 + v2)) * 100).toFixed(2)
+  chartOption4.value.series[0].data[0].value = v2
+  chartOption4.value.series[0].data[1].value = v1
 })
+//获取对应属性组成一个数组
+function extractDataData(data, str) {
+  return data
+    .map(obj => obj[str])
+    .filter(dataValue => dataValue !== undefined && dataValue !== null)
+}
 //获取颜色
 function getLabel(content, number) {
   if (number == true) {
@@ -737,7 +748,7 @@ const chartOption3 = ref({
 const chartOption4 = ref({
   title: {
     text: `{value|教室占用率}`,
-    subtext: `{titleSize|61 }{value|%}`,
+    subtext: `{titleSize|${rateValue.value} }{value|%}`,
     textStyle: {
       color: '#7ab25f',
       rich: {},
@@ -765,14 +776,14 @@ const chartOption4 = ref({
       data: [
         {
           value: 40,
-          name: 'rose 1',
+          name: '已占用',
           itemStyle: {
             color: '#DBDEE5',
           },
         },
         {
           value: 45,
-          name: 'rose 2',
+          name: '未占用',
           itemStyle: {
             color: '#7ab25f',
           },

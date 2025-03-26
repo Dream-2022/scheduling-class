@@ -1,7 +1,14 @@
 import http from '@/utils/http.js'
 
 //获取教师和学生
-export const getTeacherAndStudentAPI = (teacherId, teacherName, department, title, current) => {
+export const getTeacherAndStudentAPI = (
+  teacherId,
+  teacherName,
+  department,
+  title,
+  current,
+  pageSize,
+) => {
   return http({
     url: '/engine/search-teacher',
     method: 'GET',
@@ -11,7 +18,7 @@ export const getTeacherAndStudentAPI = (teacherId, teacherName, department, titl
       title,
       department,
       current,
-      pageSize: 12,
+      pageSize,
     },
   })
 }
