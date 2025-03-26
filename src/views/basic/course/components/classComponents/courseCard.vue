@@ -1,5 +1,9 @@
 <template>
-  <div ref="cardRef" class="course-card" :style="{ backgroundColor: courseColor, opacity }">
+  <div
+    ref="cardRef"
+    :class="isDraggable ? 'course-card-height' : 'course-card'"
+    :style="{ backgroundColor: courseColor, opacity }"
+  >
     <div class="course-name">{{ courseName }}</div>
     <div class="course-classroom">@ {{ classroomName }}</div>
     <div class="course-teacher" v-if="props.identity == 'student'">{{ teacherName }}</div>
@@ -27,6 +31,7 @@ const props = defineProps({
   timeStart: Number,
   identity: String,
   moveCourse: Function,
+  isDraggable: Boolean,
 })
 
 const opacity = computed(() => (unref(isDragging) ? 0.5 : 1))
@@ -60,7 +65,7 @@ drag(cardRef)
 </script>
 <style lang="scss" scoped>
 .course-card {
-  height: 90%;
+  min-height: 160px;
   width: 90%;
   padding: 6px;
   color: #fff;
@@ -73,14 +78,38 @@ drag(cardRef)
     word-break: break-all;
     line-height: 22px;
   }
-  .course-name,
-  .course-classroom {
-    font-weight: bold;
-    margin-bottom: 5px;
+}
+.course-card-height {
+  min-height: 100px;
+  width: 90%;
+  padding: 6px;
+  color: #fff;
+  box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  text-align: left;
+  > div {
+    word-break: break-all;
+    line-height: 22px;
   }
-  .course-teacher {
-    font-size: 12px;
-    margin-top: 10px;
-  }
+}
+.course-name,
+.course-classroom {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.course-teacher {
+  font-size: 12px;
+  margin-top: 10px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

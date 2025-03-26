@@ -163,7 +163,7 @@ const loginData = ref({
   password: '666666',
   // account: '0305', //  教师
   // password: '666666',
-  //  account: '2024301714',  //  学生
+  //  account: '1714',  //  学生
   //  password: '666666',
 })
 
