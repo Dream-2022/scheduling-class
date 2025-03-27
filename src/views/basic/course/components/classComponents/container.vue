@@ -18,11 +18,12 @@
             <template v-for="(day, colIndex) in days" :key="colIndex">
               <template v-if="!isDraggable">
                 <!-- 不可拖拽时，检查是否需要合并行 -->
-                <template v-for="course in getCourses(colIndex, rowIndex)" :key="course.courseId">
-                  <template
-                    v-if="course.timeStart === rowIndex && course.timeEnd != course.timeStart"
-                  >
-                    <td class="cell" :rowspan="course.rowspan">
+                <template v-if="hasCoursesStartingAt(colIndex, rowIndex)">
+                  <td class="cell" :rowspan="getMaxRowspan(colIndex, rowIndex)">
+                    <template
+                      v-for="course in getCoursesStartingAt(colIndex, rowIndex)"
+                      :key="course.courseId"
+                    >
                       <DropZone
                         :day="colIndex"
                         :time="rowIndex"
@@ -38,6 +39,7 @@
                           :classroomName="course.classroomName"
                           :teachingClassId="course.teachingClassId"
                           :teachingClassName="course.teachingClassName"
+                          :week="course.week"
                           :dayOfWeek="colIndex"
                           :timeStart="rowIndex"
                           :identity="userStore.user.identity.toLowerCase()"
@@ -46,14 +48,10 @@
                           :isDraggable="isDraggable"
                         />
                       </DropZone>
-                    </td>
-                  </template>
+                    </template>
+                  </td>
                 </template>
-                <template
-                  v-if="
-                    !getCourses(colIndex, rowIndex).some(course => course.timeStart === rowIndex)
-                  "
-                >
+                <template v-else>
                   <td class="cell"></td>
                 </template>
               </template>
@@ -77,6 +75,7 @@
                       :classroomName="course.classroomName"
                       :teachingClassId="course.teachingClassId"
                       :teachingClassName="course.teachingClassName"
+                      :week="course.week"
                       :dayOfWeek="colIndex"
                       :timeStart="rowIndex"
                       :identity="userStore.user.identity.toLowerCase()"
@@ -96,10 +95,9 @@
 </template>
 
 <script setup>
-import { ref, toRefs, provide, defineProps, onMounted } from 'vue'
+import { ref, toRefs, provide, defineProps } from 'vue'
 import CourseCard from './CourseCard.vue'
 import DropZone from './DropZone.vue'
-import { setTimetableAPI } from '@/apis/timetable'
 import { useUserStore } from '@/stores/userStore'
 const userStore = useUserStore()
 
@@ -116,10 +114,11 @@ const timeSlots = [
 ] // 4 大节对应的时间
 const props = defineProps({
   isDraggable: Boolean,
+  courses: Array,
 })
 // 从 props 中解构出 isDraggable
 const { isDraggable } = toRefs(props)
-const courses = ref([]) // 课程数据
+const { courses } = toRefs(props) // 课程数据
 const courseColors = ref({}) // 颜色映射
 
 const colors = [
@@ -136,33 +135,12 @@ const colors = [
   '#b6bbff',
 ]
 
-onMounted(async () => {
-  //获取课程数据
-  //如果是管理员（需要提供年级、专业）
-  if (userStore.user.identity === 'MANATER') {
-    userGetCourses()
-  } else {
-    //如果是教师和学生
-    userGetCourses()
-  }
-})
-//获取课程
-async function userGetCourses() {
-  const res1 = await setTimetableAPI()
-  console.log('2', res1.data)
-  if (res1.data.code === 'B000001') {
-    console.log('系统繁忙')
-  }
-  // courses.value = res1.data.data
-}
 const getColor = id => {
-  console.log('id', id)
   let num = 0
   for (let i = 0; i < id.length; i++) {
     num += id.charCodeAt(i)
   }
   num = num % colors.length
-  console.log('num', num)
   courseColors.value[id] = colors[num]
 
   return courseColors.value[id]
@@ -221,6 +199,30 @@ const getCourses = (day, time) => {
     // 课表可拖拽模式：正常返回所有课程
     return filteredCourses.filter(course => course.timeStart === time)
   }
+}
+
+// 判断是否有课程在指定时间开始
+const hasCoursesStartingAt = (day, time) => {
+  const courseList = courses.value.filter(
+    course => course.dayOfWeek === day && course.timeStart === time,
+  )
+  for (let i = 0; i < courseList.length; i++) {
+    if (courseList[i].timeEnd == time) {
+      return false
+    }
+  }
+  return getCourses(day, time).length > 0
+}
+
+// 获取指定时间开始的课程的最大 rowspan
+const getMaxRowspan = (day, time) => {
+  const coursesStartingAt = getCourses(day, time)
+  return coursesStartingAt.reduce((max, course) => Math.max(max, course.rowspan), 0)
+}
+
+// 获取指定时间开始的课程
+const getCoursesStartingAt = (day, time) => {
+  return getCourses(day, time)
 }
 
 // 拖拽移动课程

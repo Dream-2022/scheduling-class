@@ -6,17 +6,17 @@
   >
     <div class="course-name">{{ courseName }}</div>
     <div class="course-classroom">@ {{ classroomName }}</div>
-    <div class="course-teacher" v-if="props.identity == 'student'">{{ teacherName }}</div>
-    <div class="course-teacher" v-if="props.identity == 'teacher'">
-      {{ teachingClassName }}
+    <div>
+      <b>{{ week }}</b> 周
     </div>
+    <div class="course-teacher" v-if="props.identity != 'teacher'">{{ teacherName }}</div>
+    <div class="course-teacher" v-if="props.identity != 'student'">{{ teachingClassName }}''</div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, unref, inject, onMounted } from 'vue'
+import { ref, computed, unref, inject, onMounted, toRefs } from 'vue'
 import { useDrag } from 'vue3-dnd'
-import { toRefs } from '@vueuse/core'
 const props = defineProps({
   courseId: String,
   courseName: String,
@@ -35,7 +35,6 @@ const props = defineProps({
 })
 
 const opacity = computed(() => (unref(isDragging) ? 0.5 : 1))
-
 const cardRef = ref(null)
 const getColor = inject('getColor') // 通过 provide/inject 获取颜色函数
 let courseColor = ref('') // 获取当前课程颜色
@@ -67,6 +66,7 @@ drag(cardRef)
 .course-card {
   min-height: 160px;
   width: 90%;
+  margin-top: 5px;
   padding: 6px;
   color: #fff;
   box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
@@ -80,6 +80,8 @@ drag(cardRef)
   }
 }
 .course-card-height {
+  background-color: #ccc !important;
+  margin-top: 5px;
   min-height: 100px;
   width: 90%;
   padding: 6px;

@@ -1,7 +1,7 @@
 import http from '@/utils/http.js'
 
 //获取课表详细
-export const setTimetableAPI = (week, days, yearOfEntry, majors) => {
+export const setTimetableAPI = (week, days, yearOfEntry, majors, className, teacherId) => {
   return http({
     url: '/users/get-timetable',
     method: 'GET',
@@ -10,6 +10,8 @@ export const setTimetableAPI = (week, days, yearOfEntry, majors) => {
       days,
       yearOfEntry,
       majors,
+      className,
+      teacherId,
     },
   })
 }
