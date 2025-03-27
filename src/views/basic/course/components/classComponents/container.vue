@@ -203,6 +203,9 @@ const getCourses = (day, time) => {
 
 // 判断是否有课程在指定时间开始
 const hasCoursesStartingAt = (day, time) => {
+  if (!courses.value || !courses.value.length) {
+    return false
+  }
   const courseList = courses.value.filter(
     course => course.dayOfWeek === day && course.timeStart === time,
   )

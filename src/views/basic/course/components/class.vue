@@ -60,7 +60,7 @@
                 <div v-if="data.day == item.time && item.data != 0">
                   <div
                     class="iconfont icon-dian1"
-                    :class="item.data == 4 ? 'red-icon' : item.data == 3 ? 'yellow-icon' : ''"
+                    :class="item.data >= 7 ? 'red-icon' : item.data >= 3 ? 'yellow-icon' : ''"
                   ></div>
                 </div>
                 <div v-else></div>
@@ -93,7 +93,7 @@
                   class="course-box"
                   :style="{
                     backgroundColor: getColor(
-                      userStore.user.identity === 'TEACHER' || selectedArr[0] == '0'
+                      userStore.user.identity === 'TEACHER' || selectedArr[0] != '1'
                         ? item.teachingClassId
                         : item.courseId,
                     ),
@@ -129,35 +129,14 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { useUserStore } from '@/stores/userStore'
 import { getMajorsAPI, getClassesAPI, getDepartmentsAPI, getGradesAPI } from '@/apis/classMajor'
 import { getTeacherAndStudentAPI } from '@/apis/person'
-import { setTimetableAPI } from '@/apis/timetable'
+import { setTimetableAPI, getEverydayCourseAPI } from '@/apis/timetable'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 const userStore = useUserStore()
 const selectedArr = ref(['0', '现代农业学院', '0033']) //默认选中的数据
 const weekValue = ref(null) //选择的周次
 // 每日课程数量数据
-let signData = ref([
-  {
-    time: '2025-03-22',
-    data: 1,
-  },
-  {
-    time: '2025-03-23',
-    data: 1,
-  },
-  {
-    time: '2025-03-24',
-    data: 3,
-  },
-  {
-    time: '2025-03-25',
-    data: 2,
-  },
-  {
-    time: '2025-03-26',
-    data: 4,
-  },
-])
+let signData = ref([])
 //日时间线
 const dayActivities = ref([])
 //选择框选项
@@ -240,6 +219,11 @@ async function dateClick(date) {
     teacherId,
   )
   console.log(res.data)
+  if (res.data.code == 'A000001') {
+    ElMessage.warning('无课程数据')
+    dayActivities.value = []
+    return
+  }
   //根据timeStart排序,并且合并上课时间相同的课程
   res.data.data.sort((a, b) => a.timeStart - b.timeStart)
   // 用于存储分组结果的对象
@@ -263,6 +247,14 @@ async function dateClick(date) {
 }
 //点击搜索
 async function searchClick() {
+  //还需要获取日课表
+  //日设置为当前天
+  const year = calendarDate.value.getFullYear()
+  const month = calendarDate.value.getMonth() + 1
+  dateString.value = calendarDate.value.getDate()
+  dateClick(`${year}-${month}-${dateString.value}`)
+  //更新日历上的课程数量
+  getEverydayCourse(year, month)
   let yearOfEntry = ''
   let majors = ''
   let className = ''
@@ -296,13 +288,6 @@ async function searchClick() {
   } else {
     courses.value = res1.data.data
   }
-  //还需要获取日课表
-
-  //日设置为当前天
-  const year = calendarDate.value.getFullYear()
-  const month = calendarDate.value.getMonth() + 1
-  dateString.value = calendarDate.value.getDate()
-  dateClick(`${year}-${month}-${dateString.value}`)
 }
 //获取信息,设置选择框option
 async function getOptions() {
@@ -390,12 +375,42 @@ async function getOptions() {
   }
 }
 // 初始化日历
-function initializeCalendar() {
+async function initializeCalendar() {
   //初始化日课表
   const year = calendarDate.value.getFullYear()
   const month = calendarDate.value.getMonth() + 1
   dateString.value = calendarDate.value.getDate()
   calendarString.value = `${year}年${month}月`
+  getEverydayCourse(year, month)
+}
+async function getEverydayCourse(year, month) {
+  //获取每天的课程数量
+  let yearOfEntry = ''
+  let majors = ''
+  let className = ''
+  let teacherId = ''
+  if (userStore.user.identity == 'MANAGER') {
+    if (selectedArr.value[0] == '0') {
+      teacherId = selectedArr.value[2]
+    } else if (selectedArr.value[0] == '1') {
+      className = selectedArr.value[3]
+    } else if (selectedArr.value[0] == '2') {
+      majors = selectedArr.value[2]
+      yearOfEntry = selectedArr.value[3]
+    }
+  }
+  const res = await getEverydayCourseAPI(
+    '',
+    '',
+    yearOfEntry,
+    majors,
+    className,
+    teacherId,
+    year,
+    month,
+  )
+  console.log(res.data)
+  signData.value = res.data.data
 }
 //获取上课时间
 function getTime(time) {
@@ -446,6 +461,8 @@ const selectDate = val => {
     year = calendarDate.value.getFullYear()
     month = calendarDate.value.getMonth() + 1
   }
+  //获取每月每天的课程数量
+  getEverydayCourse(year, month)
   calendarString.value = year + '年' + month + '月'
 }
 // 保存编辑
