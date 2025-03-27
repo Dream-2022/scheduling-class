@@ -24,11 +24,16 @@
         </div>
       </div>
 
-      <RouterView @information="informationValue"></RouterView>
+      <RouterView @downloadClick="downloadClick" @information="informationValue"> </RouterView>
     </div>
   </div>
   <!-- 课表信息编辑 -->
-  <el-dialog v-model="informationVisible" title="课表基本信息编辑" width="500">
+  <el-dialog
+    v-model="informationVisible"
+    title="课表基本信息编辑"
+    width="500"
+    :before-close="handleClose"
+  >
     <div>
       <el-form
         ref="elFormRef"
@@ -74,7 +79,7 @@
                   </div>
                   <div class="plan-button-box">
                     <el-button
-                      @click="saveScheduling"
+                      @click="downloadClick"
                       size="small"
                       color="#547bf1"
                       :icon="Download"
@@ -121,18 +126,35 @@
       </div>
     </template>
   </el-dialog>
+
+  <el-dialog
+    v-model="schoolVisible"
+    title="课表基本信息编辑"
+    width="500"
+    :before-close="handleClose"
+  >
+    <div>165</div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="saveScheduling" color="#547bf1" plain>确认</el-button>
+        <el-button @click="schoolVisible = false">关闭</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 <script setup>
 import { RouterView } from 'vue-router'
-import { reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { reactive, ref, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Promotion } from '@element-plus/icons-vue'
+import { downloadAPI } from '@/apis/scheduling'
 
 const information = reactive({
   arr: [],
 })
 const elFormRef = ref() //表单验证
-const informationVisible = ref(false)
+const informationVisible = ref(false) //课表基本信息弹窗
+const schoolVisible = ref(false) //选择学校基础信息弹窗
 const cycles = [
   {
     label: '周一 至 周五',
@@ -155,9 +177,30 @@ const rules = {
   cycle: [{ required: true, message: '请选择上课周期', trigger: 'change' }],
   planValue: [{ required: true, message: '请选择导入方式', trigger: 'change' }],
 }
+onMounted(() => {})
 //子组件传值
 const informationValue = value => {
   informationVisible.value = value
+}
+//误触弹窗空白区，提醒用户
+const handleClose = done => {
+  ElMessageBox.confirm('是否取消编辑?', '提醒', {
+    confirmButtonText: '返回',
+    cancelButtonText: '取消编辑',
+    type: 'warning',
+  })
+    .then(() => {})
+    .catch(() => {
+      ElMessage.success('未保存编辑数据')
+      done()
+    })
+}
+//下载教学计划示例
+async function downloadClick() {
+  const res = await downloadAPI()
+  console.log(res.data)
+  window.open(res.data.data)
+  ElMessage.success('下载成功')
 }
 //保存排课基本信息
 function saveScheduling() {
@@ -168,11 +211,13 @@ function saveScheduling() {
       return false
     }
     if (valid) {
-      ElMessage.success('设置成功！')
       informationVisible.value = false
+      //打开新的弹窗
+      schoolVisible.value = true
+      ElMessage.success('设置成功！')
     }
   })
-}
+} //  router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/scheduling/scheduleCourse`)
 </script>
 <style lang="scss" scoped>
 .course {

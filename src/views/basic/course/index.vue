@@ -5,6 +5,8 @@
         <div :class="active[0] ? 'active' : 'gray-active'" @click="setActive(0)">排课表</div>
         <div>/</div>
         <div :class="active[1] ? 'active' : 'gray-active'" @click="setActive(1)">排考试表</div>
+        <div v-if="route.query.name">></div>
+        <div v-if="route.query.name">{{ route.query.name }}</div>
       </div>
       <div class="search-container" @click.stop="toggleSearch">
         <Search class="search-icon" />

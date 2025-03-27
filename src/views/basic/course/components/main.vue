@@ -5,7 +5,7 @@
         class="course-box"
         v-for="item in courseList.arr"
         :key="item"
-        @click="courseClick(item.scheduleTaskId, 'class')"
+        @click="courseClick(item.scheduleTaskId, 'class', item.taskName)"
       >
         <div class="course-box-left">
           <div>
@@ -95,7 +95,7 @@
         class="course-box"
         v-for="item in examList.arr"
         :key="item"
-        @click="courseClick(item.id, 'exam')"
+        @click="courseClick(item.id, 'exam', item.taskName)"
       >
         <div class="course-box-left">
           <div>
@@ -237,11 +237,9 @@ function deleteCourse(type, id) {
 function editCourse(type, id) {
   console.log('编辑', type, id)
 }
-const courseClick = (id, string) => {
+const courseClick = (id, string, name) => {
   const identity = userStore.user.identity.toLowerCase()
-  console.log(identity)
-  console.log(`/${identity}/functionPage/course/${id}/${string}`)
-  router.push(`/${identity}/functionPage/course/${id}/${string}`)
+  router.push(`/${identity}/functionPage/course/${id}/${string}?name=${name}`)
 }
 </script>
 <style lang="scss" scoped>

@@ -17,12 +17,7 @@
       <el-button color="#547bf1" :icon="Plus" style="margin-bottom: 10px" @click="addTimetable()">
         新建课表
       </el-button>
-      <el-button
-        :icon="Download"
-        plain
-        style="margin-bottom: 10px"
-        @click="applicationSearchClick()"
-      >
+      <el-button :icon="Download" plain style="margin-bottom: 10px" @click="downloadClick">
         下载教学计划示例
       </el-button>
       <el-button
@@ -48,54 +43,117 @@
   </div>
   <div class="middle-word"></div>
   <el-table
-    :data="courseList"
+    :data="courseList.arr"
     style="width: 100%"
     stripe
     :header-cell-style="{ 'text-align': 'center' }"
     :cell-style="{ 'text-align': 'center' }"
   >
-    <el-table-column label="课表名称" min-width="120">
+    <el-table-column label="课表名称" width="150">
       <template #default="{ row }">
-        <div>{{ row.teacherName }}（{{ row.teacherId }}）</div>
+        <strong
+          ><div>{{ row.taskName }}</div></strong
+        >
       </template>
     </el-table-column>
-    <el-table-column label="发布状态" min-width="160">
+    <el-table-column label="学期" width="160">
       <template #default="{ row }">
         <div>
-          <strong>{{ row.leaveReason }}</strong>
+          {{ row.academicTerm }}
         </div>
       </template>
     </el-table-column>
-    <el-table-column label="创建时间" min-width="90">
+    <el-table-column label="发布状态" width="140">
       <template #default="{ row }">
-        <div>
-          {{ row.leaveType }}
+        <div
+          class="publish"
+          :class="
+            row.taskStatus == '0'
+              ? 'status0'
+              : row.taskStatus == '1'
+                ? 'status1'
+                : row.taskStatus == '2'
+                  ? 'status2'
+                  : row.taskStatus == '3'
+                    ? 'status3'
+                    : 'status4'
+          "
+        >
+          {{
+            row.taskStatus == '0'
+              ? '待执行'
+              : row.taskStatus == '1'
+                ? '进行中'
+                : row.taskStatus == '2'
+                  ? '已完成'
+                  : row.taskStatus == '3'
+                    ? '失败'
+                    : '进行中'
+          }}
         </div>
       </template>
     </el-table-column>
-    <el-table-column label="调整举措" min-width="120">
+    <el-table-column label="课时数量" width="95">
       <template #default="{ row }">
         <div>
-          {{ row.title }}
+          {{ row.totalClassHours }}
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column label="课程数量" width="95">
+      <template #default="{ row }">
+        <div>
+          {{ row.totalCourseSize }}
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column label="未排课程" width="95">
+      <template #default="{ row }">
+        <div>
+          {{ row.totalCourseSize - row.successCourseSize }}
+          <span class="iconfont icon-bangzhu"></span>
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column label="班级数量" width="95">
+      <template #default="{ row }">
+        <div>
+          {{ row.totalClassSize }}
         </div>
       </template>
     </el-table-column>
 
-    <el-table-column label="签名" min-width="180">
+    <el-table-column label="签名" width="180">
       <template #default="{ row }">
         <img class="signature-img" :src="row.signature" alt="签名" />
       </template>
     </el-table-column>
-    <el-table-column fixed="right" label="操作" min-width="140">
+    <el-table-column label="创建时间" width="180">
+      <template #default="{ row }">
+        <div>
+          {{ row.createdAt }}
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column label="执行时间" width="180">
+      <template #default="{ row }">
+        <div>{{ row.startTime }}</div>
+      </template>
+    </el-table-column>
+    <el-table-column fixed="right" label="操作" width="140">
       <template #default="{ row }">
         <div>
           <el-button
             color="#368eec"
             size="small"
-            @click="byApplicationClick(row.id, 1)"
+            @click="
+              router.push(
+                `/manager/functionPage/course/${row.scheduleTaskId}/class?name=${row.taskName}`,
+              )
+            "
             style="margin-bottom: 10px; color: #fff"
           >
-            批准
+            查看 / 修改
           </el-button>
         </div>
       </template>
@@ -111,22 +169,32 @@
 import { ref, defineEmits, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Plus, Download, Discount } from '@element-plus/icons-vue'
-import { useUserStore } from '@/stores/userStore'
-const userStore = useUserStore()
+// import { useUserStore } from '@/stores/userStore'
+import { getCourseSchedulingAPI } from '@/apis/course.js'
+
+const emits = defineEmits(['downloadClick', 'information'])
+const downloadClick = () => {
+  emits('downloadClick')
+}
+// const userStore = useUserStore()
 const router = useRouter()
 
-const emit = defineEmits(['information'])
 const courseList = reactive([])
 const keyInput = ref('') //输入的关键字
 let dialogVisible = ref(false)
-onMounted(() => {
-  console.log('传值')
-  emit('information', false)
+onMounted(async () => {
+  emits('information', false)
+  const res = await getCourseSchedulingAPI()
+  console.log(res.data)
+  courseList.arr = res.data.data
+  for (let i = 0; i < courseList.arr.length; i++) {
+    courseList.arr[i].createdAt = courseList.arr[i].createdAt.replace('T', ' ')
+    courseList.arr[i].startTime = courseList.arr[i].startTime.replace('T', ' ')
+  }
 })
 //点击新建课表
 function addTimetable() {
-  emit('information', true)
-  router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/scheduling/scheduleCourse`)
+  emits('information', true)
 }
 </script>
 <style lang="scss" scoped>
@@ -199,6 +267,33 @@ function addTimetable() {
       margin-top: 30px;
       margin-bottom: 10px;
       font-size: 15px;
+    }
+    .el-table {
+      .publish {
+        color: $green;
+      }
+
+      .class-status1 {
+        color: $main-green;
+      }
+      .class-status2 {
+        color: $main-yellow;
+      }
+      .status0 {
+        color: $word-grey-color;
+      }
+      .status1 {
+        color: $main-yellow;
+      }
+      .status2 {
+        color: $purple;
+      }
+      .status3 {
+        color: $red;
+      }
+      .status4 {
+        color: $main-green;
+      }
     }
     .search-box {
       display: flex;
