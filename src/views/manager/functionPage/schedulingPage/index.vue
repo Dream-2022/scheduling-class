@@ -121,7 +121,12 @@
     </div>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="saveScheduling" color="#547bf1" plain>确认</el-button>
+        <el-button
+          @click="((schoolVisible = true), (informationVisible = false))"
+          color="#547bf1"
+          plain
+          >确认</el-button
+        >
         <el-button @click="informationVisible = false">关闭</el-button>
       </div>
     </template>
@@ -130,31 +135,69 @@
   <el-dialog
     v-model="schoolVisible"
     title="课表基本信息编辑"
-    width="500"
+    width="550"
     :before-close="handleClose"
   >
-    <div>165</div>
+    <div class="school-container">
+      <div class="school-word">
+        <div>选择已设置的学校信息</div>
+        <div><el-button color="#547bf1" plain>去添加</el-button></div>
+      </div>
+      <el-radio-group v-model="informationRadioValue" class="custom-radio">
+        <el-radio value="1" border>
+          <div class="school-box">
+            <div class="school-title">
+              <div class="title-main">
+                <div class="title"><strong>2025年度</strong> 学校基本信息</div>
+                <div>2025-3-28 12:51</div>
+              </div>
+
+              <div class="school-button">
+                <el-button color="#547bf1" plain>修改</el-button>
+                <el-button color="#547bf1">查看</el-button>
+              </div>
+            </div>
+          </div>
+        </el-radio>
+        <el-radio value="2" border>
+          <div class="school-box">
+            <div class="school-title">
+              <div class="title-main">
+                <div class="title"><strong>2024年度</strong> 学校基本信息</div>
+                <div>2024-6-13 18:43</div>
+              </div>
+              <div class="school-button">
+                <el-button color="#547bf1" plain>修改</el-button>
+                <el-button color="#547bf1">查看</el-button>
+              </div>
+            </div>
+          </div>
+        </el-radio>
+      </el-radio-group>
+    </div>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="saveScheduling" color="#547bf1" plain>确认</el-button>
+        <el-button @click="saveInformationClick" color="#547bf1" plain>确认</el-button>
         <el-button @click="schoolVisible = false">关闭</el-button>
       </div>
     </template>
   </el-dialog>
 </template>
 <script setup>
-import { RouterView } from 'vue-router'
-import { reactive, ref, onMounted } from 'vue'
+import { RouterView, useRouter } from 'vue-router'
+import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Promotion } from '@element-plus/icons-vue'
 import { downloadAPI } from '@/apis/scheduling'
 
+const router = useRouter()
 const information = reactive({
   arr: [],
 })
 const elFormRef = ref() //表单验证
 const informationVisible = ref(false) //课表基本信息弹窗
 const schoolVisible = ref(false) //选择学校基础信息弹窗
+const informationRadioValue = ref('') //单选框选中的值
 const cycles = [
   {
     label: '周一 至 周五',
@@ -177,7 +220,10 @@ const rules = {
   cycle: [{ required: true, message: '请选择上课周期', trigger: 'change' }],
   planValue: [{ required: true, message: '请选择导入方式', trigger: 'change' }],
 }
-onMounted(() => {})
+//点击课表基本信息确认按钮，跳转到课表编辑页面
+function saveInformationClick() {
+  router.push(`/manager/functionPage/scheduling/scheduleCourse`)
+}
 //子组件传值
 const informationValue = value => {
   informationVisible.value = value
@@ -263,7 +309,7 @@ function saveScheduling() {
 
     .title-box {
       display: flex;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid $word-back-color;
       padding-bottom: 6px;
       line-height: 30px;
       margin-bottom: 15px;
@@ -390,6 +436,13 @@ function saveScheduling() {
     border-top: #ccc 1px solid;
     padding-top: 20px;
   }
+
+  .school-word {
+    padding-right: 10px;
+    display: flex;
+    justify-content: space-between;
+    color: $word-shallow-color;
+  }
   .warn-box {
     background-color: #fff3e0;
     color: #cd871d;
@@ -444,5 +497,27 @@ function saveScheduling() {
 :deep(.el-radio__label) {
   width: 450px;
   padding-left: 20px;
+}
+:deep(.custom-radio) {
+  .el-radio__label {
+    line-height: 30px;
+  }
+  .el-radio {
+    margin-top: 10px;
+    height: 80px;
+
+    .school-box {
+      .school-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .title-main {
+          .title {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
 }
 </style>
