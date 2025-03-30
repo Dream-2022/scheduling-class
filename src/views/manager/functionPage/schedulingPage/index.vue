@@ -18,7 +18,13 @@
     <div class="middle-box">
       <div class="title-box">
         <div class="middle-title">排课</div>
-        <div v-if="information.arr?.title == ''" class="plan-title">
+        <div
+          v-if="
+            information.arr?.title != '' &&
+            router.currentRoute.value.fullPath.includes('/scheduleCourse')
+          "
+          class="middle-plan-title"
+        >
           <div class="plan-title-word">/</div>
           {{ information.arr?.title }}
         </div>
@@ -87,12 +93,7 @@
                     >
                       下载教学计划示例
                     </el-button>
-                    <el-button
-                      @click="saveScheduling"
-                      size="small"
-                      color="#547bf1"
-                      :icon="Promotion"
-                    >
+                    <el-button size="small" color="#547bf1" :icon="Promotion">
                       导入教学计划
                     </el-button>
                   </div>
@@ -121,12 +122,7 @@
     </div>
     <template #footer>
       <div class="dialog-footer">
-        <el-button
-          @click="((schoolVisible = true), (informationVisible = false))"
-          color="#547bf1"
-          plain
-          >确认</el-button
-        >
+        <el-button @click="saveScheduling" color="#547bf1" plain>确认</el-button>
         <el-button @click="informationVisible = false">关闭</el-button>
       </div>
     </template>
@@ -222,7 +218,12 @@ const rules = {
 }
 //点击课表基本信息确认按钮，跳转到课表编辑页面
 function saveInformationClick() {
+  if (informationRadioValue.value === '') {
+    ElMessage.error('请选择学校信息')
+    return false
+  }
   router.push(`/manager/functionPage/scheduling/scheduleCourse`)
+  schoolVisible.value = false
 }
 //子组件传值
 const informationValue = value => {
@@ -258,6 +259,7 @@ function saveScheduling() {
     }
     if (valid) {
       informationVisible.value = false
+      schoolVisible.value = true
       //打开新的弹窗
       schoolVisible.value = true
       ElMessage.success('设置成功！')
@@ -322,10 +324,11 @@ function saveScheduling() {
         margin-right: 30px;
         font-size: 16px;
       }
-      .plan-title {
+      .middle-plan-title {
         margin-left: 20px;
         font-size: 16px;
         font-weight: 600;
+        display: flex;
       }
 
       .list {

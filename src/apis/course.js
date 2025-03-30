@@ -19,3 +19,27 @@ export const getCourseSchedulingAPI = (taskName, academicTerm, taskStatus, creat
     },
   })
 }
+//分页查询课程
+export const getCoursePageSizeAPI = (
+  courseId,
+  name,
+  type,
+  departmentName,
+  isActive,
+  current,
+  pageSize,
+) => {
+  return http({
+    url: '/engine/search-course',
+    method: 'GET',
+    params: {
+      courseId,
+      name,
+      type,
+      departmentName,
+      isActive,
+      current,
+      pageSize,
+    },
+  })
+}

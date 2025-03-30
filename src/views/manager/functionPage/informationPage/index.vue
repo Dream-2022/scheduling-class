@@ -3,12 +3,7 @@
     <div class="middle-box">
       <div class="title-box">
         <div class="middle-title">学校基础信息</div>
-        <!-- <div v-if="information.arr?.title == ''" class="plan-title">
-          <div class="plan-title-word">/</div>
-          {{ information.arr?.title }}
-        </div> -->
       </div>
-
       <RouterView></RouterView>
     </div>
   </div>

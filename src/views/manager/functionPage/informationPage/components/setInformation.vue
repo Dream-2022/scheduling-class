@@ -9,7 +9,14 @@
             ref="childRef"
           ></MajorInformation>
         </el-tab-pane>
-        <el-tab-pane label="课程信息" name="2">Config</el-tab-pane>
+        <el-tab-pane label="课程信息" name="2">
+          <CourseInformation
+            @titleValue="getDialogTitle"
+            @dialogVisible="getDialogVisible"
+            ref="childRef"
+          >
+          </CourseInformation>
+        </el-tab-pane>
         <el-tab-pane label="教师学生信息" name="3">
           <TeacherInformation
             @titleValue="getDialogTitle"
@@ -51,6 +58,7 @@
 import { ref } from 'vue'
 import MajorInformation from './components/majorInformation.vue'
 import TeacherInformation from './components/teacherInformation.vue'
+import CourseInformation from './components/courseInformation.vue'
 import {
   importClassesAPI,
   importMajorsAPI,
@@ -64,7 +72,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-let activeName = ref('3')
+let activeName = ref('2')
 const fileX = ref(null)
 let dialogTitle = ref('')
 let dialogVisible = ref(false)

@@ -216,7 +216,7 @@ import { getFeedbackAllAPI } from '@/apis/feedback'
 const route = useRoute()
 let applicationList = ref([])
 let feedbackList = ref([])
-let navigationValue = ref(false)
+let navigationValue = ref(true)
 const dialogImageUrl = ref('') //预览图
 const dialogVisible = ref(false) //预览图是否存在
 let teacher = ref(''),
