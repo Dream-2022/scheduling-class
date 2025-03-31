@@ -1,19 +1,4 @@
 <template>
-  <!-- <div class="course">
-    <div class="course-top">
-      <el-steps :active="1" finish-status="success" simple>
-        <el-step title="学校基础信息" />
-        <el-step title="特殊设置" />
-        <el-step title="禁排设置" />
-        <el-step title="排课优先级" />
-        <el-step title="设置课程教室，可以自动排" />
-        <el-step title="排课设置" />
-      </el-steps>
-      <el-button color="#626aef">Default</el-button>
-      <el-button color="#626aef">Default</el-button>
-    </div>
-  </div> -->
-
   <div class="wow animate__fadeInUp scheduling-box">
     <div class="middle-box">
       <div class="title-box">
@@ -38,6 +23,7 @@
     v-model="informationVisible"
     title="课表基本信息编辑"
     width="500"
+    class="information-dialog"
     :before-close="handleClose"
   >
     <div>
@@ -74,7 +60,7 @@
         <el-form-item class="plan-boxes" prop="planValue">
           <el-radio-group v-model="information.arr.planValue">
             <div class="plan-box">
-              <el-radio :value="1" size="large" border style="height: 130px; width: 450px">
+              <el-radio :value="1" size="large" border style="height: 136px; width: 466px">
                 <div>
                   <div class="plan-title">
                     <span class="iconfont icon-dian1"></span>方案一：一次性导入数据
@@ -268,31 +254,6 @@ function saveScheduling() {
 } //  router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/scheduling/scheduleCourse`)
 </script>
 <style lang="scss" scoped>
-.course {
-  display: flex;
-  justify-content: center;
-  .course-top {
-    display: flex;
-    align-items: center;
-    width: 95%;
-    background-color: #fff;
-    border-radius: 26px 26px 8px 8px;
-
-    height: 50px;
-
-    .el-button {
-      line-height: 50px;
-    }
-  }
-}
-:deep(.el-steps) {
-  width: 100%;
-}
-:deep(.el-steps--simple) {
-  background-color: #fff !important;
-  border-radius: 26px 26px 8px 8px;
-}
-
 .scheduling-box {
   width: 90%;
   min-width: 600px;
@@ -496,7 +457,11 @@ function saveScheduling() {
     }
   }
 }
-
+.information-dialog {
+  .el-radio {
+    padding-bottom: 10px;
+  }
+}
 :deep(.el-radio__label) {
   width: 450px;
   padding-left: 20px;

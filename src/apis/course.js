@@ -19,6 +19,7 @@ export const getCourseSchedulingAPI = (taskName, academicTerm, taskStatus, creat
     },
   })
 }
+
 //分页查询课程
 export const getCoursePageSizeAPI = (
   courseId,
@@ -41,5 +42,13 @@ export const getCoursePageSizeAPI = (
       current,
       pageSize,
     },
+  })
+}
+
+//获取课程性质
+export const getCourseTypeAPI = () => {
+  return http({
+    url: '/engine/search-course-nature',
+    method: 'GET',
   })
 }

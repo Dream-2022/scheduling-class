@@ -237,10 +237,55 @@ const setRouter = async () => {
                   },
                   {
                     path: 'scheduleCourse',
+                    redirect: '/manager/functionPage/scheduling/scheduleCourse/setInformation',
                     component: () =>
                       import(
                         '../views/manager/functionPage/schedulingPage/components/scheduleCourse.vue'
                       ),
+                    children: [
+                      {
+                        path: 'setInformation',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/informationPage/components/setInformation.vue'
+                          ),
+                      },
+                      {
+                        path: 'planLesson',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulingPage/components/components/planLesson.vue'
+                          ),
+                      },
+                      {
+                        path: 'priority',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulingPage/components/components/priority.vue'
+                          ),
+                      },
+                      {
+                        path: 'prohibition',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulingPage/components/components/prohibition.vue'
+                          ),
+                      },
+                      {
+                        path: 'show',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulingPage/components/components/show.vue'
+                          ),
+                      },
+                      {
+                        path: 'special',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulingPage/components/components/special.vue'
+                          ),
+                      },
+                    ],
                   },
                 ],
               },

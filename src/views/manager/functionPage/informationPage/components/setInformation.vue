@@ -56,6 +56,7 @@
 </template>
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import MajorInformation from './components/majorInformation.vue'
 import TeacherInformation from './components/teacherInformation.vue'
 import CourseInformation from './components/courseInformation.vue'
@@ -72,7 +73,8 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-let activeName = ref('2')
+const router = useRouter()
+let activeName = ref('1')
 const fileX = ref(null)
 let dialogTitle = ref('')
 let dialogVisible = ref(false)
@@ -140,6 +142,9 @@ async function uploadDataClick() {
 }
 
 function handleClick(tab, event) {
+  if (router.currentRoute.value.fullPath.includes('/scheduling/scheduleCourse/setInformation')) {
+    return
+  }
   console.log(tab, event, '需要判断是否保存了')
   ElMessageBox.confirm('是否保存暂定更改?', '提醒', {
     confirmButtonText: '确定',
