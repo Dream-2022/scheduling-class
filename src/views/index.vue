@@ -291,8 +291,8 @@
         </div>
         <div class="record-listes">
           <div class="record-list" v-for="item in reversedAndLimitedList" :key="item">
-            <div class="icon-liaotian iconfont"></div>
-            <div class="list-title">{{ item }}</div>
+            <div class="icon-liaotian iconfont" :class="item.value == 1 ? 'blue' : ''"></div>
+            <div class="list-title">{{ item.content }}</div>
           </div>
         </div>
       </div>
@@ -355,7 +355,7 @@ import { ElMessage } from 'element-plus'
 import { getCourseAllAPI } from '@/apis/course'
 import { setPreferredCoursesAPI, preferenceTimesAPI } from '@/apis/preference'
 import { editAvatarAPI } from '@/apis/user'
-import { getAIAPI } from '@/apis/ai.js'
+import { getAIAPI, getTitleAPI } from '@/apis/ai.js'
 import '@/assets/iconfont/iconfont.css'
 
 import WOW from 'wow.js'
@@ -495,11 +495,23 @@ onMounted(async () => {
     : []
   //根据身份获取历史对话数据
   if (userStore.user.identity === 'STUDENT') {
-    recordList.value = ['如何处理提交的申请', '排课过程有特殊要求的课程如何处理', '如何查看课表']
+    recordList.value = [
+      { content: '如何处理提交的申请', value: 0 },
+      { content: '排课过程有特殊要求的课程如何处理', value: 0 },
+      { content: '如何查看课表', value: 0 },
+    ]
   } else if (userStore.user.identity === 'TEACHER') {
-    recordList.value = ['请假流程介绍', '如何对发布的课表进行反馈', '怎么修改偏好教授的课程']
+    recordList.value = [
+      { content: '请假流程介绍', value: 0 },
+      { content: '如何对发布的课表进行反馈', value: 0 },
+      { content: '怎么修改偏好教授的课程', value: 0 },
+    ]
   } else {
-    recordList.value = ['如何查看课表', '上课建议', '如何查看学校信息']
+    recordList.value = [
+      { content: '如何查看课表', value: 0 },
+      { content: '上课建议', value: 0 },
+      { content: '如何查看学校信息', value: 0 },
+    ]
   }
 })
 let reversedAndLimitedList = computed(() => {
@@ -516,6 +528,9 @@ const sendMessage = async () => {
   chatHistory.value.push({ sender: 'user', text: userInput.value })
   let content = userInput.value
   userInput.value = ''
+  const res1 = await getTitleAPI(content)
+  console.log(res1.data)
+  recordList.value.push({ content: res1.data, value: 1 })
   const res = await getAIAPI(content)
   // 添加 AI 消息的占位符
   chatHistory.value.push({ sender: 'bot', text: '' })
@@ -523,14 +538,12 @@ const sendMessage = async () => {
   let index = 0
   let currentText = ''
   const aiMessageIndex = chatHistory.value.length - 1
-  console.log(chatHistory.value)
   function typeNextCharacter() {
     if (index < aiMessage.length) {
       // 处理 HTML 标签和换行符
       const nextChar = aiMessage[index++]
       currentText += nextChar
       // 替换换行符为 <br> 标签
-      console.log(aiMessageIndex, chatHistory.value[aiMessageIndex], currentText)
       chatHistory.value[aiMessageIndex].text = formatText(currentText)
       setTimeout(typeNextCharacter, 15) // 逐字打印速度
     }
@@ -1205,7 +1218,9 @@ onUnmounted(() => {
         cursor: pointer;
         padding: 15px 10px;
         border-top: 1px solid #ccc;
-
+        .blue::before {
+          color: $blue;
+        }
         .list-title {
           font-size: 15px;
         }

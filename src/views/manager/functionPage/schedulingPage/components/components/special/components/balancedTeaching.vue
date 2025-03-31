@@ -1,5 +1,5 @@
 <template>
-  <div>sp</div>
+  <div>pro</div>
 </template>
 <script setup></script>
 <style lang="scss" scoped></style>

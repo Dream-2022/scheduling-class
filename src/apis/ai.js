@@ -9,3 +9,13 @@ export const getAIAPI = message => {
     },
   })
 }
+//ai总结标题
+export const getTitleAPI = message => {
+  return http({
+    url: '/ai/sum-up',
+    method: 'GET',
+    params: {
+      message,
+    },
+  })
+}

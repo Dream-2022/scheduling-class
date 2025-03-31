@@ -3,7 +3,9 @@
     <div class="plan-box-top">
       <el-button color="#547bf1" plain @click="downloadClick">下载教学计划示例</el-button>
       <el-button plain :icon="Upload">导入教学计划</el-button>
-      <div class="plan-word">课表总课时：40</div>
+      <div class="plan-word">
+        <div v-if="tableData && tableData.length > 0">课表总课时：{{ courseHourValue }}</div>
+      </div>
       <el-button color="#547bf1" :icon="Promotion" @click="aiGenerateClick">{{
         (flagValue ? '重新' : '') + '生成教学计划'
       }}</el-button>
@@ -44,7 +46,7 @@
       >
         <el-table-column prop="courseName" label="课程名" min-width="180" />
         <el-table-column prop="teacherName" label="教师名" min-width="100" />
-        <el-table-column prop="designatedRoomType" label="教室" min-width="180" />
+        <el-table-column prop="designatedRoomType" label="教室类型" min-width="180" />
         <el-table-column prop="classComposition" label="班级名" min-width="180" />
         <el-table-column prop="scheduledHours" label="总课时" min-width="80" />
         <el-table-column prop="continuousPeriods" label="连排" min-width="80" />
@@ -66,7 +68,7 @@
       </el-table>
     </div>
     <el-empty v-else description="暂无教学计划" :image-size="200">
-      <el-button color="#547bf1" :icon="Promotion" @click="searchClick">生成教学计划</el-button>
+      <el-button color="#547bf1" :icon="Promotion" @click="aiGenerateClick">生成教学计划</el-button>
       <el-button color="#547bf1" :icon="Upload" plain>导入教学计划</el-button>
     </el-empty>
   </div>
@@ -76,7 +78,7 @@ import { ref, onMounted } from 'vue'
 import { Search, Promotion, Upload } from '@element-plus/icons-vue'
 import { getDepartmentsAPI } from '@/apis/classMajor'
 import { getCourseTypeAPI } from '@/apis/course'
-import { getTeachingPlanAPI, getAIGenerateAPI } from '@/apis/planAll'
+import { getTeachingPlanAPI, getAIGenerateAPI, getCourseHoursAPI } from '@/apis/planAll'
 import { downloadAPI } from '@/apis/scheduling'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as XLSX from 'xlsx'
@@ -93,6 +95,7 @@ const tableRef = ref()
 const departmentList = ref([]) //院系列表
 const typeList = ref([]) //课程性质
 const tableData = ref([])
+const courseHourValue = ref(0) //课表课时
 let flagValue = ref(false) //是否点击过
 onMounted(async () => {
   const res = await getDepartmentsAPI()
@@ -127,6 +130,7 @@ function deleteClick(row) {
           item.teacherId != row.teacherId,
       )
       ElMessage.success('删除成功！')
+      courseHourValue.value = courseHourValue.value - 2
     })
     .catch(() => {
       ElMessage.success('已取消删除！')
@@ -146,6 +150,8 @@ async function aiGenerateClick() {
   await getAIGenerateAPI()
   searchClick()
   ElMessage.success('生成成功，可对此进行修改或重新生成！')
+  const res = await getCourseHoursAPI('1902649449470054400')
+  courseHourValue.value = res.data.data
 }
 
 const exportToExcel = () => {
@@ -153,9 +159,15 @@ const exportToExcel = () => {
 
   // 获取表格数据
   const data = tableData.value.map(row => ({
-    ID: row.id,
-    姓名: row.name,
-    年龄: row.age,
+    课程名: row.classComposition,
+    教师名: row.teacherName,
+    教室类型: row.designatedRoomType,
+    班级名: row.classComposition,
+    总课时: row.scheduledHours,
+    连排: 2,
+    课程类型: row.courseNature,
+    学院: row.department,
+    校区: row.campus,
   }))
 
   // 创建工作表
@@ -173,7 +185,7 @@ const exportToExcel = () => {
 
   // 下载 Excel 文件
   const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
-  saveAs(blob, '表格数据.xlsx')
+  saveAs(blob, '教学计划示例.xlsx')
 }
 //下载教学示例
 async function downloadClick() {

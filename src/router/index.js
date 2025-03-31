@@ -282,8 +282,115 @@ const setRouter = async () => {
                         path: 'special',
                         component: () =>
                           import(
-                            '../views/manager/functionPage/schedulingPage/components/components/special.vue'
+                            '../views/manager/functionPage/schedulingPage/components/components/special/index.vue'
                           ),
+                        children: [
+                          {
+                            path: 'teacherExclusion',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherExclusion.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherActivities',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherActivities.vue'
+                              ),
+                          },
+                          {
+                            path: 'subjectExclusion',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectExclusion.vue'
+                              ),
+                          },
+                          {
+                            path: 'subjectCombination',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectCombination.vue'
+                              ),
+                          },
+                          {
+                            path: 'balancedTeaching',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/balancedTeaching.vue'
+                              ),
+                          },
+                          {
+                            path: 'subjectDayLimit',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectDayLimit.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherWeekLimit',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherWeekLimit.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherRestrictions',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherRestrictions.vue'
+                              ),
+                          },
+                          {
+                            path: 'subjectRestrictions',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectRestrictions.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherMorningAfternoon',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherMorningAfternoon.vue'
+                              ),
+                          },
+                          {
+                            path: 'subjectMorningAfternoon',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectMorningAfternoon.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherDayLimit',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherDayLimit.vue'
+                              ),
+                          },
+                          {
+                            path: 'jointClass',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/jointClass.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherRow',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherRow.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherRowProhibited',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherRowProhibited.vue'
+                              ),
+                          },
+                        ],
                       },
                     ],
                   },
