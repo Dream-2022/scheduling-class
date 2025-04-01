@@ -280,6 +280,8 @@ const setRouter = async () => {
                       },
                       {
                         path: 'special',
+                        redirect:
+                          '/manager/functionPage/scheduling/scheduleCourse/special/teacherExclusion',
                         component: () =>
                           import(
                             '../views/manager/functionPage/schedulingPage/components/components/special/index.vue'
@@ -384,10 +386,24 @@ const setRouter = async () => {
                               ),
                           },
                           {
-                            path: 'teacherRowProhibited',
+                            path: 'teacherProhibitedRow',
                             component: () =>
                               import(
-                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherRowProhibited.vue'
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherProhibitedRow.vue'
+                              ),
+                          },
+                          {
+                            path: 'classClassroom',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/classClassroom.vue'
+                              ),
+                          },
+                          {
+                            path: 'continuousScheduling',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/continuousScheduling.vue'
                               ),
                           },
                         ],

@@ -40,6 +40,7 @@ import {
   ElCalendar,
   ElDatePicker,
   ElTimeline,
+  ElTag,
 } from 'element-plus'
 
 export default function (app) {
@@ -80,4 +81,5 @@ export default function (app) {
   app.use(ElCalendar)
   app.use(ElDatePicker)
   app.use(ElTimeline)
+  app.use(ElTag)
 }

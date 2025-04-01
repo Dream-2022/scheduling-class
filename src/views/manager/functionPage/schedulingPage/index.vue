@@ -258,7 +258,7 @@ function saveScheduling() {
   width: 90%;
   min-width: 600px;
   margin: 25px auto;
-  padding-bottom: 50px;
+  padding-bottom: 20px;
   position: relative;
   background-color: #fff;
   padding-top: 5px;

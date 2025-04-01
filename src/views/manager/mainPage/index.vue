@@ -290,7 +290,7 @@ import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import '@/assets/iconfont/iconfont.css'
 import Chart from '@/components/Chart.vue'
-import { getRoomRateAPI, getFeedbackSizeAPI } from '@/apis/mainPage'
+import { getRoomRateAPI, getFeedbackSizeAPI, getTearchWorkloadAPI } from '@/apis/mainPage'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -501,6 +501,9 @@ onMounted(async () => {
   rateValue.value = ((v1 / (v1 + v2)) * 100).toFixed(2)
   chartOption4.value.series[0].data[0].value = v2
   chartOption4.value.series[0].data[1].value = v1
+  //获取教师工作量
+  const res5 = await getTearchWorkloadAPI()
+  console.log(res5.data)
 })
 //获取对应属性组成一个数组
 function extractDataData(data, str) {
