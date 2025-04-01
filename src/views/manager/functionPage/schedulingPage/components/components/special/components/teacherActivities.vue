@@ -28,7 +28,13 @@
           :class="{ 'active-box': index === activeValue }"
         >
           <div class="activity-box-left">
-            <div class="title">{{ item.name }}</div>
+            <div class="title">
+              {{ item.name }}
+              <span class="title-word">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;第 {{ item.weekStart }} 周 - 第
+                {{ item.weekEnd }} 周
+              </span>
+            </div>
             <div class="teacher-list">
               <el-tag
                 v-for="tag in item.teachers"
@@ -96,6 +102,28 @@
             v-model="addTeacherForm.name"
           />
         </el-form-item>
+        <div style="display: flex; gap: 10px">
+          <el-form-item label="禁排周次" prop="weekStart">
+            <el-select
+              style="width: 145px"
+              placeholder="请选择开始周次"
+              v-model="addTeacherForm.weekStart"
+            >
+              <el-option label="全部" value="全部"></el-option>
+              <el-option v-for="week in 18" :key="week" :label="week" :value="week"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="weekEnd">
+            <el-select
+              style="width: 145px"
+              placeholder="请选择结束周次"
+              v-model="addTeacherForm.weekEnd"
+            >
+              <el-option label="全部" value="全部"></el-option>
+              <el-option v-for="week in 18" :key="week" :label="week" :value="week"></el-option>
+            </el-select>
+          </el-form-item>
+        </div>
         <el-form-item label="选择教师" prop="teachers">
           <el-cascader
             style="width: 300px"
@@ -118,20 +146,28 @@
   </el-dialog>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineProps, watch, defineEmits } from 'vue'
 import { getTeacherAndStudentAPI } from '@/apis/person'
 import { getDepartmentsAPI } from '@/apis/classMajor'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+const emit = defineEmits(['update:allContent'])
+const props = defineProps({
+  allContent: {
+    type: Object,
+  },
+})
 let option = ref() //筛选框选项
 const selectedArr = ref('') //选中的内容
 const TeacherOptions = ref([])
 const teacherVisible = ref(false) //弹出是否可见
 const ruleFormRef = ref() //表单验证
-const teacherList = ref([]) //教师分组列表
+const teacherList = ref(props.allContent.teacherActivities || []) //教师分组列表
 const addTeacherForm = ref({
   name: '',
   teachers: [],
+  weekStart: '',
+  weekEnd: '',
 })
 const isDragging = ref(false) //记录左键是否拖拽
 const isRightDrag = ref(false) //记录右键是否拖拽
@@ -276,6 +312,8 @@ function addClick() {
   addTeacherForm.value = {
     name: '',
     teachers: [],
+    weekStart: '',
+    weekEnd: '',
   }
   ElMessage.success('添加成功！')
   teacherVisible.value = false
@@ -291,14 +329,75 @@ function deleteTeacherClick(item, tag) {
   item.teachers = item.teachers.filter(d => d[1] != tag[1])
   if (item.teachers.length == 0) {
     teacherList.value = teacherList.value.filter(d => d.name != item.name)
+    if (teacherList.value.length == 0) {
+      activeValue.value = null
+    } else {
+      activeValue.value = 0
+    }
   }
   ElMessage.success('删除成功！')
 }
 
+// 自定义验证规则：结束周次不小于开始周次
+const validateWeekRange = (rule, value, callback) => {
+  const start = addTeacherForm.value.weekStart
+  const end = value
+  if (start === '全部' || end === '全部') {
+    callback()
+  } else {
+    const startNum = parseInt(start)
+    const endNum = parseInt(end)
+    if (isNaN(startNum) || isNaN(endNum)) {
+      callback(new Error('请选择有效的周次'))
+    } else if (endNum < startNum) {
+      callback(new Error('结束周次不能小于开始周次'))
+    } else {
+      callback()
+    }
+  }
+}
 // 表单验证规则
 const rules = ref({
   name: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
+  weekStart: [
+    { required: true, message: '请选择禁排开始周次', trigger: 'change' },
+    {
+      validator: (rule, value, callback) => {
+        const start = value
+        const end = addTeacherForm.value.weekEnd
+        if (start === '全部' || end === '全部') {
+          callback()
+        } else {
+          const startNum = parseInt(start)
+          const endNum = parseInt(end)
+          if (isNaN(startNum)) {
+            callback(new Error('请选择有效的周次'))
+          } else if (!isNaN(endNum) && startNum > endNum) {
+            callback(new Error('开始周次不能大于结束周次'))
+          } else {
+            callback()
+          }
+        }
+      },
+      trigger: 'change',
+    },
+  ],
+  weekEnd: [
+    { required: true, message: '请选择禁排结束周次', trigger: 'change' },
+    { validator: validateWeekRange, trigger: 'change' },
+  ],
 })
+// 监听 teacherList 的变化并传递给父组件
+watch(
+  teacherList,
+  newValue => {
+    emit('update:allContent', {
+      ...props.allContent,
+      teacherActivities: newValue,
+    })
+  },
+  { deep: true },
+)
 </script>
 <style lang="scss" scoped>
 .activity-container {
@@ -317,6 +416,7 @@ const rules = ref({
       margin: 16px 0;
 
       .activity-box {
+        box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.05);
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -327,6 +427,10 @@ const rules = ref({
         .activity-box-left {
           .title {
             margin-bottom: 5px;
+            .title-word {
+              font-size: 12px;
+              color: #4d4d4d;
+            }
           }
           .teacher-list {
             display: flex;

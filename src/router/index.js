@@ -316,10 +316,10 @@ const setRouter = async () => {
                               ),
                           },
                           {
-                            path: 'balancedTeaching',
+                            path: 'subjectProhibition',
                             component: () =>
                               import(
-                                '../views/manager/functionPage/schedulingPage/components/components/special/components/balancedTeaching.vue'
+                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectProhibition.vue'
                               ),
                           },
                           {
