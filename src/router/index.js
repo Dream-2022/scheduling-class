@@ -268,8 +268,54 @@ const setRouter = async () => {
                         path: 'prohibition',
                         component: () =>
                           import(
-                            '../views/manager/functionPage/schedulingPage/components/components/prohibition.vue'
+                            '../views/manager/functionPage/schedulingPage/components/components/prohibition/index.vue'
                           ),
+                        redirect:
+                          '/manager/functionPage/scheduling/scheduleCourse/prohibition/schoolProhibition',
+                        children: [
+                          {
+                            path: 'schoolProhibition',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/prohibition/components/schoolProhibition.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherProhibition',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/prohibition/components/teacherProhibition.vue'
+                              ),
+                          },
+                          {
+                            path: 'studentProhibition',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/prohibition/components/studentProhibition.vue'
+                              ),
+                          },
+                          {
+                            path: 'subjectProhibition',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/prohibition/components/subjectProhibition.vue'
+                              ),
+                          },
+                          {
+                            path: 'classroomProhibition',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/prohibition/components/classroomProhibition.vue'
+                              ),
+                          },
+                          {
+                            path: 'roleProhibition',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/prohibition/components/roleProhibition.vue'
+                              ),
+                          },
+                        ],
                       },
                       {
                         path: 'show',
@@ -313,13 +359,6 @@ const setRouter = async () => {
                             component: () =>
                               import(
                                 '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectCombination.vue'
-                              ),
-                          },
-                          {
-                            path: 'subjectProhibition',
-                            component: () =>
-                              import(
-                                '../views/manager/functionPage/schedulingPage/components/components/special/components/subjectProhibition.vue'
                               ),
                           },
                           {
@@ -383,13 +422,6 @@ const setRouter = async () => {
                             component: () =>
                               import(
                                 '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherRow.vue'
-                              ),
-                          },
-                          {
-                            path: 'teacherProhibitedRow',
-                            component: () =>
-                              import(
-                                '../views/manager/functionPage/schedulingPage/components/components/special/components/teacherProhibitedRow.vue'
                               ),
                           },
                           {

@@ -363,7 +363,7 @@ function addClick() {
   ElMessage.success('添加成功！')
   teacherVisible.value = false
 
-  //将acitve指定为当前新增的分组
+  //将active指定为当前新增的分组
   activeValue.value = subjectList.value.length - 1
   subjectList.value[activeValue.value].contentList = initContentList()
   console.log(subjectList.value)
