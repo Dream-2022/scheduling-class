@@ -16,7 +16,14 @@
           v-model="selectedArr"
         >
         </el-cascader>
-        <el-button color="#547bf1" plain style="margin-right: auto" :icon="Search">搜索</el-button>
+        <el-button
+          color="#547bf1"
+          plain
+          style="margin-right: auto"
+          :icon="Search"
+          @click="handleSearch"
+          >搜索</el-button
+        >
         <el-button color="#547bf1" :icon="Plus" @click="teacherVisible = true">新增分组</el-button>
       </div>
       <div class="activity-boxes">
@@ -51,6 +58,9 @@
             <el-button color="#f56c6c" plain>删除</el-button>
           </div>
         </div>
+      </div>
+      <div v-if="teacherList.length == 0">
+        <el-empty description="暂无数据，请新增分组" />
       </div>
     </div>
     <div class="activity-right">
@@ -360,7 +370,7 @@ const validateWeekRange = (rule, value, callback) => {
 const rules = ref({
   name: [{ required: true, message: '分组名称不能为空', trigger: 'blur' }],
   weekStart: [
-    { required: true, message: '请选择禁排开始周次', trigger: 'change' },
+    { required: true, message: '请选择禁排开始周次', trigger: 'blur' },
     {
       validator: (rule, value, callback) => {
         const start = value
@@ -379,12 +389,12 @@ const rules = ref({
           }
         }
       },
-      trigger: 'change',
+      trigger: 'blur',
     },
   ],
   weekEnd: [
-    { required: true, message: '请选择禁排结束周次', trigger: 'change' },
-    { validator: validateWeekRange, trigger: 'change' },
+    { required: true, message: '请选择禁排结束周次', trigger: 'blur' },
+    { validator: validateWeekRange, trigger: 'blur' },
   ],
 })
 // 监听 teacherList 的变化并传递给父组件
@@ -398,6 +408,25 @@ watch(
   },
   { deep: true },
 )
+
+// 在 script setup 中添加搜索方法
+const handleSearch = () => {
+  if (!selectedArr.value || selectedArr.value.length === 0) {
+    // 如果没有选择搜索条件，显示全部
+    teacherList.value = props.allContent.teacherActivities || []
+    return
+  }
+
+  // 根据选择的教师进行过滤
+  teacherList.value = (props.allContent.teacherActivities || []).filter(item => {
+    return item.teachers.some(teacher => {
+      return selectedArr.value.some(selected => {
+        // 检查教师所属院系和姓名是否匹配
+        return selected[0] === teacher[0] && selected[1] === teacher[1]
+      })
+    })
+  })
+}
 </script>
 <style lang="scss" scoped>
 .activity-container {
@@ -416,6 +445,7 @@ watch(
       margin: 16px 0;
 
       .activity-box {
+        margin-bottom: 10px;
         box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.05);
         display: flex;
         align-items: center;
