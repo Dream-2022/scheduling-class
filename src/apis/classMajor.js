@@ -105,3 +105,17 @@ export const importCoursesAPI = usersData => {
     },
   })
 }
+//获取教室信息
+export const getClassroomAPI = (type, department, campus, pageNum, pageSize) => {
+  return http({
+    url: '/engine/search-room',
+    method: 'GET',
+    params: {
+      type,
+      department,
+      campus,
+      pageNum,
+      pageSize,
+    },
+  })
+}

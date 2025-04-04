@@ -209,6 +209,7 @@ function saveInformationClick() {
     return false
   }
   router.push(`/manager/functionPage/scheduling/scheduleCourse`)
+  ElMessage.success('成功导入学校基本信息！')
   schoolVisible.value = false
 }
 //子组件传值

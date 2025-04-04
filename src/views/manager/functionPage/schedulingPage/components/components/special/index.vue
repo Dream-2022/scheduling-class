@@ -136,6 +136,7 @@ function clearConditionClick() {
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    margin-left: 20px;
   }
 }
 .special-bottom {
