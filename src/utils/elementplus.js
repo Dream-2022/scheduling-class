@@ -43,6 +43,7 @@ import {
   ElTag,
   ElInputNumber,
   ElCheckbox,
+  ElTransfer,
 } from 'element-plus'
 
 export default function (app) {
@@ -86,4 +87,5 @@ export default function (app) {
   app.use(ElTag)
   app.use(ElInputNumber)
   app.use(ElCheckbox)
+  app.use(ElTransfer)
 }

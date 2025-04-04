@@ -52,3 +52,10 @@ export const getCourseTypeAPI = () => {
     method: 'GET',
   })
 }
+//获取课程类别
+export const getCourseCategoryAPI = () => {
+  return http({
+    url: '/engine/search-course-category',
+    method: 'GET',
+  })
+}

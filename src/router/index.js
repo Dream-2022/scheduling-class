@@ -261,8 +261,54 @@ const setRouter = async () => {
                         path: 'priority',
                         component: () =>
                           import(
-                            '../views/manager/functionPage/schedulingPage/components/components/priority.vue'
+                            '../views/manager/functionPage/schedulingPage/components/components/priority/index.vue'
                           ),
+                        redirect:
+                          '/manager/functionPage/scheduling/scheduleCourse/priority/studentDepartment',
+                        children: [
+                          {
+                            path: 'studentDepartment',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/priority/components/studentDepartment.vue'
+                              ),
+                          },
+                          {
+                            path: 'lessonDepartment',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/priority/components/lessonDepartment.vue'
+                              ),
+                          },
+                          {
+                            path: 'lessonNature',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/priority/components/lessonNature.vue'
+                              ),
+                          },
+                          {
+                            path: 'creditHourType',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/priority/components/creditHourType.vue'
+                              ),
+                          },
+                          {
+                            path: 'lessonType',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/priority/components/lessonType.vue'
+                              ),
+                          },
+                          {
+                            path: 'priorityTime',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/priority/components/priorityTime.vue'
+                              ),
+                          },
+                        ],
                       },
                       {
                         path: 'prohibition',
