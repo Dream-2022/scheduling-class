@@ -367,8 +367,44 @@ const setRouter = async () => {
                         path: 'show',
                         component: () =>
                           import(
-                            '../views/manager/functionPage/schedulingPage/components/components/show.vue'
+                            '../views/manager/functionPage/schedulingPage/components/components/show/index.vue'
                           ),
+                        redirect:
+                          '/manager/functionPage/scheduling/scheduleCourse/show/totalSchedule',
+                        children: [
+                          {
+                            path: 'totalSchedule',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/show/components/totalSchedule.vue'
+                              ),
+                          },
+                        ],
+                      },
+                      {
+                        path: 'arrangeSetting',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulingPage/components/components/arrangeSetting/index.vue'
+                          ),
+                        redirect:
+                          '/manager/functionPage/scheduling/scheduleCourse/arrangeSetting/fullSchedule',
+                        children: [
+                          {
+                            path: 'fullSchedule',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/arrangeSetting/components/fullSchedule.vue'
+                              ),
+                          },
+                          {
+                            path: 'schedulePreview',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulingPage/components/components/arrangeSetting/components/schedulePreview.vue'
+                              ),
+                          },
+                        ],
                       },
                       {
                         path: 'special',

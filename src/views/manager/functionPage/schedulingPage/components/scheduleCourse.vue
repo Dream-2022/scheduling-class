@@ -20,7 +20,7 @@
       <el-button
         color="#547bf1"
         plain
-        :disabled="activePage === 5"
+        :disabled="activePage === 6"
         :icon="ArrowRightBold"
         circle
         style="transform: translateX(-20px)"
@@ -28,7 +28,7 @@
       ></el-button>
     </div>
     <div class="step-bottom">
-      <RouterView></RouterView>
+      <RouterView v-model:activePage="activePage"></RouterView>
     </div>
   </div>
 </template>
@@ -62,8 +62,10 @@ onMounted(() => {
     activePage.value = 3
   } else if (path.includes('/priority')) {
     activePage.value = 4
-  } else if (path.includes('/show')) {
+  } else if (path.includes('/arrangeSetting')) {
     activePage.value = 5
+  } else if (path.includes('/show')) {
+    activePage.value = 6
   }
 })
 const handleStepClick = index => {
@@ -83,6 +85,8 @@ const handleStepClick = index => {
   } else if (activePage.value == 4) {
     router.push(`/manager/functionPage/scheduling/scheduleCourse/priority`)
   } else if (activePage.value == 5) {
+    router.push(`/manager/functionPage/scheduling/scheduleCourse/arrangeSetting`)
+  } else if (activePage.value == 6) {
     router.push(`/manager/functionPage/scheduling/scheduleCourse/show`)
   }
 }
