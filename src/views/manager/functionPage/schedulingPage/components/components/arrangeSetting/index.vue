@@ -80,11 +80,7 @@
       <div class="schedule-display">
         <div class="display-header">
           <h2>课表详情</h2>
-          <div
-            class="class-right-title"
-            v-if="currentScheduleData"
-            @click="helpClick(currentScheduleData.departments[0])"
-          >
+          <div class="class-right-title" @click="helpClick('1902649449470054400')">
             未排原因
             <span class="iconfont icon-bangzhu"></span>
           </div>
@@ -412,12 +408,11 @@ const filterHelpData = () => {
 }
 
 // 获取未排课程原因
-const helpClick = async department => {
+const helpClick = async id => {
   try {
-    const res = await getTimetableHelpAPI('1902649449470054400') // 使用固定的任务ID
+    const res = await getTimetableHelpAPI(id)
     if (res.data.data) {
-      // 只显示当前学院的未排课程
-      helpData.value = res.data.data.filter(item => item.department === department).slice(0, 20)
+      helpData.value = res.data.data.slice(0, 20)
       filteredHelpData.value = helpData.value
       helpDialogVisible.value = true
     } else {
@@ -490,8 +485,6 @@ const helpClick = async department => {
           font-size: 16px;
           cursor: pointer;
           font-weight: normal;
-          color: #6c6c6c;
-          margin-right: 20px;
         }
         h2 {
           margin: 0;

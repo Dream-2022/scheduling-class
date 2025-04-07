@@ -529,6 +529,64 @@ const setRouter = async () => {
               {
                 path: 'schedule',
                 component: () => import('../views/manager/functionPage/schedulePage/index.vue'),
+                redirect: '/manager/functionPage/schedule/scheduleList',
+                children: [
+                  {
+                    path: 'scheduleList',
+                    component: () =>
+                      import(
+                        '../views/manager/functionPage/schedulePage/components/scheduleList.vue'
+                      ),
+                  },
+                  {
+                    path: 'scheduleExam',
+                    redirect: '/manager/functionPage/schedule/scheduleList/step',
+                    component: () =>
+                      import(
+                        '../views/manager/functionPage/schedulePage/components/scheduleExam.vue'
+                      ),
+                    children: [
+                      {
+                        path: 'step',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulePage/components/components/step/index.vue'
+                          ),
+                        children: [
+                          {
+                            path: 'classroomDisabled',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulePage/components/components/step/components/classroomDisabled.vue'
+                              ),
+                          },
+                          {
+                            path: 'teacherDisabled',
+                            component: () =>
+                              import(
+                                '../views/manager/functionPage/schedulePage/components/components/step/components/teacherDisabled.vue'
+                              ),
+                          },
+                          {
+                            path: 'schedulePeriod',
+                            component: () => {
+                              import(
+                                '../views/manager/functionPage/schedulePage/components/components/step/components/schedulePeriod.vue'
+                              )
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        path: 'show',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulePage/components/components/show.vue'
+                          ),
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },
