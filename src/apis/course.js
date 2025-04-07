@@ -59,3 +59,13 @@ export const getCourseCategoryAPI = () => {
     method: 'GET',
   })
 }
+//获取课表未排原因
+export const getTimetableHelpAPI = scheduleTaskId => {
+  return http({
+    url: '/schedule/get-schedule-error',
+    method: 'GET',
+    params: {
+      scheduleTaskId,
+    },
+  })
+}

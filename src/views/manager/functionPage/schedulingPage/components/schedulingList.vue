@@ -109,7 +109,7 @@
     </el-table-column>
     <el-table-column label="未排课程" width="95">
       <template #default="{ row }">
-        <div>
+        <div @click="helpClick(row.scheduleTaskId)">
           {{ row.totalCourseSize - row.successCourseSize }}
           <span class="iconfont icon-bangzhu"></span>
         </div>
@@ -164,13 +164,29 @@
   <!-- :before-close="handleClose" -->
   <el-dialog v-model="dialogVisible" title="课表基础信息" width="30%" :show-close="false">
   </el-dialog>
+
+  <!-- 未排课程原因弹窗 -->
+  <el-dialog v-model="helpDialogVisible" title="未排课程原因" width="70%">
+    <el-table :data="helpData" style="width: 100%" stripe>
+      <el-table-column prop="courseName" label="课程名称" width="180" />
+      <el-table-column prop="teacherName" label="教师" width="120" />
+      <el-table-column prop="department" label="院系" width="180" />
+      <el-table-column prop="classComposition" label="班级" width="200" />
+      <el-table-column prop="conflictReason" label="冲突原因" width="150" />
+      <el-table-column prop="designatedRoomType" label="指定教室类型" width="150" />
+      <el-table-column prop="weeklyHours" label="周学时" width="120" />
+      <el-table-column prop="scheduledHours" label="已排课时" width="120" />
+      <el-table-column prop="schedulingPriority" label="优先级" width="100" />
+    </el-table>
+  </el-dialog>
 </template>
 <script setup>
 import { ref, defineEmits, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Plus, Download, Discount } from '@element-plus/icons-vue'
 // import { useUserStore } from '@/stores/userStore'
-import { getCourseSchedulingAPI } from '@/apis/course.js'
+import { getCourseSchedulingAPI, getTimetableHelpAPI } from '@/apis/course.js'
+import { ElMessage } from 'element-plus'
 
 const emits = defineEmits(['downloadClick', 'information'])
 const downloadClick = () => {
@@ -182,6 +198,9 @@ const router = useRouter()
 const courseList = reactive([])
 const keyInput = ref('') //输入的关键字
 let dialogVisible = ref(false)
+const helpDialogVisible = ref(false)
+const helpData = ref([])
+
 onMounted(async () => {
   emits('information', false)
   const res = await getCourseSchedulingAPI()
@@ -192,6 +211,25 @@ onMounted(async () => {
     courseList.arr[i].startTime = courseList.arr[i].startTime.replace('T', ' ')
   }
 })
+
+//获取课表未排原因
+const helpClick = async id => {
+  console.log(id)
+  try {
+    const res = await getTimetableHelpAPI(id)
+    console.log(res.data.data)
+    if (res.data.data) {
+      // 只取前20条数据
+      helpData.value = res.data.data.slice(0, 20)
+      helpDialogVisible.value = true
+    } else {
+      ElMessage.info('暂无未排课程数据')
+    }
+  } catch (error) {
+    console.error('获取未排课程原因失败:', error)
+    ElMessage.error('获取未排课程原因失败')
+  }
+}
 //点击新建课表
 function addTimetable() {
   emits('information', true)

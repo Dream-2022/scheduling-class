@@ -80,10 +80,13 @@
       <div class="schedule-display">
         <div class="display-header">
           <h2>课表详情</h2>
-          <div class="display-actions">
-            <el-button type="primary" @click="saveSchedule" v-if="currentScheduleData">
-              保存课表
-            </el-button>
+          <div
+            class="class-right-title"
+            v-if="currentScheduleData"
+            @click="helpClick(currentScheduleData.departments[0])"
+          >
+            未排原因
+            <span class="iconfont icon-bangzhu"></span>
           </div>
         </div>
         <div class="display-content">
@@ -100,6 +103,36 @@
       </div>
     </div>
   </div>
+
+  <!-- 未排课程原因弹窗 -->
+  <el-dialog v-model="helpDialogVisible" title="未排课程原因" width="70%">
+    <div class="filter-box">
+      <el-select
+        v-model="selectedDepartment"
+        placeholder="选择学院"
+        clearable
+        @change="filterHelpData"
+      >
+        <el-option
+          v-for="dept in departments"
+          :key="dept.id"
+          :label="dept.name"
+          :value="dept.name"
+        />
+      </el-select>
+    </div>
+    <el-table :data="filteredHelpData" style="width: 100%" stripe>
+      <el-table-column prop="courseName" label="课程名称" width="180" />
+      <el-table-column prop="teacherName" label="教师" width="120" />
+      <el-table-column prop="department" label="院系" width="180" />
+      <el-table-column prop="classComposition" label="班级" width="200" />
+      <el-table-column prop="conflictReason" label="冲突原因" width="150" />
+      <el-table-column prop="designatedRoomType" label="指定教室类型" width="150" />
+      <el-table-column prop="weeklyHours" label="周学时" width="120" />
+      <el-table-column prop="scheduledHours" label="已排课时" width="120" />
+      <el-table-column prop="schedulingPriority" label="优先级" width="100" />
+    </el-table>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -109,6 +142,7 @@ import { setTimetableAPI } from '@/apis/timetable'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { Promotion } from '@element-plus/icons-vue'
+import { getTimetableHelpAPI } from '@/apis/course.js'
 
 const emit = defineEmits(['update:activePage'])
 
@@ -122,6 +156,11 @@ const selectedRecords = ref([])
 const currentScheduleData = ref(null)
 const router = useRouter()
 const isDraggable = ref(false) // 是否可拖拽
+
+const helpDialogVisible = ref(false)
+const helpData = ref([])
+const selectedDepartment = ref('')
+const filteredHelpData = ref([])
 
 // 获取学院数据
 onMounted(async () => {
@@ -292,11 +331,6 @@ const deleteRecord = record => {
     .catch(() => {})
 }
 
-// 保存课表
-const saveSchedule = () => {
-  ElMessage.success('课表保存成功')
-}
-
 // 生成总课表
 const generateTotalSchedule = () => {
   emit('update:activePage', 6)
@@ -365,6 +399,35 @@ const getRandomColor = () => {
 const handleScheduleDataUpdate = newData => {
   currentScheduleData.value = newData
 }
+
+// 筛选未排课程数据
+const filterHelpData = () => {
+  if (!selectedDepartment.value) {
+    filteredHelpData.value = helpData.value
+    return
+  }
+  filteredHelpData.value = helpData.value.filter(
+    item => item.department === selectedDepartment.value,
+  )
+}
+
+// 获取未排课程原因
+const helpClick = async department => {
+  try {
+    const res = await getTimetableHelpAPI('1902649449470054400') // 使用固定的任务ID
+    if (res.data.data) {
+      // 只显示当前学院的未排课程
+      helpData.value = res.data.data.filter(item => item.department === department).slice(0, 20)
+      filteredHelpData.value = helpData.value
+      helpDialogVisible.value = true
+    } else {
+      ElMessage.info('暂无未排课程数据')
+    }
+  } catch (error) {
+    console.error('获取未排课程原因失败:', error)
+    ElMessage.error('获取未排课程原因失败')
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -423,6 +486,13 @@ const handleScheduleDataUpdate = newData => {
         align-items: center;
         margin-bottom: 20px;
 
+        .class-right-title {
+          font-size: 16px;
+          cursor: pointer;
+          font-weight: normal;
+          color: #6c6c6c;
+          margin-right: 20px;
+        }
         h2 {
           margin: 0;
         }
@@ -460,5 +530,11 @@ const handleScheduleDataUpdate = newData => {
   .iconfont::before {
     font-size: 16px;
   }
+}
+
+.filter-box {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

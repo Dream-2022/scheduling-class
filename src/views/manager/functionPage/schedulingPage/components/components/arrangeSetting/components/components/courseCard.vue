@@ -111,6 +111,10 @@ const getColor = inject('getColor', () => '#e78891')
   display: flex;
   flex-direction: column;
   justify-content: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);

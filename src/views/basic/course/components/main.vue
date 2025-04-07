@@ -56,7 +56,10 @@
               <div class="class-right-content">{{ item.totalClassSize }}</div>
             </div>
             <div class="class-right-box">
-              <div style="display: flex">
+              <div
+                style="display: flex; cursor: pointer"
+                @click.stop="helpClick(item.scheduleTaskId)"
+              >
                 <div class="class-right-title">未排课程</div>
                 <span class="iconfont icon-bangzhu"></span>
               </div>
@@ -156,13 +159,30 @@
       </div>
     </div>
   </div>
+
+  <!-- 未排课程原因弹窗 -->
+  <el-dialog v-model="helpDialogVisible" title="未排课程原因" width="70%">
+    <el-table :data="helpData" style="width: 100%" stripe>
+      <el-table-column prop="courseName" label="课程名称" width="180" />
+      <el-table-column prop="teacherName" label="教师" width="120" />
+      <el-table-column prop="department" label="院系" width="180" />
+      <el-table-column prop="classComposition" label="班级" width="200" />
+      <el-table-column prop="conflictReason" label="冲突原因" width="150" />
+      <el-table-column prop="designatedRoomType" label="指定教室类型" width="150" />
+      <el-table-column prop="weeklyHours" label="周学时" width="120" />
+      <el-table-column prop="scheduledHours" label="已排课时" width="120" />
+      <el-table-column prop="schedulingPriority" label="优先级" width="100" />
+    </el-table>
+  </el-dialog>
 </template>
 <script setup>
-import { reactive, defineProps, onMounted } from 'vue'
+import { reactive, defineProps, onMounted, ref } from 'vue'
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
-import { getCourseSchedulingAPI } from '@/apis/course.js'
+import { getCourseSchedulingAPI, getTimetableHelpAPI } from '@/apis/course.js'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+
 const router = useRouter()
 const userStore = useUserStore()
 let courseList = reactive({
@@ -240,6 +260,28 @@ function editCourse(type, id) {
 const courseClick = (id, string, name) => {
   const identity = userStore.user.identity.toLowerCase()
   router.push(`/${identity}/functionPage/course/${id}/${string}?name=${name}`)
+}
+
+const helpDialogVisible = ref(false)
+const helpData = ref([])
+
+//获取课表未排原因
+const helpClick = async id => {
+  console.log('helpClick triggered with id:', id)
+  try {
+    const res = await getTimetableHelpAPI(id)
+    console.log('API response:', res.data)
+    if (res.data.data) {
+      // 只取前20条数据
+      helpData.value = res.data.data.slice(0, 20)
+      helpDialogVisible.value = true
+    } else {
+      ElMessage.info('暂无未排课程数据')
+    }
+  } catch (error) {
+    console.error('获取未排课程原因失败:', error)
+    ElMessage.error('获取未排课程原因失败')
+  }
 }
 </script>
 <style lang="scss" scoped>
