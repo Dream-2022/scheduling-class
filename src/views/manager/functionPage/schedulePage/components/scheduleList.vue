@@ -36,9 +36,9 @@
     :header-cell-style="{ 'text-align': 'center' }"
     :cell-style="{ 'text-align': 'center' }"
   >
-    <el-table-column label="考试 id" min-width="150">
+    <el-table-column label="考试 id" min-width="100">
       <template #default="{ row }">
-        <div>{{ row.operatorId }}</div>
+        <div>{{ row.id }}</div>
       </template>
     </el-table-column>
     <el-table-column label="考试名称" min-width="180">
@@ -81,11 +81,12 @@
     <el-table-column label="考试数量" min-width="120">
       <template #default="{ row }">
         <div>
-          {{ row.totalExamSize }}
+          {{ row.examSize }}
         </div>
       </template>
     </el-table-column>
-    <el-table-column label="未排考试" min-width="120"> 0 </el-table-column>
+    <el-table-column prop="failSize" label="未排考试" min-width="120" />
+    <el-table-column prop="operatorName" label="管理员" min-width="120" />
     <el-table-column label="班级数量" min-width="120">
       <template #default="{ row }">
         <div>

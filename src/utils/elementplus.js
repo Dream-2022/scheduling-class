@@ -44,6 +44,7 @@ import {
   ElInputNumber,
   ElCheckbox,
   ElTransfer,
+  ElCard,
 } from 'element-plus'
 
 export default function (app) {
@@ -88,4 +89,5 @@ export default function (app) {
   app.use(ElInputNumber)
   app.use(ElCheckbox)
   app.use(ElTransfer)
+  app.use(ElCard)
 }

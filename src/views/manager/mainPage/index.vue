@@ -110,14 +110,14 @@
         <div class="application-boxes">
           <div
             class="application-box"
-            v-for="(item, index) in applicationList"
+            v-for="(item, index) in applicationList.arr"
             :key="item"
             @mouseenter="isDisable.arr[index] = false"
             @mouseleave="isDisable.arr[index] = true"
           >
             <span style="display: flex">
               <span class="application-title" @click="applicationClick(item.essayId)">{{
-                item?.title
+                item?.leaveReason
               }}</span>
               <span
                 @click="temLoadClick(item.id)"
@@ -131,20 +131,19 @@
                 class="application-detail"
                 :class="isDisable?.arr[index] == true ? '' : 'disabled'"
               >
-                <span>{{ item?.leaveStartTime }}</span>
+                <span>{{ item?.leaveStart }} </span>
                 <span>{{ item?.leaveDays }} 天</span>
-                <span>{{ item?.leaveCourseCount }} 大节课</span>
               </span>
             </span>
             <span class="application-bottom" @click="applicationClick(item.essayId)">
-              <span class="first-label" :class="getLabel(item?.leaveType, true)">{{
-                item?.leaveType
-              }}</span>
-              <span class="second-label" :class="getLabel(item?.leaveReason, false)">{{
-                item?.leaveReason
-              }}</span>
+              <span class="first-label" :class="item.leaveType + '-label'">
+                {{ getLabelByValue(item.leaveType) }}
+              </span>
+              <span class="second-label" :class="item.title + '-label'">
+                {{ getLabelByValue(item?.title) }}
+              </span>
               <span class="name-label">{{ item?.applicant }}</span>
-              <span class="time-label">{{ item?.time }}</span>
+              <span class="time-label">{{ item?.updatedAt }}</span>
             </span>
           </div>
         </div>
@@ -155,7 +154,7 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">工作量 / 周</div>
-            <div class="more-view" @click="() => $router.push('/manager/functionPage/workload')">
+            <div class="more-view" @click="() => $router.push('/manager/functionPage/analysis')">
               查看更多<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
@@ -167,11 +166,17 @@
               @click="analysisClick(item.id)"
             >
               <div>
-                <el-progress type="circle" :color="customColors" :percentage="item.job" />
-                <div class="teacher-name">{{ item?.name }}</div>
+                <el-progress
+                  type="circle"
+                  :color="customColors"
+                  :percentage="item.workload > 100 ? 100 : item.workload"
+                >
+                  <span>{{ item.workload }}%</span>
+                </el-progress>
+                <div class="teacher-name">{{ item?.username }}</div>
                 <div class="teacher-bottom">
-                  <div class="teacher-subject">{{ item.subject }}</div>
-                  <div class="teacher-status">{{ item.status }}</div>
+                  <div class="teacher-subject">{{ item.courseList[0] }}</div>
+                  <div class="teacher-status">{{ item.title }}</div>
                 </div>
               </div>
             </div>
@@ -189,44 +194,58 @@
             <div class="class-box" v-for="item in classList.arr" :key="item">
               <div class="class-left">
                 <div class="class-left-top">
-                  <div class="class-left-title">{{ item.title }}</div>
-                  <div
-                    class="class-left-status"
-                    :class="item.status === '已发布' ? 'class-status1' : 'class-status2'"
+                  <div class="class-left-title">{{ item.taskName }}</div>
+                  <span
+                    class="status"
+                    :class="
+                      item.taskStatus == '0'
+                        ? 'status0'
+                        : item.taskStatus == '1'
+                          ? 'status1'
+                          : item.taskStatus == '2'
+                            ? 'status2'
+                            : item.taskStatus == '3'
+                              ? 'status3'
+                              : 'status4'
+                    "
                   >
-                    {{ item.status }}
-                  </div>
+                    {{
+                      item.taskStatus == '0'
+                        ? '待执行'
+                        : item.taskStatus == '1'
+                          ? '进行中'
+                          : item.taskStatus == '2'
+                            ? '已完成'
+                            : item.taskStatus == '3'
+                              ? '失败'
+                              : '进行中'
+                    }}
+                  </span>
                 </div>
                 <div class="class-left-bottom">
-                  {{ item.time }}
+                  {{ item.updatedAt }}
                 </div>
               </div>
               <div class="class-right">
                 <div class="class-right-box">
                   <div class="class-right-title">课时任务</div>
-                  <div class="class-right-content">{{ item.assign }}</div>
+                  <div class="class-right-content">{{ item.totalClassHours }}</div>
                 </div>
                 <div class="class-right-box">
                   <div class="class-right-title">课程数量</div>
-                  <div class="class-right-content">{{ item.class }}</div>
+                  <div class="class-right-content">{{ item.totalCourseSize }}</div>
+                </div>
+                <div class="class-right-box">
+                  <div class="class-right-title">班级数量</div>
+                  <div class="class-right-content">{{ item.totalClassSize }}</div>
                 </div>
                 <div class="class-right-box">
                   <div class="class-right-title">
                     未排课程
                     <span class="iconfont icon-bangzhu"></span>
                   </div>
-                  <div class="class-right-content">{{ item.noCourse }}</div>
-                </div>
-                <div class="class-right-box">
-                  <div class="class-right-title">参与教师</div>
-                  <div class="class-teacher">
-                    <div v-for="(teacher, index) in item.teachers" :key="teacher">
-                      <img
-                        src="@/assets/img/cat.jpeg"
-                        class="class-teacher-img"
-                        :style="{ transform: `translateX(${index * -10}px)` }"
-                      />
-                    </div>
+                  <div class="class-right-content">
+                    {{ item.totalCourseSize - item.successCourseSize }}
                   </div>
                 </div>
               </div>
@@ -255,7 +274,7 @@
         <div class="feedback-boxes">
           <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
             <div class="feedback-top">
-              <div class="feedback-content">{{ item.content }}</div>
+              <div class="feedback-content">{{ item.title }}</div>
               <div class="feedback-class">{{ item.class }}</div>
             </div>
             <div class="feedback-bottom">
@@ -266,15 +285,15 @@
                 >
                   {{ item?.identity }}
                 </div>
-                <div class="feedback-name">{{ item?.name }}</div>
+                <div class="feedback-name">{{ item?.teacherName }}</div>
                 <div
                   class="feedback-status"
-                  :class="item.status === '已解决' ? 'green-status' : 'red-status'"
+                  :class="item.status === '1' ? 'green-status' : 'red-status'"
                 >
-                  {{ item.status }}
+                  {{ item.status == '1' ? '已读' : '未读' }}
                 </div>
               </div>
-              <div class="feedback-time">{{ item.time }}</div>
+              <div class="feedback-time">{{ item.createdAt }}</div>
             </div>
           </div>
         </div>
@@ -290,7 +309,10 @@ import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
 import '@/assets/iconfont/iconfont.css'
 import Chart from '@/components/Chart.vue'
-import { getRoomRateAPI, getFeedbackSizeAPI, getTearchWorkloadAPI } from '@/apis/mainPage'
+import { getRoomRateAPI, getFeedbackSizeAPI, getTeacherWorkloadAPI } from '@/apis/mainPage'
+import { getLeaveAllAPI } from '@/apis/application'
+import { getCourseSchedulingAPI } from '@/apis/course'
+import { getFeedbackAllAPI } from '@/apis/feedback'
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
@@ -336,125 +358,14 @@ const panelContents = reactive({
 let isDisable = reactive({
   arr: [],
 })
-let applicationList = reactive([
-  {
-    id: 124,
-    title: '需要实习两天',
-    // 申请时间
-    time: '2025-2-8 15:30',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '2',
-    // 请假课程数量
-    leaveCourseCount: '5',
-    // 请假类型
-    leaveType: '公假',
-    // 申请事项
-    leaveReason: '调课申请',
-    // 申请人信息
-    applicant: '赵六(N21452153)',
-  },
-  {
-    id: 122,
-    title: '外出学习（老吉大）',
-    // 申请时间
-    time: '2025-2-8 12:30',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '1',
-    // 请假课程数量
-    leaveCourseCount: '2',
-    // 请假类型
-    leaveType: '事假',
-    // 申请事项
-    leaveReason: '代课申请',
-    // 申请人信息
-    applicant: '王五(N219856153)',
-  },
-])
+let applicationList = reactive({
+  arr: [],
+})
 let teacherList = reactive({
-  arr: [
-    {
-      id: 0,
-      name: '李华',
-      subject: '物理',
-      status: '教授',
-      job: 99,
-    },
-    {
-      id: 1,
-      name: '王五',
-      subject: '数据结构与算法',
-      status: '教授',
-      job: 68,
-    },
-    {
-      id: 2,
-      name: '李华',
-      subject: '软件质量保证与测试',
-      status: '教授',
-      job: 61,
-    },
-    {
-      id: 3,
-      name: '王五',
-      subject: '软件质量保证与测试',
-      status: '教授',
-      job: 40,
-    },
-  ],
+  arr: [],
 })
 let classList = reactive({
-  arr: [
-    {
-      id: 0,
-      title: '第一次排课',
-      status: '未发布',
-      time: '2025-2-8 15:30',
-      assign: 122,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-    {
-      id: 0,
-      title: '第一次排课',
-      status: '已发布',
-      time: '2025-2-8 15:30',
-      assign: 122,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-  ],
+  arr: [],
 })
 let feedbackList = reactive({
   arr: [
@@ -482,54 +393,58 @@ let feedbackList = reactive({
 let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
-const rateValue = ref('10') //图四的占用率
 onMounted(async () => {
   userStore.initialize()
   userInfo.push(...[userStore.user])
-  for (let i = 0; i < applicationList.length; i++) {
-    isDisable.arr[i] = true
-  }
   //获取当前反馈记录数
   const res2 = await getFeedbackSizeAPI(7)
+  let sum = 0
+  for (let i = 0; i < res2.data.data.length; i++) {
+    sum += res2.data.data[i].data
+  }
   chartOption2.value.xAxis[0].data = extractDataData(res2.data.data, 'time')
   chartOption2.value.series[0].data = extractDataData(res2.data.data, 'data')
+  chartOption2.value.title.subtext = `{value|平均}{titleSize| ${sum} }{value|次}`
   //获取当前教室占用率
   const res4 = await getRoomRateAPI(7)
   console.log(res4.data)
   const v1 = res4.data.data[0].value,
     v2 = res4.data.data[1].value
-  rateValue.value = ((v1 / (v1 + v2)) * 100).toFixed(2)
+  const x = ((v2 / (v1 + v2)) * 100).toFixed(2)
+  chartOption4.value.title.subtext = `{titleSize| ${x} }{value|%}`
   chartOption4.value.series[0].data[0].value = v2
   chartOption4.value.series[0].data[1].value = v1
   //获取教师工作量
-  const res5 = await getTearchWorkloadAPI()
-  console.log(res5.data)
+  const res5 = await getTeacherWorkloadAPI()
+  teacherList.arr = res5.data.data.slice(0, 4)
+  //获取请假申请
+  const res6 = await getLeaveAllAPI()
+  console.log(res6.data)
+  applicationList.arr = res6.data.data
+  console.log(applicationList.arr)
+  for (let i = 0; i < applicationList.arr.length; i++) {
+    isDisable.arr[i] = true
+    applicationList.arr[i].updatedAt = applicationList.arr[i].updatedAt.replace('T', ' ')
+    applicationList.arr[i].leaveStart = applicationList.arr[i].leaveStart.split('T')
+    applicationList.arr[i].leaveStart = applicationList.arr[i].leaveStart[0]
+  }
+  //获取排课列表
+  const res7 = await getCourseSchedulingAPI()
+  console.log(res7.data)
+  classList.arr = res7.data.data
+  for (let i = 0; i < classList.arr.length; i++) {
+    classList.arr[i].updatedAt = classList.arr[i].updatedAt.replace('T', ' ')
+  }
+  //反馈列表
+  const res8 = await getFeedbackAllAPI()
+  console.log(res8.data)
+  feedbackList.arr = res8.data.data
 })
 //获取对应属性组成一个数组
 function extractDataData(data, str) {
   return data
     .map(obj => obj[str])
     .filter(dataValue => dataValue !== undefined && dataValue !== null)
-}
-//获取颜色
-function getLabel(content, number) {
-  if (number == true) {
-    if (content === '事假') {
-      return 'first-label1'
-    } else if (content === '公假') {
-      return 'first-label2'
-    } else {
-      return 'first-label3'
-    }
-  } else {
-    if (content === '调课申请') {
-      return 'second-label1'
-    } else if (content === '代课申请') {
-      return 'second-label2'
-    } else {
-      return 'second-label3'
-    }
-  }
 }
 //点击搜索
 async function searchClick() {
@@ -554,7 +469,7 @@ const chartOption1 = ref({
   title: {
     show: true,
     text: `{value|学期进度}`,
-    subtext: `{titleSize| 20 }{value|%}`,
+    subtext: `{titleSize| 34 }{value|%}`,
     textStyle: {
       rich: {},
     },
@@ -615,7 +530,7 @@ const chartOption1 = ref({
       },
       data: [
         {
-          value: 20,
+          value: 34,
         },
       ],
     },
@@ -653,7 +568,7 @@ const chartOption1 = ref({
       },
       data: [
         {
-          value: 20,
+          value: 34,
         },
       ],
     },
@@ -751,7 +666,7 @@ const chartOption3 = ref({
 const chartOption4 = ref({
   title: {
     text: `{value|教室占用率}`,
-    subtext: `{titleSize|${rateValue.value} }{value|%}`,
+    subtext: `{titleSize| 10 }{value|%}`,
     textStyle: {
       color: '#7ab25f',
       rich: {},
@@ -795,6 +710,36 @@ const chartOption4 = ref({
     },
   ],
 })
+const typeApplication = [
+  { label: '全部', value: '' },
+  { label: '公假', value: 'public' },
+  { label: '事假', value: 'matter' },
+  { label: '病假', value: 'illness' },
+  { label: '婚假', value: 'wed' },
+  { label: '产假', value: 'maternity' },
+  { label: '丧假', value: 'funeral' },
+  { label: '其他', value: 'other' },
+]
+const titleApplication = [
+  { label: '全部', value: '' },
+  { label: '换课申请', value: 'change' },
+  { label: '代课申请', value: 'place' },
+  { label: '调课申请', value: 'adjust' },
+]
+//获取申请类型
+function getLabelByValue(value) {
+  for (let i = 0; i < typeApplication.length; i++) {
+    if (typeApplication[i].value === value) {
+      return typeApplication[i].label
+    }
+  }
+  for (let i = 0; i < titleApplication.length; i++) {
+    if (titleApplication[i].value === value) {
+      return titleApplication[i].label
+    }
+  }
+  return null
+}
 //点击快捷入口
 function staticAnalysis(string, value) {
   if (value != null) {
@@ -1139,19 +1084,56 @@ function staticAnalysis(string, value) {
             align-items: center;
 
             .first-label {
-              color: #fff;
               border-radius: 5px;
               padding: 0 5px;
             }
 
-            .first-label1 {
-              background-color: $main-blue;
+            .matter-label {
+              background-color: $blue-back;
+              color: $main-blue;
             }
-            .first-label2 {
-              background-color: $main-purple;
+            .public-label {
+              color: $main-purple;
+              background-color: $purple-back;
             }
-            .first-label3 {
-              background-color: $word-grey-color;
+            .illness-label {
+              color: $main-yellow;
+              background-color: $yellow-shallow;
+            }
+            .wed-label {
+              color: $pink;
+              background-color: $red-back;
+            }
+            .maternity-label {
+              color: $green;
+              background-color: $green-back;
+            }
+            .funeral-label {
+              color: $deep-color;
+              background-color: $blue-back;
+            }
+            .other-label {
+              color: $word-grey-color;
+              background-color: $word-back-color;
+            }
+            .signature-img {
+              width: 100%;
+            }
+
+            .change-label,
+            .adjust-label,
+            .place-label {
+              font-size: 13px;
+              border-radius: 5px;
+              margin-left: 6%;
+              margin-right: 6px;
+              color: $main-green;
+            }
+            .change-label {
+              color: $purple;
+            }
+            .place-label {
+              color: $main-blue;
             }
 
             .second-label {
@@ -1287,11 +1269,27 @@ function staticAnalysis(string, value) {
                   border-radius: 5px;
                   color: #fff;
                 }
-                .class-status1 {
-                  background-color: $main-blue;
+                .status {
+                  line-height: 22px;
+                  border-radius: 5px;
+                  font-size: 14px;
+                  padding: 2px 6px;
+                  color: #fff;
                 }
-                .class-status2 {
+                .status0 {
+                  background-color: $word-grey-color;
+                }
+                .status1 {
                   background-color: $main-yellow;
+                }
+                .status2 {
+                  background-color: $purple;
+                }
+                .status3 {
+                  background-color: $red;
+                }
+                .status4 {
+                  background-color: $main-green;
                 }
               }
 

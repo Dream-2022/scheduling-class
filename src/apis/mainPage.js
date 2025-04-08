@@ -21,7 +21,7 @@ export const getFeedbackSizeAPI = time => {
   })
 }
 //获取教师工作量
-export const getTearchWorkloadAPI = teacherId => {
+export const getTeacherWorkloadAPI = teacherId => {
   return http({
     url: '/schedule/get-teacher-workload',
     method: 'GET',

@@ -80,7 +80,11 @@
             删除
             <el-icon class="el-icon--right"><Delete /></el-icon>
           </el-button>
-          <el-button color="#a372df" plain @click.stop="editCourse('class', item.id)">
+          <el-button
+            color="#a372df"
+            plain
+            @click.stop="editCourse('class', item.scheduleTaskId, item)"
+          >
             编辑
             <el-icon class="el-icon--right"><Edit /></el-icon>
           </el-button>
@@ -147,7 +151,7 @@
             删除
             <el-icon class="el-icon--right"><Delete /></el-icon>
           </el-button>
-          <el-button color="#a372df" plain @click.stop="editCourse('exam', item.id)">
+          <el-button color="#a372df" plain @click.stop="editCourse('exam', item.id, item)">
             编辑
             <el-icon class="el-icon--right"><Edit /></el-icon>
           </el-button>
@@ -174,6 +178,64 @@
       <el-table-column prop="schedulingPriority" label="优先级" width="100" />
     </el-table>
   </el-dialog>
+
+  <!-- 编辑状态弹窗 -->
+  <el-dialog v-model="editDialogVisible" title="编辑排课状态" width="50%">
+    <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px" status-icon>
+      <el-form-item label="当前状态">
+        <el-tag
+          :type="
+            editForm.currentStatus == '0'
+              ? 'info'
+              : editForm.currentStatus == '1'
+                ? 'warning'
+                : editForm.currentStatus == '2'
+                  ? 'success'
+                  : editForm.currentStatus == '3'
+                    ? 'danger'
+                    : 'warning'
+          "
+        >
+          {{
+            editForm.currentStatus == '0'
+              ? '待执行'
+              : editForm.currentStatus == '1'
+                ? '进行中'
+                : editForm.currentStatus == '2'
+                  ? '已完成'
+                  : editForm.currentStatus == '3'
+                    ? '失败'
+                    : '进行中'
+          }}
+        </el-tag>
+      </el-form-item>
+      <el-form-item label="新状态" prop="newStatus">
+        <el-select v-model="editForm.newStatus" placeholder="请选择新状态">
+          <el-option label="待执行" value="0" />
+          <el-option label="进行中" value="1" />
+          <el-option label="已完成" value="2" />
+          <el-option label="失败" value="3" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="修改原因" prop="reason">
+        <el-input
+          v-model="editForm.reason"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入修改原因"
+        />
+      </el-form-item>
+      <el-form-item label="负责人签名" prop="signature">
+        <HandwrittenSignature v-model="editForm.signature" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEditForm">确认</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 <script setup>
 import { reactive, defineProps, onMounted, ref } from 'vue'
@@ -182,6 +244,7 @@ import { useUserStore } from '@/stores/userStore'
 import { getCourseSchedulingAPI, getTimetableHelpAPI } from '@/apis/course.js'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import HandwrittenSignature from '@/components/signature.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -254,9 +317,91 @@ defineProps({
 function deleteCourse(type, id) {
   console.log('删除', type, id)
 }
-function editCourse(type, id) {
-  console.log('编辑', type, id)
+
+// 编辑表单相关
+const editDialogVisible = ref(false)
+const editFormRef = ref(null)
+const editForm = reactive({
+  id: '',
+  type: '',
+  currentStatus: '',
+  newStatus: '',
+  reason: '',
+  signature: '',
+  taskName: '',
+})
+
+const editRules = {
+  newStatus: [{ required: true, message: '请选择新状态', trigger: 'change' }],
+  reason: [{ required: true, message: '请输入修改原因', trigger: 'blur' }],
+  signature: [{ required: true, message: '请进行签名', trigger: 'blur' }],
 }
+
+function editCourse(type, id, item) {
+  console.log('编辑', type, id, item)
+  editForm.id = id
+  editForm.type = type
+  editForm.taskName = item.taskName || item.title
+  editForm.currentStatus = item.taskStatus || (item.status === '已发布' ? '1' : '0')
+  editForm.newStatus = ''
+  editForm.reason = ''
+  editForm.signature = ''
+  editDialogVisible.value = true
+}
+
+// 提交编辑表单
+const submitEditForm = () => {
+  editFormRef.value.validate(async valid => {
+    if (valid) {
+      // 这里应该调用API更新状态
+      console.log('提交编辑表单', editForm)
+
+      // 模拟API调用成功
+      ElMessage.success(
+        `已将"${editForm.taskName}"状态从${
+          editForm.currentStatus == '0'
+            ? '待执行'
+            : editForm.currentStatus == '1'
+              ? '进行中'
+              : editForm.currentStatus == '2'
+                ? '已完成'
+                : editForm.currentStatus == '3'
+                  ? '失败'
+                  : '进行中'
+        }修改为${
+          editForm.newStatus == '0'
+            ? '待执行'
+            : editForm.newStatus == '1'
+              ? '进行中'
+              : editForm.newStatus == '2'
+                ? '已完成'
+                : editForm.newStatus == '3'
+                  ? '失败'
+                  : '进行中'
+        }`,
+      )
+
+      // 更新本地数据
+      if (editForm.type === 'class') {
+        const index = courseList.arr.findIndex(item => item.scheduleTaskId === editForm.id)
+        if (index !== -1) {
+          courseList.arr[index].taskStatus = editForm.newStatus
+        }
+      } else {
+        const index = examList.arr.findIndex(item => item.id === editForm.id)
+        if (index !== -1) {
+          examList.arr[index].status = editForm.newStatus === '1' ? '已发布' : '未发布'
+        }
+      }
+
+      editDialogVisible.value = false
+    } else {
+      ElMessage.error('表单验证失败，请检查输入')
+      return false
+    }
+  })
+}
+
 const courseClick = (id, string, name) => {
   const identity = userStore.user.identity.toLowerCase()
   router.push(`/${identity}/functionPage/course/${id}/${string}?name=${name}`)
@@ -380,5 +525,11 @@ const helpClick = async id => {
       font-size: 13px;
     }
   }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>
