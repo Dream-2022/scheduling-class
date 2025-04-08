@@ -57,3 +57,13 @@ export const getLeaveListAPI = () => {
     method: 'GET',
   })
 }
+//获取近期申请的图表
+export const getLeaveChartAPI = time => {
+  return http({
+    url: '/review/get-apply-for-size',
+    method: 'GET',
+    params: {
+      time,
+    },
+  })
+}

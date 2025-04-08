@@ -260,7 +260,9 @@
           <div class="iconfont" :class="item.class" :style="'color: ' + item.color"></div>
           <div class="panel-word">{{ item.content }}</div>
           <div class="panel-number">{{ item.value }}</div>
-          <div class="panel-button">查看</div>
+          <div class="panel-button" @click="router.push('/manager/functionPage/application')">
+            查看
+          </div>
         </div>
       </div>
       <div class="right-box2">
@@ -310,23 +312,32 @@ import { ElMessage } from 'element-plus'
 import '@/assets/iconfont/iconfont.css'
 import Chart from '@/components/Chart.vue'
 import { getRoomRateAPI, getFeedbackSizeAPI, getTeacherWorkloadAPI } from '@/apis/mainPage'
-import { getLeaveAllAPI } from '@/apis/application'
+import { getLeaveAllAPI, getLeaveChartAPI } from '@/apis/application'
 import { getCourseSchedulingAPI } from '@/apis/course'
 import { getFeedbackAllAPI } from '@/apis/feedback'
+import { connectAPI } from '@/apis/inform'
+
+// 获取全局实例和echarts
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
+// 初始化状态管理
 const userStore = useUserStore()
 const router = useRouter()
 
+// 基础数据
 let searchValue = ref('') // 搜索内容
 let userInfo = reactive([]) // 用户信息
+
+// 常量定义
 const customColors = [
   { color: '#7ab25f', percentage: 25 },
   { color: '#547bf1', percentage: 50 },
   { color: '#ef943f', percentage: 75 },
   { color: '#f56c6c', percentage: 100 },
 ]
+
+// 面板内容数据
 const panelContents = reactive({
   arr: [
     {
@@ -355,98 +366,179 @@ const panelContents = reactive({
     },
   ],
 })
-let isDisable = reactive({
-  arr: [],
-})
-let applicationList = reactive({
-  arr: [],
-})
-let teacherList = reactive({
-  arr: [],
-})
-let classList = reactive({
-  arr: [],
-})
-let feedbackList = reactive({
-  arr: [
-    {
-      id: 0,
-      name: '张三',
-      content: '排课系统的使用方法',
-      time: '2023-10-10 15:30',
-      status: '已解决', //已解决,未解决,已拒绝
-      identity: 'teacher',
-      class: '计科院 软件工程 22.4',
-    },
-    {
-      id: 11,
-      name: '张李',
-      content: '排课系统的使用方法',
-      time: '2023-10-10 14:30',
-      status: '未解决',
-      identity: 'student',
-      class: '计科院 软件工程 22.7',
-    },
-  ],
-})
-// charts图标选中
+
+// 列表数据
+let isDisable = reactive({ arr: [] })
+let applicationList = reactive({ arr: [] })
+let teacherList = reactive({ arr: [] })
+let classList = reactive({ arr: [] })
+let feedbackList = reactive({ arr: [] })
+
+// 图表选项
 let selectedOption2 = ref('近一周趋势图')
 let selectedOption3 = ref('近一周趋势图')
 let selectedOption4 = ref('近一周趋势图')
-onMounted(async () => {
-  userStore.initialize()
-  userInfo.push(...[userStore.user])
-  //获取当前反馈记录数
-  const res2 = await getFeedbackSizeAPI(7)
-  let sum = 0
-  for (let i = 0; i < res2.data.data.length; i++) {
-    sum += res2.data.data[i].data
-  }
-  chartOption2.value.xAxis[0].data = extractDataData(res2.data.data, 'time')
-  chartOption2.value.series[0].data = extractDataData(res2.data.data, 'data')
-  chartOption2.value.title.subtext = `{value|平均}{titleSize| ${sum} }{value|次}`
-  //获取当前教室占用率
-  const res4 = await getRoomRateAPI(7)
-  console.log(res4.data)
-  const v1 = res4.data.data[0].value,
-    v2 = res4.data.data[1].value
-  const x = ((v2 / (v1 + v2)) * 100).toFixed(2)
-  chartOption4.value.title.subtext = `{titleSize| ${x} }{value|%}`
-  chartOption4.value.series[0].data[0].value = v2
-  chartOption4.value.series[0].data[1].value = v1
-  //获取教师工作量
-  const res5 = await getTeacherWorkloadAPI()
-  teacherList.arr = res5.data.data.slice(0, 4)
-  //获取请假申请
-  const res6 = await getLeaveAllAPI()
-  console.log(res6.data)
-  applicationList.arr = res6.data.data
-  console.log(applicationList.arr)
-  for (let i = 0; i < applicationList.arr.length; i++) {
-    isDisable.arr[i] = true
-    applicationList.arr[i].updatedAt = applicationList.arr[i].updatedAt.replace('T', ' ')
-    applicationList.arr[i].leaveStart = applicationList.arr[i].leaveStart.split('T')
-    applicationList.arr[i].leaveStart = applicationList.arr[i].leaveStart[0]
-  }
-  //获取排课列表
-  const res7 = await getCourseSchedulingAPI()
-  console.log(res7.data)
-  classList.arr = res7.data.data
-  for (let i = 0; i < classList.arr.length; i++) {
-    classList.arr[i].updatedAt = classList.arr[i].updatedAt.replace('T', ' ')
-  }
-  //反馈列表
-  const res8 = await getFeedbackAllAPI()
-  console.log(res8.data)
-  feedbackList.arr = res8.data.data
-})
-//获取对应属性组成一个数组
+
+// 申请类型和标题选项
+const typeApplication = [
+  { label: '全部', value: '' },
+  { label: '公假', value: 'public' },
+  { label: '事假', value: 'matter' },
+  { label: '病假', value: 'illness' },
+  { label: '婚假', value: 'wed' },
+  { label: '产假', value: 'maternity' },
+  { label: '丧假', value: 'funeral' },
+  { label: '其他', value: 'other' },
+]
+
+const titleApplication = [
+  { label: '全部', value: '' },
+  { label: '换课申请', value: 'change' },
+  { label: '代课申请', value: 'place' },
+  { label: '调课申请', value: 'adjust' },
+]
+
+// 从数据中提取指定属性组成数组
 function extractDataData(data, str) {
   return data
     .map(obj => obj[str])
     .filter(dataValue => dataValue !== undefined && dataValue !== null)
 }
-//点击搜索
+
+//根据值获取对应的标签
+function getLabelByValue(value) {
+  for (let i = 0; i < typeApplication.length; i++) {
+    if (typeApplication[i].value === value) {
+      return typeApplication[i].label
+    }
+  }
+  for (let i = 0; i < titleApplication.length; i++) {
+    if (titleApplication[i].value === value) {
+      return titleApplication[i].label
+    }
+  }
+  return null
+}
+
+//格式化日期时间
+function formatDateTime(dateTimeStr) {
+  return dateTimeStr.replace('T', ' ')
+}
+
+//格式化日期
+function formatDate(dateStr) {
+  return dateStr.split('T')[0]
+}
+//获取反馈图表数据
+async function fetchFeedbackChartData(days = 7) {
+  try {
+    const res = await getFeedbackSizeAPI(days)
+    let sum = 0
+    for (let i = 0; i < res.data.data.length; i++) {
+      sum += res.data.data[i].data
+    }
+    chartOption2.value.xAxis[0].data = extractDataData(res.data.data, 'time')
+    chartOption2.value.series[0].data = extractDataData(res.data.data, 'data')
+    chartOption2.value.title.subtext = `{value|平均}{titleSize| ${sum} }{value|次}`
+  } catch (error) {
+    console.error('获取反馈图表数据失败:', error)
+  }
+}
+
+//获取教室占用率数据
+async function fetchRoomRateData(days = 7) {
+  try {
+    const res = await getRoomRateAPI(days)
+    const v1 = res.data.data[0].value,
+      v2 = res.data.data[1].value
+    const x = ((v2 / (v1 + v2)) * 100).toFixed(2)
+    chartOption4.value.title.subtext = `{titleSize| ${x} }{value|%}`
+    chartOption4.value.series[0].data[0].value = v2
+    chartOption4.value.series[0].data[1].value = v1
+  } catch (error) {
+    console.error('获取教室占用率数据失败:', error)
+  }
+}
+
+//获取教师工作量数据
+async function fetchTeacherWorkloadData() {
+  try {
+    const res = await getTeacherWorkloadAPI()
+    teacherList.arr = res.data.data.slice(0, 4)
+  } catch (error) {
+    console.error('获取教师工作量数据失败:', error)
+  }
+}
+
+//获取请假申请数据
+async function fetchLeaveApplicationData() {
+  try {
+    const res = await getLeaveAllAPI()
+    applicationList.arr = res.data.data
+
+    // 处理日期格式
+    for (let i = 0; i < applicationList.arr.length; i++) {
+      isDisable.arr[i] = true
+      applicationList.arr[i].updatedAt = formatDateTime(applicationList.arr[i].updatedAt)
+      applicationList.arr[i].leaveStart = formatDate(applicationList.arr[i].leaveStart)
+    }
+  } catch (error) {
+    console.error('获取请假申请数据失败:', error)
+  }
+}
+
+//获取排课列表数据
+async function fetchCourseSchedulingData() {
+  try {
+    const res = await getCourseSchedulingAPI()
+    classList.arr = res.data.data
+
+    // 处理日期格式
+    for (let i = 0; i < classList.arr.length; i++) {
+      classList.arr[i].updatedAt = formatDateTime(classList.arr[i].updatedAt)
+    }
+  } catch (error) {
+    console.error('获取排课列表数据失败:', error)
+  }
+}
+
+//获取反馈列表数据
+async function fetchFeedbackListData() {
+  try {
+    const res = await getFeedbackAllAPI()
+    feedbackList.arr = res.data.data
+  } catch (error) {
+    console.error('获取反馈列表数据失败:', error)
+  }
+}
+
+//获取近期申请图表数据
+async function fetchLeaveChartData(days = 7) {
+  try {
+    const res = await getLeaveChartAPI(days)
+    let sum = 0
+    for (let i = 0; i < res.data.data.length; i++) {
+      sum += res.data.data[i].data
+    }
+    chartOption3.value.xAxis.data = extractDataData(res.data.data, 'time')
+    chartOption3.value.series.data = extractDataData(res.data.data, 'data')
+    chartOption3.value.title.subtext = `{titleSize| ${sum} }{value|个}`
+  } catch (error) {
+    console.error('获取近期申请图表数据失败:', error)
+  }
+}
+
+//获取通知连接
+async function fetchNotificationConnection() {
+  try {
+    const res = await connectAPI()
+    console.log('通知连接数据:', res.data)
+  } catch (error) {
+    console.error('获取通知连接失败:', error)
+  }
+}
+
+// 事件处理函数
 async function searchClick() {
   if (searchValue.value == '' || searchValue.value == null) {
     ElMessage.warning('输入内容不能为空！')
@@ -455,16 +547,69 @@ async function searchClick() {
   router.push(`/function/manager/${searchValue.value}`)
 }
 
+//下拉菜单命令处理函数
 async function handleCommand2(command) {
-  console.log(command)
-}
-async function handleCommand3(command) {
-  console.log(command)
-}
-async function handleCommand4(command) {
-  console.log(command)
+  console.log('图表2命令:', command)
 }
 
+async function handleCommand3(command) {
+  console.log('图表3命令:', command)
+}
+
+async function handleCommand4(command) {
+  console.log('图表4命令:', command)
+}
+
+//快捷入口点击事件
+function staticAnalysis(string, value) {
+  if (value != null) {
+    router.push(`/manager/functionPage/${string}/?value=${value}`)
+    return
+  }
+  router.push(`/manager/functionPage/${string}`)
+}
+
+//申请点击事件
+function applicationClick(essayId) {
+  // 处理申请点击逻辑
+  console.log('申请点击:', essayId)
+}
+
+//临时加载点击事件
+function temLoadClick(id) {
+  // 处理临时加载点击逻辑
+  console.log('临时加载点击:', id)
+}
+
+function analysisClick(id) {
+  // 处理分析点击逻辑
+  console.log('分析点击:', id)
+}
+
+// 初始化函数
+async function initializeData() {
+  userStore.initialize()
+  userInfo.push(...[userStore.user])
+
+  // 获取所有数据
+  await Promise.all([
+    fetchFeedbackChartData(),
+    fetchRoomRateData(),
+    fetchTeacherWorkloadData(),
+    fetchLeaveApplicationData(),
+    fetchCourseSchedulingData(),
+    fetchFeedbackListData(),
+    fetchLeaveChartData(),
+    fetchNotificationConnection(),
+  ])
+}
+
+// 生命周期钩子
+onMounted(async () => {
+  await initializeData()
+})
+
+// 图表配置
 const chartOption1 = ref({
   title: {
     show: true,
@@ -710,44 +855,6 @@ const chartOption4 = ref({
     },
   ],
 })
-const typeApplication = [
-  { label: '全部', value: '' },
-  { label: '公假', value: 'public' },
-  { label: '事假', value: 'matter' },
-  { label: '病假', value: 'illness' },
-  { label: '婚假', value: 'wed' },
-  { label: '产假', value: 'maternity' },
-  { label: '丧假', value: 'funeral' },
-  { label: '其他', value: 'other' },
-]
-const titleApplication = [
-  { label: '全部', value: '' },
-  { label: '换课申请', value: 'change' },
-  { label: '代课申请', value: 'place' },
-  { label: '调课申请', value: 'adjust' },
-]
-//获取申请类型
-function getLabelByValue(value) {
-  for (let i = 0; i < typeApplication.length; i++) {
-    if (typeApplication[i].value === value) {
-      return typeApplication[i].label
-    }
-  }
-  for (let i = 0; i < titleApplication.length; i++) {
-    if (titleApplication[i].value === value) {
-      return titleApplication[i].label
-    }
-  }
-  return null
-}
-//点击快捷入口
-function staticAnalysis(string, value) {
-  if (value != null) {
-    router.push(`/manager/functionPage/${string}/?value=${value}`)
-    return
-  }
-  router.push(`/manager/functionPage/${string}`)
-}
 </script>
 <style lang="scss" scoped>
 .component-box {
