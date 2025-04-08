@@ -59,57 +59,14 @@
             style="width: 100%"
           />
         </el-form-item>
-        <div class="dialog-title">选择导入步骤（二选一）</div>
-        <div class="wow animate__fadeInRight warn-box">
-          <span class="iconfont icon-icon-gantanhao"></span>
-          选择参照模板一键导入所需表格，或按步骤自由导入所需表格
-        </div>
-        <el-form-item class="plan-boxes" prop="planValue">
-          <el-radio-group v-model="information.arr.planValue">
-            <div class="plan-box">
-              <el-radio :value="1" size="large" border style="height: 136px; width: 466px">
-                <div>
-                  <div class="plan-title">
-                    <span class="iconfont icon-dian1"></span>方案一：一次性导入数据
-                  </div>
-                  <div class="plan-word">
-                    如下载考试计划示例，表格内容有填写说明<br />
-                    按要求导入数据，一次性完成考试计划信息配置，即可自动排考
-                  </div>
-                  <div class="plan-button-box">
-                    <el-button
-                      @click="downloadClick"
-                      size="small"
-                      color="#547bf1"
-                      :icon="Download"
-                      plain
-                    >
-                      下载考试计划示例
-                    </el-button>
-                    <el-button size="small" color="#547bf1" :icon="Promotion">
-                      导入考试计划
-                    </el-button>
-                  </div>
-                </div>
-              </el-radio>
-            </div>
-            <div class="plan-box">
-              <el-radio :value="2" size="large" border style="height: 120px; width: 450px">
-                <div class="plan-title">
-                  <span class="iconfont icon-dian1"></span>方案二：按步骤添加数据
-                </div>
-                <div class="plan-word">
-                  按步骤导入数据，按需进行编辑修改<br />
-                  <span class="iconfont icon-shuzi-"></span>设置学校信息
-                  <span class="iconfont icon-shuzi-2"></span>特殊设置
-                  <span class="iconfont icon-shuzi-4"></span>禁排设置
-                  <span class="iconfont icon-shuzi-1"></span>排考优先级<br />
-                  <span class="iconfont icon-shuzi-5"></span>设置考试教室
-                  <span class="iconfont icon-shuzi-7"></span>排考设置
-                </div>
-              </el-radio>
-            </div>
-          </el-radio-group>
+        <el-form-item label="考试时长" prop="duration">
+          <el-input-number
+            v-model="information.arr.duration"
+            :min="30"
+            :max="180"
+            :step="30"
+            placeholder="请输入考试时长(分钟)"
+          />
         </el-form-item>
       </el-form>
     </div>
@@ -176,7 +133,6 @@
 import { RouterView, useRouter } from 'vue-router'
 import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Download, Promotion } from '@element-plus/icons-vue'
 import { downloadAPI } from '@/apis/scheduling'
 
 const router = useRouter()
@@ -208,6 +164,7 @@ const rules = {
   ],
   cycle: [{ required: true, message: '请选择考试周期', trigger: 'change' }],
   examTime: [{ required: true, message: '请选择考试时间', trigger: 'change' }],
+  duration: [{ required: true, message: '请输入考试时长', trigger: 'change' }],
   planValue: [{ required: true, message: '请选择导入方式', trigger: 'change' }],
 }
 //点击考试基本信息确认按钮，跳转到考试编辑页面
@@ -254,8 +211,6 @@ function saveScheduling() {
     }
     if (valid) {
       informationVisible.value = false
-      schoolVisible.value = true
-      //打开新的弹窗
       schoolVisible.value = true
       ElMessage.success('设置成功！')
     }

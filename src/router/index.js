@@ -540,42 +540,39 @@ const setRouter = async () => {
                   },
                   {
                     path: 'scheduleExam',
-                    redirect: '/manager/functionPage/schedule/scheduleList/step',
+                    redirect: '/manager/functionPage/schedule/scheduleExam/setInformation',
                     component: () =>
                       import(
                         '../views/manager/functionPage/schedulePage/components/scheduleExam.vue'
                       ),
                     children: [
                       {
-                        path: 'step',
+                        path: 'setInformation',
                         component: () =>
                           import(
-                            '../views/manager/functionPage/schedulePage/components/components/step/index.vue'
+                            '../views/manager/functionPage/informationPage/components/setInformation.vue'
                           ),
-                        children: [
-                          {
-                            path: 'classroomDisabled',
-                            component: () =>
-                              import(
-                                '../views/manager/functionPage/schedulePage/components/components/step/components/classroomDisabled.vue'
-                              ),
-                          },
-                          {
-                            path: 'teacherDisabled',
-                            component: () =>
-                              import(
-                                '../views/manager/functionPage/schedulePage/components/components/step/components/teacherDisabled.vue'
-                              ),
-                          },
-                          {
-                            path: 'schedulePeriod',
-                            component: () => {
-                              import(
-                                '../views/manager/functionPage/schedulePage/components/components/step/components/schedulePeriod.vue'
-                              )
-                            },
-                          },
-                        ],
+                      },
+                      {
+                        path: 'classroomDisabled',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulePage/components/components/classroomDisabled.vue'
+                          ),
+                      },
+                      {
+                        path: 'teacherDisabled',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulePage/components/components/teacherDisabled.vue'
+                          ),
+                      },
+                      {
+                        path: 'schedulePeriod',
+                        component: () =>
+                          import(
+                            '../views/manager/functionPage/schedulePage/components/components/schedulePeriod.vue'
+                          ),
                       },
                       {
                         path: 'show',
