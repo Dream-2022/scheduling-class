@@ -73,6 +73,6 @@ export const getTimetableHelpAPI = scheduleTaskId => {
 export const getTimetableProgressAPI = () => {
   return http({
     url: '/admin/create-scheduling-task',
-    method: 'GET',
+    method: 'POST',
   })
 }

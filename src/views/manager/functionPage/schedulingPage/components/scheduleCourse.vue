@@ -4,7 +4,7 @@
       <el-button
         color="#547bf1"
         plain
-        :disabled="activePage === 0"
+        :disabled="activePage == 0"
         :icon="ArrowLeftBold"
         circle
         @click="handleStepClick(--activePage)"
@@ -20,7 +20,7 @@
       <el-button
         color="#547bf1"
         plain
-        :disabled="activePage === 6"
+        :disabled="activePage == 6"
         :icon="ArrowRightBold"
         circle
         style="transform: translateX(-20px)"

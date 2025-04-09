@@ -125,7 +125,8 @@
 
     <el-table-column label="签名" width="180">
       <template #default="{ row }">
-        <img class="signature-img" :src="row.signature" alt="签名" />
+        <img v-if="row.signature" class="signature-img" :src="row.signature" alt="签名" />
+        <div v-else>--</div>
       </template>
     </el-table-column>
     <el-table-column label="创建时间" width="180">

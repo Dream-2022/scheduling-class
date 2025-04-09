@@ -455,7 +455,7 @@ let navigation3 = [
     value: 'feedback',
   },
   {
-    name: '今日安排',
+    name: '近日安排',
     value: 'arrange',
   },
 ]

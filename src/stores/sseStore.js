@@ -22,9 +22,13 @@ export const useSseStore = defineStore('sse', () => {
     })
     return eventSource.value
   }
+  const getEventSource = () => {
+    return eventSource.value
+  }
 
   return {
     eventSource,
     setEventSource,
+    getEventSource,
   }
 })

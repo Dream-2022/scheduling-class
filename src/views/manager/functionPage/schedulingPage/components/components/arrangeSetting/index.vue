@@ -1,5 +1,26 @@
 <template>
   <div class="arrange-setting">
+    <!-- 添加进度条对话框 -->
+    <el-dialog
+      v-model="progressDialogVisible"
+      title="生成课表进度"
+      width="30%"
+      :close-on-click-modal="false"
+      :show-close="false"
+    >
+      <div class="progress-container">
+        <el-progress
+          :percentage="progressPercentage"
+          striped
+          striped-flow
+          :duration="10"
+          :stroke-width="15"
+          :format="format"
+        />
+        <div class="progress-text">{{ progressText }}</div>
+      </div>
+    </el-dialog>
+
     <div class="setting-container">
       <div class="setting-left">
         <div class="wow animate__fadeInLeft warn-box">
@@ -133,6 +154,7 @@
 
 <script setup>
 import { ref, onMounted, defineEmits } from 'vue'
+import { useSseStore } from '@/stores/sseStore'
 import { getDepartmentsAPI, getMajorsAPI, getGradesAPI } from '@/apis/classMajor'
 import { setTimetableAPI } from '@/apis/timetable'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -141,6 +163,7 @@ import { Promotion } from '@element-plus/icons-vue'
 import { getTimetableHelpAPI, getTimetableProgressAPI } from '@/apis/course.js'
 
 const emit = defineEmits(['update:activePage'])
+const sseStore = useSseStore()
 
 // 学院数据
 const departments = ref([])
@@ -158,6 +181,10 @@ const helpData = ref([])
 const selectedDepartment = ref('')
 const filteredHelpData = ref([])
 
+const progressDialogVisible = ref(false)
+const progressPercentage = ref(0)
+const progressText = ref('正在准备生成课表...')
+
 // 获取学院数据
 onMounted(async () => {
   try {
@@ -168,6 +195,45 @@ onMounted(async () => {
     console.error(error)
   }
 })
+
+// 格式化进度条百分比
+const format = percentage => {
+  return percentage === 100 ? '完成' : `${percentage}%`
+}
+
+// 生成总课表
+const generateTotalSchedule = async () => {
+  //获取排课进度展示
+  const openFullScreen2 = async () => {
+    progressDialogVisible.value = true
+    progressPercentage.value = 0
+    progressText.value = '正在准备生成课表...'
+
+    const res = await getTimetableProgressAPI()
+    console.log(res.data)
+    const eventSource = sseStore.getEventSource()
+    eventSource.onmessage = event => {
+      const eventData = JSON.parse(event.data)
+
+      // 更新进度条
+      const currentSize = eventData.data.currentSize
+      progressPercentage.value = Math.floor((currentSize / 1306) * 100)
+      progressText.value = `正在处理: ${currentSize}/1306`
+
+      // 当进度达到1306时
+      if (currentSize >= 1306) {
+        progressDialogVisible.value = false
+        // 执行路由跳转
+        router.push('/manager/functionPage/scheduling/scheduleCourse/show/totalSchedule')
+        // 触发事件
+        emit('update:modelValue', false)
+        ElMessage.success('总课表生成成功，正在跳转页面...')
+      }
+    }
+  }
+  openFullScreen2()
+  emit('update:activePage', 6)
+}
 
 // 生成课表
 const generateSchedule = async () => {
@@ -327,13 +393,6 @@ const deleteRecord = record => {
       }
     })
     .catch(() => {})
-}
-
-// 生成总课表
-const generateTotalSchedule = () => {
-  emit('update:activePage', 6)
-  router.push(`/manager/functionPage/scheduling/scheduleCourse/show`)
-  ElMessage.success('总课表生成成功，正在跳转页面...')
 }
 
 // 处理表格选择变化
@@ -531,5 +590,16 @@ const helpClick = async id => {
   margin-bottom: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.progress-container {
+  padding: 20px;
+  text-align: center;
+
+  .progress-text {
+    margin-top: 15px;
+    color: #606266;
+    font-size: 14px;
+  }
 }
 </style>

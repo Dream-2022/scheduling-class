@@ -79,7 +79,12 @@
                     >
                       下载教学计划示例
                     </el-button>
-                    <el-button size="small" color="#547bf1" :icon="Promotion">
+                    <el-button
+                      size="small"
+                      @click="importValue = true"
+                      color="#547bf1"
+                      :icon="Promotion"
+                    >
                       导入教学计划
                     </el-button>
                   </div>
@@ -164,18 +169,94 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 导入教学计划弹窗 -->
+  <el-dialog
+    v-model="importValue"
+    title="导入教学计划"
+    width="60%"
+    :close-on-click-modal="false"
+    :before-close="handleImportClose"
+  >
+    <div class="import-container">
+      <div class="import-upload">
+        <el-upload
+          class="upload-dragger"
+          drag
+          action="#"
+          :auto-upload="false"
+          :on-change="handleFileChange"
+          :limit="1"
+          accept=".xlsx,.xls"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+          <template #tip>
+            <div class="el-upload__tip">只能上传 xlsx/xls 文件</div>
+          </template>
+        </el-upload>
+      </div>
+
+      <div class="import-preview" v-if="previewData.length > 0">
+        <div class="preview-title">文件部分预览</div>
+        <el-table :data="previewData" style="width: 100%" height="300" border>
+          <el-table-column
+            v-for="(col, index) in tableColumns"
+            :key="index"
+            :prop="col"
+            :label="col"
+          />
+        </el-table>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="handleImportClose">取消</el-button>
+        <el-button type="primary" @click="handleImportNext" :disabled="!selectedFile"
+          >下一步</el-button
+        >
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 进度条对话框 -->
+  <el-dialog
+    v-model="progressDialogVisible"
+    title="导入进度"
+    width="30%"
+    :close-on-click-modal="false"
+    :show-close="false"
+  >
+    <div class="progress-container">
+      <el-progress
+        :percentage="progressPercentage"
+        striped
+        striped-flow
+        :duration="10"
+        :stroke-width="15"
+        :format="format"
+      />
+      <div class="progress-text">{{ progressText }}</div>
+    </div>
+  </el-dialog>
 </template>
 <script setup>
 import { RouterView, useRouter } from 'vue-router'
 import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Download, Promotion } from '@element-plus/icons-vue'
+import { Download, Promotion, UploadFilled } from '@element-plus/icons-vue'
 import { downloadAPI } from '@/apis/scheduling'
+import * as XLSX from 'xlsx'
+import { useSseStore } from '@/stores/sseStore'
+import { getTimetableProgressAPI } from '@/apis/course.js'
 
 const router = useRouter()
+const sseStore = useSseStore()
 const information = reactive({
   arr: [],
 })
+const importValue = ref(false) //导入教学计划示例文件的弹窗
 const elFormRef = ref() //表单验证
 const informationVisible = ref(false) //课表基本信息弹窗
 const schoolVisible = ref(false) //选择学校基础信息弹窗
@@ -202,6 +283,13 @@ const rules = {
   cycle: [{ required: true, message: '请选择上课周期', trigger: 'change' }],
   planValue: [{ required: true, message: '请选择导入方式', trigger: 'change' }],
 }
+const selectedFile = ref(null)
+const previewData = ref([])
+const tableColumns = ref([])
+const progressDialogVisible = ref(false)
+const progressPercentage = ref(0)
+const progressText = ref('')
+
 //点击课表基本信息确认按钮，跳转到课表编辑页面
 function saveInformationClick() {
   if (informationRadioValue.value === '') {
@@ -253,6 +341,110 @@ function saveScheduling() {
     }
   })
 } //  router.push(`/${userStore.user.identity.toLowerCase()}/functionPage/scheduling/scheduleCourse`)
+
+// 处理文件变化
+const handleFileChange = file => {
+  selectedFile.value = file.raw
+  previewExcelFile(file.raw)
+}
+
+// 预览Excel文件
+const previewExcelFile = file => {
+  const reader = new FileReader()
+  reader.onload = e => {
+    const data = e.target.result
+    const workbook = XLSX.read(data, { type: 'array' })
+    const firstSheetName = workbook.SheetNames[0]
+    const worksheet = workbook.Sheets[firstSheetName]
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
+
+    if (jsonData.length > 0) {
+      // 获取表头
+      tableColumns.value = jsonData[0]
+      // 获取数据（最多显示10行）
+      previewData.value = jsonData.slice(1, 11).map(row => {
+        const rowData = {}
+        tableColumns.value.forEach((col, index) => {
+          rowData[col] = row[index] || ''
+        })
+        return rowData
+      })
+    }
+  }
+  reader.readAsArrayBuffer(file)
+}
+
+// 处理导入弹窗关闭
+const handleImportClose = done => {
+  if (typeof done === 'function') {
+    ElMessageBox.confirm('是否取消导入?', '提醒', {
+      confirmButtonText: '返回',
+      cancelButtonText: '取消导入',
+      type: 'warning',
+    })
+      .then(() => {})
+      .catch(() => {
+        ElMessage.success('已取消导入')
+        done()
+      })
+  } else {
+    importValue.value = false
+  }
+}
+
+// 处理导入下一步
+const handleImportNext = async () => {
+  if (!selectedFile.value) {
+    ElMessage.warning('请先选择文件')
+    return
+  }
+
+  // 显示进度条对话框
+  importValue.value = false
+  informationVisible.value = false
+  progressDialogVisible.value = true
+  progressPercentage.value = 0
+  progressText.value = '正在准备导入教学计划...'
+
+  // 准备文件上传
+  const formData = new FormData()
+  formData.append('file', selectedFile.value)
+
+  try {
+    // 调用进度API
+    const res = await getTimetableProgressAPI()
+    console.log(res.data)
+
+    // 设置SSE监听
+    const eventSource = sseStore.getEventSource()
+    eventSource.onmessage = event => {
+      const eventData = JSON.parse(event.data)
+      console.log('收到新消息:', eventData)
+
+      // 更新进度条
+      const currentSize = eventData.data.currentSize
+      progressPercentage.value = Math.floor((currentSize / 1306) * 100)
+      progressText.value = `正在处理: ${currentSize}/1306`
+
+      // 当进度达到1306时
+      if (currentSize >= 1306) {
+        progressDialogVisible.value = false
+        // 执行路由跳转
+        router.push('/manager/functionPage/scheduling/scheduleCourse/show/totalSchedule')
+        ElMessage.success('教学计划导入成功，正在跳转页面...')
+      }
+    }
+  } catch (error) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败，请重试')
+    progressDialogVisible.value = false
+  }
+}
+
+// 格式化进度条百分比
+const format = percentage => {
+  return percentage === 100 ? '完成' : `${percentage}%`
+}
 </script>
 <style lang="scss" scoped>
 .scheduling-box {
@@ -487,6 +679,39 @@ function saveScheduling() {
         }
       }
     }
+  }
+}
+.import-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .import-upload {
+    display: flex;
+    justify-content: center;
+
+    .upload-dragger {
+      width: 100%;
+    }
+  }
+
+  .import-preview {
+    .preview-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.progress-container {
+  padding: 20px;
+  text-align: center;
+
+  .progress-text {
+    margin-top: 15px;
+    color: #606266;
+    font-size: 14px;
   }
 }
 </style>
