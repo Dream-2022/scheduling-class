@@ -4,11 +4,10 @@
     <div class="search-box">
       <el-input
         v-model="searchValue"
-        @keyup.enter="searchClick"
         class="search-content"
         placeholder="查看课表、考试安排、申请等"
       />
-      <el-button color="#065fed" @click="searchClick">搜索</el-button>
+      <el-button color="#065fed">搜索</el-button>
     </div>
   </div>
   <div class="main-box">
@@ -19,40 +18,28 @@
           <div @click="staticAnalysis('course')">课程安排</div>
         </div>
         <div class="module-box">
-          <img src="@/assets/3D/0-t.png" @click="staticAnalysis('arrage')" />
-          <div @click="staticAnalysis('arrage')">考试安排</div>
+          <img src="@/assets/3D/0-t.png" @click="staticAnalysis('course/main')" />
+          <div @click="staticAnalysis('arrange')">考试安排</div>
         </div>
         <div class="module-box">
           <img src="@/assets/3D/private.png" @click="staticAnalysis('feedback')" />
           <div @click="staticAnalysis('feedback')">我的反馈</div>
         </div>
         <div class="module-box">
-          <img src="@/assets/3D/book-search.png" @click="staticAnalysis('course/main', false)" />
+          <img src="@/assets/3D/book-search.png" @click="staticAnalysis('arrange', false)" />
           <div @click="staticAnalysis('exam')">近日安排</div>
         </div>
       </div>
       <div class="module-top">
         <div class="wow fadeInLeft pulse chart1">
           <div class="chart-content1">
-            <Chart :option="chartOption1" />
+            <chart :option="chartOption1" />
           </div>
         </div>
         <div class="wow fadeInLeft chart2">
           <div class="chart-content2">
-            <Chart :option="chartOption2" />
+            <chart :option="chartOption2" />
           </div>
-          <el-dropdown @command="handleCommand2">
-            <span class="el-dropdown-link"
-              >{{ selectedOption2 }}<span class="iconfont icon-down"></span
-            ></span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="a">近一周趋势</el-dropdown-item>
-                <el-dropdown-item command="b">近两周趋势</el-dropdown-item>
-                <el-dropdown-item command="c">近一月趋势</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
         </div>
         <div class="wow fadeInLeft panel">
           <div v-for="item in panelContents.arr" :key="item">
@@ -70,13 +57,29 @@
           <div class="footer-title">
             <el-divider direction="vertical" />
             <div class="title-box">通知</div>
-            <div class="more-view" @click="() => $router.push('/teacher/functionPage/information')">
+            <div class="more-view" @click="() => $router.push('/student/functionPage/information')">
               查看<span class="iconfont icon-Rightyou"></span>
             </div>
           </div>
           <div class="information-boxes">
-            <div class="information-box" v-for="item in 5" :key="item">
-              <div>12</div>
+            <div class="information-box" v-for="item in notificationList.arr" :key="item.id">
+              <div class="information-title">{{ item.title }}</div>
+              <div class="information-detail">
+                <span>{{ item.content }}</span>
+              </div>
+              <div class="information-bottom">
+                <div class="first-label" :class="'first-label' + item.type">
+                  {{ item.typeText }}
+                </div>
+                <div class="second-label" :class="'second-label' + item.type">
+                  {{ item.category }}
+                </div>
+                <div class="name-label">{{ item.publisher }}</div>
+                <div class="time-label">{{ item.publishTime }}</div>
+              </div>
+            </div>
+            <div v-if="notificationList.length === 0">
+              <el-empty description="暂无通知" :image-size="130" />
             </div>
           </div>
           <div><img src="@/assets/img/book.png" class="information-img" /></div>
@@ -90,26 +93,25 @@
             <div class="class-box">
               <div class="class-left">
                 <div class="class-left-top">
-                  <div class="class-left-title">{{ classX.title }}</div>
-                  <div
-                    class="class-left-status"
-                    :class="classX.status === '已发布' ? 'class-status1' : 'class-status2'"
-                  >
-                    {{ classX.status }}
-                  </div>
+                  <div class="class-left-title">{{ classX.arr.taskName }}</div>
+                  <div class="class-left-status class-status1">参与</div>
                 </div>
                 <div class="class-left-bottom">
-                  {{ classX.time }}
+                  {{ classX.arr.startTime }}
                 </div>
               </div>
               <div class="class-right">
                 <div class="class-right-box">
                   <div class="class-right-title">课时任务</div>
-                  <div class="class-right-content">{{ classX.assign }}</div>
+                  <div class="class-right-content">{{ classX.arr.totalClassHours }}</div>
                 </div>
                 <div class="class-right-box">
                   <div class="class-right-title">课程数量</div>
-                  <div class="class-right-content">{{ classX.class }}</div>
+                  <div class="class-right-content">{{ classX.arr.totalCourseSize }}</div>
+                </div>
+                <div class="class-right-box">
+                  <div class="class-right-title">班级数量</div>
+                  <div class="class-right-content">{{ classX.arr.totalClassSize }}</div>
                 </div>
                 <div class="class-right-box">
                   <div class="class-right-title">
@@ -125,18 +127,14 @@
                       @mouseleave="isHoveredIconfont = false"
                     ></span>
                   </div>
-                  <div class="class-right-content">{{ classX.noCourse }}</div>
+                  <div class="class-right-content">
+                    {{ classX.arr.totalCourseSize - classX.arr.successCourseSize }}
+                  </div>
                 </div>
                 <div class="class-right-box">
                   <div class="class-right-title">参与教师</div>
                   <div class="class-teacher">
-                    <div v-for="(teacher, index) in classX.teachers" :key="teacher">
-                      <img
-                        src="@/assets/img/cat.jpeg"
-                        class="class-teacher-img"
-                        :style="{ transform: `translateX(${index * -10}px)` }"
-                      />
-                    </div>
+                    {{ classX.arr.createdByName }}
                   </div>
                 </div>
               </div>
@@ -153,32 +151,32 @@
             <div class="feedback-boxes">
               <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
                 <div class="feedback-top">
-                  <div class="feedback-content">{{ item.content }}</div>
+                  <div class="feedback-content">{{ item.leaveReason }}</div>
                   <div class="feedback-class">{{ item.class }}</div>
                 </div>
                 <div class="feedback-bottom">
                   <div class="feedback-bottom-top">
-                    <div
-                      class="feedback-identity"
-                      :class="
-                        item?.identity === 'teacher' ? 'teacher-identity' : 'student-identity'
-                      "
-                    >
-                      {{ item?.identity }}
+                    <div class="feedback-identity student-identity">
+                      {{ item?.title }}
                     </div>
                     <div class="feedback-name">{{ item?.name }}</div>
                     <div
                       class="feedback-status"
-                      :class="item.status === '已解决' ? 'green-status' : 'red-status'"
+                      :class="item.status == '0' ? 'green-status' : 'red-status'"
                     >
-                      {{ item.status }}
+                      {{ item.status == '0' ? '已读' : '未读' }}
                     </div>
                   </div>
-                  <div class="feedback-time">{{ item.time }}</div>
+                  <div class="feedback-time">{{ item.createdAt }}</div>
                 </div>
               </div>
+              <div v-if="feedbackList.arr.length == 0">
+                <el-empty description="暂无反馈" :image-size="130" />
+              </div>
             </div>
-            <div><img src="@/assets/img/book.png" class="information-img" /></div>
+            <div v-if="feedbackList.arr.length != 0">
+              <img src="@/assets/img/book.png" class="information-img" />
+            </div>
           </div>
         </div>
       </div>
@@ -188,41 +186,43 @@
         <div class="footer-title">
           <el-divider direction="vertical" />
           <div class="title-box">安排</div>
-          <div class="more-view" @click="() => $router.push('/teacher/functionPage/course/main')">
+          <div class="more-view" @click="() => $router.push('/teacher/functionPage/arrange')">
             查看更多<span class="iconfont icon-Rightyou"></span>
           </div>
         </div>
         <div class="arrage-box">
-          <div>今日暂无课程，明日课程:</div>
+          <div>今日课程:</div>
           <div class="arrage-content">
-            <div class="arrage-content-title">2024年10月22日</div>
+            <div class="arrage-content-title">{{ date }}</div>
             <div class="arrage-content-boxes">
               <div class="arrage-content-box">
                 <div class="icon-box"><span class="iconfont icon-banji"></span></div>
                 <div>
-                  <span>课时&nbsp;&nbsp;</span> <span class="arrage-content-number">6</span>
+                  <span>课时&nbsp;&nbsp;</span> <span class="arrage-content-number">2</span>
                 </div>
               </div>
               <div class="arrage-content-box">
                 <div class="icon-box"><span class="iconfont icon-kecheng"></span></div>
                 <div>
-                  <span>班级&nbsp;&nbsp;</span> <span class="arrage-content-number">3</span>
+                  <span>课程&nbsp;&nbsp;</span> <span class="arrage-content-number">1</span>
                 </div>
               </div>
             </div>
             <div class="arrage-course">
               <el-carousel direction="vertical" type="card" :autoplay="false">
-                <el-carousel-item v-for="item in courselist.arr" :key="item">
+                <el-carousel-item v-for="item in courseList.arr" :key="item">
                   <div class="course-box">
                     <div class="course-box-top">
                       <div class="course-title">{{ item.courseName }}</div>
-                      <div class="course-time">{{ item.startTime }}--{{ item.endTime }}</div>
+                      <div class="course-time">
+                        {{ getCourseTime('start', item.timeStart) }} --
+                        {{ getCourseTime('end', item.timeStart + 1) }}
+                      </div>
                     </div>
                     <div class="course-box-bottom">
-                      <div class="course-room">{{ item.classroom }}</div>
-                      <div class="course-major">{{ item.major }}</div>
-                      <div class="course-class">{{ item.class }}</div>
-                      <div class="course-number">{{ item.classNumber }}</div>
+                      <div class="course-room">{{ item.classroomName }}</div>
+                      <div class="course-class">{{ item.teachingClassName }}</div>
+                      <div class="course-teacher">{{ item.teacherName }}</div>
                     </div>
                   </div>
                 </el-carousel-item>
@@ -230,16 +230,21 @@
             </div>
           </div>
           <div class="arrge-bottom">
-            <div>明日建议:</div>
+            <div>今日建议:</div>
             <div class="suggestion">
-              你有两堂连堂课程，分别在第二、三节课，课间休息时间较短,请提前准备好下节课所需的教学资料，避免匆忙。且这两堂课的教室位于教学楼的不同楼层，课间记得合理安排时间前往教室，以免迟到
+              {{ suggestion }}
             </div>
             <div class="arrage-bottom-content">
               <div style="display: flex; justify-content: center">
                 <el-button color="#547bf1" plain>知道了</el-button>
                 <el-button color="#547bf1">提醒我</el-button>
               </div>
-              <div class="button-word">有事? 去申请调课或换课</div>
+              <div
+                class="button-word"
+                @click="() => $router.push('/student/functionPage/feedback')"
+              >
+                有事? 去申请调课或换课
+              </div>
             </div>
           </div>
         </div>
@@ -248,81 +253,95 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Chart from '@/components/Chart.vue'
+import { setTimetableAPI } from '@/apis/timetable'
+import { getCourseSchedulingAPI } from '@/apis/course'
+import { getFeedbackAPI } from '@/apis/feedback'
+import { ElMessage } from 'element-plus'
+import chart from '@/components/chart.vue'
+const suggestion = ref('') //建议
 const router = useRouter()
 const searchValue = ref('') //搜索内容
-const selectedOption2 = ref('近一周趋势')
-let courselist = reactive({
+let courseList = reactive({
   arr: [
-    {
-      courseName: '数据库设计',
-      classroom: '三教7503',
-      startTime: '8:00',
-      endTime: '9:40',
-      class: '22级4班',
-      classNumber: '50人',
-      major: '软件工程',
-    },
-    {
-      courseName: '计算机网络',
-      classroom: '三教7504',
-      startTime: '14:30',
-      endTime: '15:50',
-      class: '22级3班',
-      classNumber: '50人',
-      major: '软件工程',
-    },
-    {
-      courseName: '计算机网络',
-      classroom: '三教7503',
-      startTime: '14:30',
-      endTime: '15:50',
-      class: '22级2班',
-      classNumber: '50人',
-      major: '软件工程',
-    },
+    // {
+    //   courseName: '数据库设计',
+    //   classroom: '三教7503',
+    //   startTime: '8:00',
+    //   endTime: '9:40',
+    //   class: '22级4班',
+    //   classNumber: '50人',
+    //   major: '软件工程',
+    // },
+    // {
+    //   courseName: '计算机网络',
+    //   classroom: '三教7504',
+    //   startTime: '14:30',
+    //   endTime: '15:50',
+    //   class: '22级3班',
+    //   classNumber: '50人',
+    //   major: '软件工程',
+    // },
+    // {
+    //   courseName: '计算机网络',
+    //   classroom: '三教7503',
+    //   startTime: '14:30',
+    //   endTime: '15:50',
+    //   class: '22级2班',
+    //   classNumber: '50人',
+    //   major: '软件工程',
+    // },
   ],
 })
 let classX = reactive({
-  id: 0,
-  title: '第一次排课',
-  status: '参与',
-  time: '2025-2-8 15:30',
-  assign: 122,
-  course: 120,
-  class: 3,
-  noCourse: 1,
+  arr: {},
 })
 let feedbackList = reactive({
+  arr: [],
+})
+// 通知列表数据
+let notificationList = reactive({
   arr: [
     {
-      id: 0,
-      name: '张三',
-      content: '排课系统的使用方法',
-      time: '2023-10-10 15:30',
-      status: '已解决', //已解决,未解决,已拒绝
-      identity: 'teacher',
-      class: '计科院 软件工程 22.4',
+      id: 1,
+      title: '数据库设计课程安排通知',
+      content:
+        '请各位同学注意，下周一上午8:00-9:40在三教7503教室上数据库设计课程，请提前10分钟到达教室。',
+      type: 1,
+      typeText: '课程',
+      category: '必修课',
+      publisher: '张老师',
+      publishTime: '2024-03-20 10:30',
     },
     {
-      id: 11,
-      name: '张李',
-      content: '排课系统的使用方法',
-      time: '2023-10-10 14:30',
-      status: '未解决',
-      identity: 'student',
-      class: '计科院 软件工程 22.7',
+      id: 2,
+      title: '计算机网络期中考试提醒',
+      content: '计算机网络课程将于下周三下午14:30-16:30在三教7504进行期中考试，请同学们做好准备。',
+      type: 2,
+      typeText: '考试',
+      category: '期中考试',
+      publisher: '李老师',
+      publishTime: '2024-03-19 15:20',
+    },
+    {
+      id: 3,
+      title: '软件工程课程调课通知',
+      content: '因教师临时有事，原定于本周五的软件工程课程将调整至下周一同一时间段，教室不变。',
+      type: 1,
+      typeText: '课程',
+      category: '调课通知',
+      publisher: '王老师',
+      publishTime: '2024-03-18 09:15',
     },
   ],
 })
 const panelContents = reactive({
   arr: [
     {
-      content: '待审核',
-      title: '申请',
-      value: 12,
+      content: '课时',
+      title: '课时',
+      value: 68,
       color: '#FFAB91',
       class: 'icon-daichuli',
     },
@@ -334,7 +353,7 @@ const panelContents = reactive({
       class: 'icon-daichuli1',
     },
     {
-      content: '待监考',
+      content: '待考试',
       title: '考试',
       value: '--',
       color: '#ed8b31',
@@ -351,16 +370,12 @@ const panelContents = reactive({
 })
 
 let isHoveredIconfont = ref(false) //是否移动到问号处
-function searchClick() {}
-async function handleCommand2(command) {
-  console.log(command)
-}
-
+const date = ref('')
 const chartOption1 = ref({
   title: {
     show: true,
     text: `{value|学期进度}`,
-    subtext: `{titleSize| 20 }{value|%}`,
+    subtext: `{titleSize| 34 }{value|%}`,
     textStyle: {
       rich: {},
     },
@@ -421,7 +436,7 @@ const chartOption1 = ref({
       },
       data: [
         {
-          value: 20,
+          value: 34,
         },
       ],
     },
@@ -459,7 +474,7 @@ const chartOption1 = ref({
       },
       data: [
         {
-          value: 20,
+          value: 34,
         },
       ],
     },
@@ -512,6 +527,40 @@ const chartOption2 = ref({
     },
   ],
 })
+onMounted(async () => {
+  //获取排课列表
+  const res = await getCourseSchedulingAPI()
+  // 过滤出状态为4的课表
+  console.log(res.data)
+  const filteredData = res.data.data.filter(item => item.taskStatus == 4)
+  console.log(filteredData)
+  if (filteredData.length > 0) {
+    classX.arr = filteredData[0]
+    classX.arr.startTime = classX.arr.startTime.replace('T', ' ')
+  }
+  //获取反馈列表
+  const res3 = await getFeedbackAPI()
+  console.log(res3.data)
+  feedbackList.arr = res3.data.data.slice(0, 7)
+  feedbackList.arr.forEach((item, index) => {
+    feedbackList.arr[index].createdAt = item.createdAt.replace('T', ' ')
+  })
+  //获取日课表
+  let calendarDate = new Date()
+  const year = calendarDate.getFullYear()
+  const month = calendarDate.getMonth() + 1
+  const dateString = calendarDate.getDate()
+  date.value = `${year}-${month}-${dateString}`
+  const res1 = await setTimetableAPI('', date.value, '', '', '', '')
+  console.log(res1.data)
+  if (res1.data.code === 'B000001') {
+    ElMessage.warning('系统繁忙，请稍后再试！')
+  } else {
+    courseList.arr = res1.data.data
+  }
+  //获取建议
+  suggestion.value = localStorage.getItem('suggestion')
+})
 //点击快捷入口
 function staticAnalysis(string, value) {
   console.log(`/student/functionPage/${string}`)
@@ -520,6 +569,29 @@ function staticAnalysis(string, value) {
     return
   }
   router.push(`/student/functionPage/${string}`)
+}
+//获取上课时间
+function getCourseTime(flag, time) {
+  if (flag == 'start') {
+    if (time == 0) return '8:00'
+    else if (time == 1) return '8:55'
+    else if (time == 2) return '10:10'
+    else if (time == 3) return '10:25'
+    else if (time == 4) return '11:05'
+    else if (time == 5) return '14:30'
+    else if (time == 6) return '15:25'
+    else if (time == 7) return '16:20'
+    else if (time == 8) return '17:15'
+  } else {
+    if (time == 1) return '8:45'
+    else if (time == 2) return '9:40'
+    else if (time == 3) return '10:55'
+    else if (time == 4) return '11:50'
+    else if (time == 5) return '15:15'
+    else if (time == 6) return '16:10'
+    else if (time == 7) return '17:05'
+    else if (time == 8) return '18:00'
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -692,7 +764,7 @@ function staticAnalysis(string, value) {
         }
         .chart-content1,
         .chart-content2 {
-          height: 69%;
+          height: 100%;
           width: 94%;
           padding: 0 3%;
           margin-top: 3%;
@@ -849,9 +921,11 @@ function staticAnalysis(string, value) {
               text-overflow: ellipsis;
             }
             .information-detail {
+              color: $grey;
               span {
-                padding-left: 8px;
+                padding-left: 12px;
               }
+              margin-bottom: 8px;
             }
 
             .information-bottom {

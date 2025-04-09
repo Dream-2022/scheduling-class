@@ -451,28 +451,12 @@ let navigation3 = [
     value: 'course/main',
   },
   {
-    name: '排课',
-    value: 'scheduling',
+    name: '我的反馈',
+    value: 'feedback',
   },
   {
-    name: '排考',
-    value: 'schedule',
-  },
-  {
-    name: '学校信息',
-    value: 'information',
-  },
-  {
-    name: '统计分析',
-    value: 'analysis',
-  },
-  {
-    name: '申请和反馈',
-    value: 'application',
-  },
-  {
-    name: '系统管理',
-    value: 'manage',
+    name: '今日安排',
+    value: 'arrange',
   },
 ]
 let isMainPage = ref('banner1')
@@ -737,6 +721,14 @@ function findActive(path, identity) {
           activeIndex = 2
         } else if (path.includes('/arrange')) {
           activeIndex = 3
+        }
+      } else if (identity === 'student') {
+        if (path.includes('/course')) {
+          activeIndex = 0
+        } else if (path.includes('/feedback')) {
+          activeIndex = 1
+        } else if (path.includes('/arrange')) {
+          activeIndex = 2
         }
       }
       divList[activeIndex].classList.add('active')

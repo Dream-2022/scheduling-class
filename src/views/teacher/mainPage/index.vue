@@ -228,9 +228,9 @@
           </div>
         </div>
         <div class="arrage-box">
-          <div>今日暂无课程，明日课程:</div>
+          <div>今日课程:</div>
           <div class="arrage-content">
-            <div class="arrage-content-title">2024年10月22日</div>
+            <div class="arrage-content-title">{{ date }}</div>
             <div class="arrage-content-boxes">
               <div class="arrage-content-box">
                 <div class="icon-box"><span class="iconfont icon-banji"></span></div>
@@ -266,9 +266,9 @@
             </div>
           </div>
           <div class="arrge-bottom">
-            <div>明日建议:</div>
+            <div>今日建议:</div>
             <div class="suggestion">
-              你有两堂连堂课程，分别在第二、三节课，课间休息时间较短,请提前准备好下节课所需的教学资料，避免匆忙。且这两堂课的教室位于教学楼的不同楼层，课间记得合理安排时间前往教室，以免迟到
+              {{ suggestion }}
             </div>
             <div class="arrage-bottom-content">
               <div style="display: flex; justify-content: center">
@@ -305,6 +305,8 @@ import Chart from '@/components/Chart.vue'
 const userStore = useUserStore()
 const router = useRouter()
 
+const suggestion = ref('') //建议
+const date = ref('')
 let isHoveredIconfont = ref(false) //是否移动到问号处
 let searchValue = ref('') // 搜索内容
 let userInfo = reactive([]) // 用户信息
@@ -388,8 +390,8 @@ onMounted(async () => {
   const year = calendarDate.getFullYear()
   const month = calendarDate.getMonth() + 1
   const dateString = calendarDate.getDate()
-  const date = `${year}-${month}-${dateString}`
-  const res1 = await setTimetableAPI('', date, '', '', '', '')
+  date.value = `${year}-${month}-${dateString}`
+  const res1 = await setTimetableAPI('', date.value, '', '', '', '')
   console.log(res1.data)
   if (res1.data.code === 'B000001') {
     ElMessage.warning('系统繁忙，请稍后再试！')
@@ -420,6 +422,8 @@ onMounted(async () => {
 
   //获取教室占用率数据
   await fetchRoomRateData()
+  //获取建议
+  suggestion.value = localStorage.getItem('suggestion')
 })
 
 //根据值获取对应的标签

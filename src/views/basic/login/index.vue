@@ -145,7 +145,7 @@ import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'
 import WOW from 'wow.js'
 import { useUserStore } from '@/stores/userStore.js'
-// import { useWebSocketStore } from '@/stores/webSocketStore.js'
+import { getSuggestionAPI } from '@/apis/ai'
 import { loginAPI, getCodeAPI, registerAPI, login2API } from '@/apis/login'
 import { getUserInfoAPI } from '@/apis/user'
 import { useRouter } from 'vue-router'
@@ -159,7 +159,7 @@ const userStore = useUserStore()
 let typeValue = ref('') //身份
 // const webSocketStore = useWebSocketStore()
 const loginData = ref({
-  account: '0304', //校园管理者
+  account: '0311', //校园管理者
   password: '666666',
   // account: '0305', //  教师
   // password: '666666',
@@ -234,6 +234,7 @@ const toEmailLogin = () => {
 const toRegister = () => {
   signUpMode.value = true
 }
+//登录
 const toLogin = () => {
   signUpMode.value = false
 }
@@ -258,6 +259,10 @@ const login = async () => {
     const user = { ...userStore.user, ...res1.data.data }
     userStore.setUserInfoPreference(user)
     // webSocketStore.initialize(userStore.user.userMail)
+    //获取建议
+    const res2 = await getSuggestionAPI()
+    console.log(res2.data)
+    localStorage.setItem('suggestion', res2.data)
     setTimeout(() => {
       router.push(`/${identify}/mainPage`)
     }, 100)

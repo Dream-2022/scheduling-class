@@ -19,3 +19,10 @@ export const getTitleAPI = message => {
     },
   })
 }
+//ai获取建议
+export const getSuggestionAPI = () => {
+  return http({
+    url: '/ai/suggestion',
+    method: 'GET',
+  })
+}

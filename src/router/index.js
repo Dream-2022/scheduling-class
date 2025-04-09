@@ -70,7 +70,7 @@ const setRouter = async () => {
               },
               {
                 path: 'feedback',
-                component: () => import('../views/basic/feedbackPage/index.vue'),
+                component: () => import('../views/student/functionPage/feedbackPage/index.vue'),
               },
               {
                 path: 'arrange',
@@ -124,10 +124,6 @@ const setRouter = async () => {
               {
                 path: 'application',
                 component: () => import('../views/teacher/functionPage/applicationPage/index.vue'),
-              },
-              {
-                path: 'feedback',
-                component: () => import('../views/basic/feedbackPage/index.vue'),
               },
               {
                 path: 'class',
