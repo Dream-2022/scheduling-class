@@ -26,7 +26,7 @@ http.interceptors.request.use(
     if (user != null) {
       config.headers.set('Authorization', 'Bearer ' + user.token)
     }
-    if (config.url === '/goodan-homepage/ai' || config.url === '/apk-info/checkFile') {
+    if (config.url === '/inform/connect') {
       // 如果是登录接口，不显示 loading 效果
       return config
     }

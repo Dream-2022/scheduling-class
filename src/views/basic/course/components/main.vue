@@ -34,11 +34,11 @@
                         ? '已完成'
                         : item.taskStatus == '3'
                           ? '失败'
-                          : '进行中'
+                          : '使用中'
                 }}
               </div>
             </div>
-            <div class="time">{{ item.createdAt }}</div>
+            <div class="time">{{ item.startTime }}</div>
           </div>
         </div>
         <div class="course-box-middle">
@@ -304,10 +304,9 @@ let examList = reactive({
 })
 onMounted(async () => {
   const res = await getCourseSchedulingAPI()
-  console.log(res.data)
-  courseList.arr = res.data.data
+  courseList.arr = [...res.data.data].reverse()
   for (let i = 0; i < courseList.arr.length; i++) {
-    courseList.arr[i].createdAt = courseList.arr[i].createdAt.replace('T', ' ')
+    courseList.arr[i].startTime = courseList.arr[i].startTime.replace('T', ' ')
   }
 })
 defineProps({

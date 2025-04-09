@@ -52,15 +52,15 @@
         <div class="chart-content2">
           <Chart :option="chartOption2" />
         </div>
-        <el-dropdown @command="handleCommand2">
+        <el-dropdown>
           <span class="el-dropdown-link"
             >{{ selectedOption2 }}<span class="iconfont icon-down"></span
           ></span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势</el-dropdown-item>
+              <el-dropdown-item command="近一周趋势">近一周趋势</el-dropdown-item>
+              <el-dropdown-item command="近两周趋势">近两周趋势</el-dropdown-item>
+              <el-dropdown-item command="近一月趋势">近一月趋势</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -88,14 +88,14 @@
         <div class="application-boxes">
           <div
             class="application-box"
-            v-for="(item, index) in applicationList"
+            v-for="(item, index) in applicationList.arr"
             :key="item"
             @mouseenter="isDisable.arr[index] = false"
             @mouseleave="isDisable.arr[index] = true"
           >
             <span style="display: flex">
               <span class="application-title" @click="applicationClick(item.essayId)">{{
-                item?.title
+                item?.leaveReason
               }}</span>
               <span
                 @click="temLoadClick(item.id)"
@@ -109,20 +109,19 @@
                 class="application-detail"
                 :class="isDisable?.arr[index] == true ? '' : 'disabled'"
               >
-                <span>{{ item?.leaveStartTime }}</span>
+                <span>{{ item?.leaveStart }}</span>
                 <span>{{ item?.leaveDays }} 天</span>
-                <span>{{ item?.leaveCourseCount }} 大节课</span>
               </span>
             </span>
             <span class="application-bottom" @click="applicationClick(item.essayId)">
-              <span class="first-label" :class="getLabel(item?.leaveType, true)">{{
-                item?.leaveType
-              }}</span>
-              <span class="second-label" :class="getLabel(item?.leaveReason, false)">{{
-                item?.leaveReason
+              <span class="first-label" :class="item.leaveType + '-label'">
+                {{ getLabelByValue(item?.leaveType) }}
+              </span>
+              <span class="second-label" :class="item.title + '-label'">{{
+                getLabelByValue(item?.title)
               }}</span>
               <span class="name-label">{{ item?.applicant }}</span>
-              <span class="time-label">{{ item?.time }}</span>
+              <span class="time-label">{{ item?.createdAt }}</span>
             </span>
           </div>
         </div>
@@ -137,26 +136,25 @@
           <div class="class-box">
             <div class="class-left">
               <div class="class-left-top">
-                <div class="class-left-title">{{ classX.title }}</div>
-                <div
-                  class="class-left-status"
-                  :class="classX.status === '已发布' ? 'class-status1' : 'class-status2'"
-                >
-                  {{ classX.status }}
-                </div>
+                <div class="class-left-title">{{ classX.arr.taskName }}</div>
+                <div class="class-left-status class-status1">参与</div>
               </div>
               <div class="class-left-bottom">
-                {{ classX.time }}
+                {{ classX.arr.startTime }}
               </div>
             </div>
             <div class="class-right">
               <div class="class-right-box">
                 <div class="class-right-title">课时任务</div>
-                <div class="class-right-content">{{ classX.assign }}</div>
+                <div class="class-right-content">{{ classX.arr.totalClassHours }}</div>
               </div>
               <div class="class-right-box">
                 <div class="class-right-title">课程数量</div>
-                <div class="class-right-content">{{ classX.class }}</div>
+                <div class="class-right-content">{{ classX.arr.totalCourseSize }}</div>
+              </div>
+              <div class="class-right-box">
+                <div class="class-right-title">班级数量</div>
+                <div class="class-right-content">{{ classX.arr.totalClassSize }}</div>
               </div>
               <div class="class-right-box">
                 <div class="class-right-title">
@@ -172,18 +170,14 @@
                     @mouseleave="isHoveredIconfont = false"
                   ></span>
                 </div>
-                <div class="class-right-content">{{ classX.noCourse }}</div>
+                <div class="class-right-content">
+                  {{ classX.arr.totalCourseSize - classX.arr.successCourseSize }}
+                </div>
               </div>
               <div class="class-right-box">
                 <div class="class-right-title">参与教师</div>
                 <div class="class-teacher">
-                  <div v-for="(teacher, index) in classX.teachers" :key="teacher">
-                    <img
-                      src="@/assets/img/cat.jpeg"
-                      class="class-teacher-img"
-                      :style="{ transform: `translateX(${index * -10}px)` }"
-                    />
-                  </div>
+                  {{ classX.arr.createdByName }}
                 </div>
               </div>
             </div>
@@ -200,26 +194,23 @@
           <div class="feedback-boxes">
             <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
               <div class="feedback-top">
-                <div class="feedback-content">{{ item.content }}</div>
+                <div class="feedback-content">{{ item.leaveReason }}</div>
                 <div class="feedback-class">{{ item.class }}</div>
               </div>
               <div class="feedback-bottom">
                 <div class="feedback-bottom-top">
-                  <div
-                    class="feedback-identity"
-                    :class="item?.identity === 'teacher' ? 'teacher-identity' : 'student-identity'"
-                  >
-                    {{ item?.identity }}
+                  <div class="feedback-identity student-identity">
+                    {{ item?.title }}
                   </div>
                   <div class="feedback-name">{{ item?.name }}</div>
                   <div
                     class="feedback-status"
-                    :class="item.status === '已解决' ? 'green-status' : 'red-status'"
+                    :class="item.status == '0' ? 'green-status' : 'red-status'"
                   >
-                    {{ item.status }}
+                    {{ item.status == '0' ? '已读' : '未读' }}
                   </div>
                 </div>
-                <div class="feedback-time">{{ item.time }}</div>
+                <div class="feedback-time">{{ item.createdAt }}</div>
               </div>
             </div>
           </div>
@@ -244,29 +235,30 @@
               <div class="arrage-content-box">
                 <div class="icon-box"><span class="iconfont icon-banji"></span></div>
                 <div>
-                  <span>课时&nbsp;&nbsp;</span> <span class="arrage-content-number">6</span>
+                  <span>课时&nbsp;&nbsp;</span> <span class="arrage-content-number">2</span>
                 </div>
               </div>
               <div class="arrage-content-box">
                 <div class="icon-box"><span class="iconfont icon-kecheng"></span></div>
                 <div>
-                  <span>班级&nbsp;&nbsp;</span> <span class="arrage-content-number">3</span>
+                  <span>班级&nbsp;&nbsp;</span> <span class="arrage-content-number">1</span>
                 </div>
               </div>
             </div>
             <div class="arrage-course">
               <el-carousel direction="vertical" type="card" :autoplay="false">
-                <el-carousel-item v-for="item in courselist.arr" :key="item">
+                <el-carousel-item v-for="item in courseList.arr" :key="item">
                   <div class="course-box">
                     <div class="course-box-top">
                       <div class="course-title">{{ item.courseName }}</div>
-                      <div class="course-time">{{ item.startTime }}--{{ item.endTime }}</div>
+                      <div class="course-time">
+                        {{ getCourseTime('start', item.timeStart) }} --
+                        {{ getCourseTime('end', item.timeStart + 1) }}
+                      </div>
                     </div>
                     <div class="course-box-bottom">
-                      <div class="course-room">{{ item.classroom }}</div>
-                      <div class="course-major">{{ item.major }}</div>
-                      <div class="course-class">{{ item.class }}</div>
-                      <div class="course-number">{{ item.classNumber }}</div>
+                      <div class="course-room">{{ item.classroomName }}</div>
+                      <div class="course-class">{{ item.teachingClassName }}</div>
                     </div>
                   </div>
                 </el-carousel-item>
@@ -283,7 +275,12 @@
                 <el-button color="#547bf1" plain>知道了</el-button>
                 <el-button color="#547bf1">提醒我</el-button>
               </div>
-              <div class="button-word">有事? 去申请调课或换课</div>
+              <div
+                class="button-word"
+                @click="() => $router.push('/teacher/functionPage/application')"
+              >
+                有事? 去申请调课或换课
+              </div>
             </div>
           </div>
         </div>
@@ -296,7 +293,12 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { ElMessage } from 'element-plus'
-// import { getLeaveListAPI } from '@/apis/application'
+import { getLeaveAPI } from '@/apis/application'
+import { getFeedbackAPI } from '@/apis/feedback'
+import { setTimetableAPI } from '@/apis/timetable'
+import { getCourseSchedulingAPI } from '@/apis/course'
+import { getRoomRateAPI } from '@/apis/mainPage'
+
 import '@/assets/iconfont/iconfont.css'
 import WOW from 'wow.js'
 import Chart from '@/components/Chart.vue'
@@ -311,14 +313,14 @@ const panelContents = reactive({
     {
       content: '待审核',
       title: '申请',
-      value: 12,
+      value: 2,
       color: '#FFAB91',
       class: 'icon-daichuli',
     },
     {
       content: '待解决',
       title: '反馈',
-      value: 5,
+      value: 1,
       color: '#6C54F1',
       class: 'icon-daichuli1',
     },
@@ -332,148 +334,138 @@ const panelContents = reactive({
     {
       content: '已完成',
       title: '课时',
-      value: 23,
+      value: 2,
       color: '#7ab25f',
       class: 'icon-yiwanchengdingdan',
     },
   ],
 })
-let isDisable = reactive({
-  arr: [],
-})
-let applicationList = reactive([
-  {
-    id: 124,
-    title: '需要实习两天',
-    // 申请时间
-    time: '2025-2-8 15:30',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '2',
-    // 请假课程数量
-    leaveCourseCount: '5',
-    // 请假类型
-    leaveType: '公假',
-    // 申请事项
-    leaveReason: '调课申请',
-    // 申请人信息
-    applicant: '赵六(N21452153)',
-  },
-  {
-    id: 122,
-    title: '外出学习（老吉大）',
-    // 申请时间
-    time: '2025-2-8 12:30',
-    // 请假开始时间
-    leaveStartTime: '2025-2-10',
-    // 请假天数
-    leaveDays: '1',
-    // 请假课程数量
-    leaveCourseCount: '2',
-    // 请假类型
-    leaveType: '事假',
-    // 申请事项
-    leaveReason: '代课申请',
-    // 申请人信息
-    applicant: '王五(N219856153)',
-  },
-])
-let classX = reactive({
-  id: 0,
-  title: '第一次排课',
-  status: '参与',
-  time: '2025-2-8 15:30',
-  assign: 122,
-  course: 120,
-  class: 3,
-  noCourse: 1,
-})
-let feedbackList = reactive({
-  arr: [
-    {
-      id: 0,
-      name: '张三',
-      content: '排课系统的使用方法',
-      time: '2023-10-10 15:30',
-      status: '已解决', //已解决,未解决,已拒绝
-      identity: 'teacher',
-      class: '计科院 软件工程 22.4',
-    },
-    {
-      id: 11,
-      name: '张李',
-      content: '排课系统的使用方法',
-      time: '2023-10-10 14:30',
-      status: '未解决',
-      identity: 'student',
-      class: '计科院 软件工程 22.7',
-    },
-  ],
-})
-let courselist = reactive({
-  arr: [
-    {
-      courseName: '数据库设计',
-      classroom: '三教7503',
-      startTime: '8:00',
-      endTime: '9:40',
-      class: '22级4班',
-      classNumber: '50人',
-      major: '软件工程',
-    },
-    {
-      courseName: '计算机网络',
-      classroom: '三教7504',
-      startTime: '14:30',
-      endTime: '15:50',
-      class: '22级3班',
-      classNumber: '50人',
-      major: '软件工程',
-    },
-    {
-      courseName: '计算机网络',
-      classroom: '三教7503',
-      startTime: '14:30',
-      endTime: '15:50',
-      class: '22级2班',
-      classNumber: '50人',
-      major: '软件工程',
-    },
-  ],
-})
-// charts图标选中
-let selectedOption2 = ref('近一周趋势')
+let isDisable = reactive({ arr: [] })
+let applicationList = reactive({ arr: [] })
+let classX = reactive({ arr: {} })
 
+let feedbackList = reactive({ arr: [] })
+let courseList = reactive({ arr: [] })
+
+// charts图标选中
+let selectedOption2 = ref('近一周趋势图')
+// 申请类型和标题选项
+const typeApplication = [
+  { label: '全部', value: '' },
+  { label: '公假', value: 'public' },
+  { label: '事假', value: 'matter' },
+  { label: '病假', value: 'illness' },
+  { label: '婚假', value: 'wed' },
+  { label: '产假', value: 'maternity' },
+  { label: '丧假', value: 'funeral' },
+  { label: '其他', value: 'other' },
+]
+
+const titleApplication = [
+  { label: '全部', value: '' },
+  { label: '换课申请', value: 'change' },
+  { label: '代课申请', value: 'place' },
+  { label: '调课申请', value: 'adjust' },
+]
 onMounted(async () => {
   const wow = new WOW({})
   wow.init()
   userStore.initialize()
   userInfo.push(...[userStore.user])
-  for (let i = 0; i < applicationList.length; i++) {
-    isDisable.arr[i] = true
+
+  //获取排课列表
+  const res = await getCourseSchedulingAPI()
+  // 过滤出状态为4的课表
+  console.log(res.data)
+  const filteredData = res.data.data.filter(item => item.taskStatus == 4)
+  console.log(filteredData)
+  if (filteredData.length > 0) {
+    classX.arr = filteredData[0]
+    classX.arr.startTime = classX.arr.startTime.replace('T', ' ')
   }
-  // const leaveList = await getLeaveListAPI()
-  // console.log(leaveList)
-})
-//获取颜色
-function getLabel(content, number) {
-  if (number == true) {
-    if (content === '事假') {
-      return 'first-label1'
-    } else if (content === '公假') {
-      return 'first-label2'
-    } else {
-      return 'first-label3'
-    }
+  //获取日课表
+  let calendarDate = new Date()
+  const year = calendarDate.getFullYear()
+  const month = calendarDate.getMonth() + 1
+  const dateString = calendarDate.getDate()
+  const date = `${year}-${month}-${dateString}`
+  const res1 = await setTimetableAPI('', date, '', '', '', '')
+  console.log(res1.data)
+  if (res1.data.code === 'B000001') {
+    ElMessage.warning('系统繁忙，请稍后再试！')
   } else {
-    if (content === '调课申请') {
-      return 'second-label1'
-    } else if (content === '代课申请') {
-      return 'second-label2'
-    } else {
-      return 'second-label3'
+    courseList.arr = res1.data.data
+  }
+  //获取请假列表
+  const res2 = await getLeaveAPI()
+  console.log(res2.data)
+  // 处理日期格式
+  applicationList.arr = res2.data.data.slice(0, 6)
+  // 处理日期格式
+  for (let i = 0; i < applicationList.arr.length; i++) {
+    isDisable.arr[i] = true
+    applicationList.arr[i].updatedAt = formatDateTime(applicationList.arr[i].updatedAt)
+    applicationList.arr[i].leaveStart = formatDate(applicationList.arr[i].leaveStart)
+  }
+  // 初始化isDisable数组
+  isDisable.arr = new Array(applicationList.arr.length).fill(true)
+
+  //获取反馈列表
+  const res3 = await getFeedbackAPI()
+  console.log(res3.data)
+  feedbackList.arr = res3.data.data.slice(0, 7)
+  feedbackList.arr.forEach((item, index) => {
+    feedbackList.arr[index].createdAt = item.createdAt.replace('T', ' ')
+  })
+
+  //获取教室占用率数据
+  await fetchRoomRateData()
+})
+
+//根据值获取对应的标签
+function getLabelByValue(value) {
+  for (let i = 0; i < typeApplication.length; i++) {
+    if (typeApplication[i].value === value) {
+      return typeApplication[i].label
     }
+  }
+  for (let i = 0; i < titleApplication.length; i++) {
+    if (titleApplication[i].value === value) {
+      return titleApplication[i].label
+    }
+  }
+  return null
+}
+//格式化日期时间
+function formatDateTime(dateTimeStr) {
+  return dateTimeStr.replace('T', ' ')
+}
+
+//格式化日期
+function formatDate(dateStr) {
+  return dateStr.split('T')[0]
+}
+//获取上课时间
+function getCourseTime(flag, time) {
+  if (flag == 'start') {
+    if (time == 0) return '8:00'
+    else if (time == 1) return '8:55'
+    else if (time == 2) return '10:10'
+    else if (time == 3) return '10:25'
+    else if (time == 4) return '11:05'
+    else if (time == 5) return '14:30'
+    else if (time == 6) return '15:25'
+    else if (time == 7) return '16:20'
+    else if (time == 8) return '17:15'
+  } else {
+    if (time == 1) return '8:45'
+    else if (time == 2) return '9:40'
+    else if (time == 3) return '10:55'
+    else if (time == 4) return '11:50'
+    else if (time == 5) return '15:15'
+    else if (time == 6) return '16:10'
+    else if (time == 7) return '17:05'
+    else if (time == 8) return '18:00'
   }
 }
 //点击搜索
@@ -484,16 +476,11 @@ async function searchClick() {
   }
   router.push(`/function/teacher/${searchValue.value}`)
 }
-
-async function handleCommand2(command) {
-  console.log(command)
-}
-
 const chartOption1 = ref({
   title: {
     show: true,
     text: `{value|学期进度}`,
-    subtext: `{titleSize| 20 }{value|%}`,
+    subtext: `{titleSize| 34 }{value|%}`,
     textStyle: {
       rich: {},
     },
@@ -554,7 +541,7 @@ const chartOption1 = ref({
       },
       data: [
         {
-          value: 20,
+          value: 34,
         },
       ],
     },
@@ -592,13 +579,22 @@ const chartOption1 = ref({
       },
       data: [
         {
-          value: 20,
+          value: 34,
         },
       ],
     },
   ],
 })
-
+//获取教室占用率数据
+async function fetchRoomRateData(days = 7) {
+  const res = await getRoomRateAPI(days)
+  const v1 = res.data.data[0].value,
+    v2 = res.data.data[1].value
+  const x = ((v2 / (v1 + v2)) * 100).toFixed(2)
+  chartOption2.value.title.subtext = `{titleSize| ${x} }{value|%}`
+  chartOption2.value.series[0].data[0].value = v2
+  chartOption2.value.series[0].data[1].value = v1
+}
 const chartOption2 = ref({
   title: {
     text: `{value|教室占用率}`,
@@ -1014,19 +1010,56 @@ function staticAnalysis(string, value) {
             align-items: center;
 
             .first-label {
-              color: #fff;
               border-radius: 5px;
               padding: 0 5px;
             }
 
-            .first-label1 {
-              background-color: $main-blue;
+            .matter-label {
+              background-color: $blue-back;
+              color: $main-blue;
             }
-            .first-label2 {
-              background-color: $main-purple;
+            .public-label {
+              color: $main-purple;
+              background-color: $purple-back;
             }
-            .first-label3 {
-              background-color: $word-grey-color;
+            .illness-label {
+              color: $main-yellow;
+              background-color: $yellow-shallow;
+            }
+            .wed-label {
+              color: $pink;
+              background-color: $red-back;
+            }
+            .maternity-label {
+              color: $green;
+              background-color: $green-back;
+            }
+            .funeral-label {
+              color: $deep-color;
+              background-color: $blue-back;
+            }
+            .other-label {
+              color: $word-grey-color;
+              background-color: $word-back-color;
+            }
+            .signature-img {
+              width: 100%;
+            }
+
+            .change-label,
+            .adjust-label,
+            .place-label {
+              font-size: 13px;
+              border-radius: 5px;
+              margin-left: 6%;
+              margin-right: 6px;
+              color: $main-green;
+            }
+            .change-label {
+              color: $purple;
+            }
+            .place-label {
+              color: $main-blue;
             }
 
             .second-label {

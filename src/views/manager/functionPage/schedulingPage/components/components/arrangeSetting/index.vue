@@ -138,7 +138,7 @@ import { setTimetableAPI } from '@/apis/timetable'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { Promotion } from '@element-plus/icons-vue'
-import { getTimetableHelpAPI } from '@/apis/course.js'
+import { getTimetableHelpAPI, getTimetableProgressAPI } from '@/apis/course.js'
 
 const emit = defineEmits(['update:activePage'])
 
@@ -177,6 +177,8 @@ const generateSchedule = async () => {
   }
 
   loading.value = true
+  const res = await getTimetableProgressAPI()
+  console.log(res.data.data)
   try {
     // 获取选中学院的第一个专业和年级
     let majors = ''

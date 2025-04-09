@@ -69,3 +69,10 @@ export const getTimetableHelpAPI = scheduleTaskId => {
     },
   })
 }
+//获取课表排课进度
+export const getTimetableProgressAPI = () => {
+  return http({
+    url: '/admin/create-scheduling-task',
+    method: 'GET',
+  })
+}

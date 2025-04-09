@@ -58,9 +58,9 @@
           ></span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
+              <el-dropdown-item command="近一周趋势图">近一周趋势图</el-dropdown-item>
+              <el-dropdown-item command="近两周趋势图">近两周趋势图</el-dropdown-item>
+              <el-dropdown-item command="近一月趋势图">近一月趋势图</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -75,9 +75,9 @@
           ></span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
+              <el-dropdown-item command="近一周趋势图">近一周趋势图</el-dropdown-item>
+              <el-dropdown-item command="近两周趋势图">近两周趋势图</el-dropdown-item>
+              <el-dropdown-item command="近一月趋势图">近一月趋势图</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -92,9 +92,9 @@
           ></span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="a">近一周趋势图</el-dropdown-item>
-              <el-dropdown-item command="b">近两周趋势图</el-dropdown-item>
-              <el-dropdown-item command="c">近一月趋势图</el-dropdown-item>
+              <el-dropdown-item command="近一周趋势图">近一周趋势图</el-dropdown-item>
+              <el-dropdown-item command="近两周趋势图">近两周趋势图</el-dropdown-item>
+              <el-dropdown-item command="近一月趋势图">近一月趋势图</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -277,22 +277,22 @@
           <div class="feedback-box" v-for="item in feedbackList.arr" :key="item">
             <div class="feedback-top">
               <div class="feedback-content">{{ item.title }}</div>
-              <div class="feedback-class">{{ item.class }}</div>
+              <div class="feedback-class">{{ item.department }}</div>
             </div>
             <div class="feedback-bottom">
               <div class="feedback-bottom-top">
                 <div
                   class="feedback-identity"
-                  :class="item?.identity === 'teacher' ? 'teacher-identity' : 'student-identity'"
+                  :class="item?.role === '教师' ? 'teacher-identity' : 'student-identity'"
                 >
-                  {{ item?.identity }}
+                  {{ item?.role }}
                 </div>
                 <div class="feedback-name">{{ item?.teacherName }}</div>
                 <div
                   class="feedback-status"
-                  :class="item.status === '1' ? 'green-status' : 'red-status'"
+                  :class="item.status == '0' ? 'green-status' : 'red-status'"
                 >
-                  {{ item.status == '1' ? '已读' : '未读' }}
+                  {{ item.status == '0' ? '已读' : '未读' }}
                 </div>
               </div>
               <div class="feedback-time">{{ item.createdAt }}</div>
@@ -315,21 +315,16 @@ import { getRoomRateAPI, getFeedbackSizeAPI, getTeacherWorkloadAPI } from '@/api
 import { getLeaveAllAPI, getLeaveChartAPI } from '@/apis/application'
 import { getCourseSchedulingAPI } from '@/apis/course'
 import { getFeedbackAllAPI } from '@/apis/feedback'
-import { connectAPI } from '@/apis/inform'
 
-// 获取全局实例和echarts
 let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
-// 初始化状态管理
 const userStore = useUserStore()
 const router = useRouter()
 
-// 基础数据
 let searchValue = ref('') // 搜索内容
 let userInfo = reactive([]) // 用户信息
 
-// 常量定义
 const customColors = [
   { color: '#7ab25f', percentage: 25 },
   { color: '#547bf1', percentage: 50 },
@@ -431,111 +426,77 @@ function formatDate(dateStr) {
 }
 //获取反馈图表数据
 async function fetchFeedbackChartData(days = 7) {
-  try {
-    const res = await getFeedbackSizeAPI(days)
-    let sum = 0
-    for (let i = 0; i < res.data.data.length; i++) {
-      sum += res.data.data[i].data
-    }
-    chartOption2.value.xAxis[0].data = extractDataData(res.data.data, 'time')
-    chartOption2.value.series[0].data = extractDataData(res.data.data, 'data')
-    chartOption2.value.title.subtext = `{value|平均}{titleSize| ${sum} }{value|次}`
-  } catch (error) {
-    console.error('获取反馈图表数据失败:', error)
+  const res = await getFeedbackSizeAPI(days)
+  let sum = 0
+  for (let i = 0; i < res.data.data.length; i++) {
+    sum += res.data.data[i].data
   }
+  chartOption2.value.xAxis[0].data = extractDataData(res.data.data, 'time')
+  chartOption2.value.series[0].data = extractDataData(res.data.data, 'data')
+  chartOption2.value.title.subtext = `{value|平均}{titleSize| ${sum} }{value|次}`
 }
 
 //获取教室占用率数据
-async function fetchRoomRateData(days = 7) {
-  try {
-    const res = await getRoomRateAPI(days)
-    const v1 = res.data.data[0].value,
-      v2 = res.data.data[1].value
-    const x = ((v2 / (v1 + v2)) * 100).toFixed(2)
-    chartOption4.value.title.subtext = `{titleSize| ${x} }{value|%}`
-    chartOption4.value.series[0].data[0].value = v2
-    chartOption4.value.series[0].data[1].value = v1
-  } catch (error) {
-    console.error('获取教室占用率数据失败:', error)
-  }
+async function fetchRoomRateData(days) {
+  const res = await getRoomRateAPI(days)
+  const v1 = res.data.data[0].value,
+    v2 = res.data.data[1].value
+  const x = ((v2 / (v1 + v2)) * 100).toFixed(2)
+  chartOption4.value.title.subtext = `{titleSize| ${x} }{value|%}`
+  chartOption4.value.series[0].data[0].value = v2
+  chartOption4.value.series[0].data[1].value = v1
 }
 
 //获取教师工作量数据
 async function fetchTeacherWorkloadData() {
-  try {
-    const res = await getTeacherWorkloadAPI()
-    teacherList.arr = res.data.data.slice(0, 4)
-  } catch (error) {
-    console.error('获取教师工作量数据失败:', error)
-  }
+  const res = await getTeacherWorkloadAPI()
+  teacherList.arr = res.data.data.slice(0, 4)
 }
 
 //获取请假申请数据
 async function fetchLeaveApplicationData() {
-  try {
-    const res = await getLeaveAllAPI()
-    applicationList.arr = res.data.data
+  const res = await getLeaveAllAPI()
+  applicationList.arr = res.data.data.slice(0, 6)
 
-    // 处理日期格式
-    for (let i = 0; i < applicationList.arr.length; i++) {
-      isDisable.arr[i] = true
-      applicationList.arr[i].updatedAt = formatDateTime(applicationList.arr[i].updatedAt)
-      applicationList.arr[i].leaveStart = formatDate(applicationList.arr[i].leaveStart)
-    }
-  } catch (error) {
-    console.error('获取请假申请数据失败:', error)
+  // 处理日期格式
+  for (let i = 0; i < applicationList.arr.length; i++) {
+    isDisable.arr[i] = true
+    applicationList.arr[i].updatedAt = formatDateTime(applicationList.arr[i].updatedAt)
+    applicationList.arr[i].leaveStart = formatDate(applicationList.arr[i].leaveStart)
   }
 }
 
 //获取排课列表数据
 async function fetchCourseSchedulingData() {
-  try {
-    const res = await getCourseSchedulingAPI()
-    classList.arr = res.data.data
-
-    // 处理日期格式
-    for (let i = 0; i < classList.arr.length; i++) {
-      classList.arr[i].updatedAt = formatDateTime(classList.arr[i].updatedAt)
-    }
-  } catch (error) {
-    console.error('获取排课列表数据失败:', error)
+  const res = await getCourseSchedulingAPI()
+  classList.arr = res.data.data.slice(0, 3)
+  classList.arr = [...classList.arr].reverse()
+  // 处理日期格式
+  for (let i = 0; i < classList.arr.length; i++) {
+    classList.arr[i].updatedAt = formatDateTime(classList.arr[i].updatedAt)
   }
 }
 
 //获取反馈列表数据
 async function fetchFeedbackListData() {
-  try {
-    const res = await getFeedbackAllAPI()
-    feedbackList.arr = res.data.data
-  } catch (error) {
-    console.error('获取反馈列表数据失败:', error)
-  }
+  const res = await getFeedbackAllAPI()
+  console.log(res.data)
+  feedbackList.arr = res.data.data.slice(0, 7)
+  feedbackList.arr.forEach((item, index) => {
+    feedbackList.arr[index].createdAt = item.createdAt.replace('T', ' ')
+  })
 }
 
 //获取近期申请图表数据
 async function fetchLeaveChartData(days = 7) {
-  try {
-    const res = await getLeaveChartAPI(days)
-    let sum = 0
-    for (let i = 0; i < res.data.data.length; i++) {
-      sum += res.data.data[i].data
-    }
-    chartOption3.value.xAxis.data = extractDataData(res.data.data, 'time')
-    chartOption3.value.series.data = extractDataData(res.data.data, 'data')
-    chartOption3.value.title.subtext = `{titleSize| ${sum} }{value|个}`
-  } catch (error) {
-    console.error('获取近期申请图表数据失败:', error)
+  const res = await getLeaveChartAPI(days)
+  let sum = 0
+  for (let i = 0; i < res.data.data.length; i++) {
+    sum += res.data.data[i].data
   }
-}
-
-//获取通知连接
-async function fetchNotificationConnection() {
-  try {
-    const res = await connectAPI()
-    console.log('通知连接数据:', res.data)
-  } catch (error) {
-    console.error('获取通知连接失败:', error)
-  }
+  chartOption3.value.xAxis.data = extractDataData(res.data.data, 'time')
+  chartOption3.value.series.data = extractDataData(res.data.data, 'data')
+  chartOption3.value.title.subtext = `{titleSize| ${sum} }{value|个}`
 }
 
 // 事件处理函数
@@ -549,11 +510,25 @@ async function searchClick() {
 
 //下拉菜单命令处理函数
 async function handleCommand2(command) {
-  console.log('图表2命令:', command)
+  selectedOption2.value = command
+  let days = 7
+  if (command == '近两周趋势图') {
+    days = 14
+  } else if (command == '近一月趋势图') {
+    days = 30
+  }
+  await fetchFeedbackChartData(days)
 }
 
 async function handleCommand3(command) {
-  console.log('图表3命令:', command)
+  selectedOption3.value = command
+  let days = 7
+  if (command == '近两周趋势图') {
+    days = 14
+  } else if (command == '近一月趋势图') {
+    days = 30
+  }
+  await fetchLeaveChartData(days)
 }
 
 async function handleCommand4(command) {
@@ -594,13 +569,12 @@ async function initializeData() {
   // 获取所有数据
   await Promise.all([
     fetchFeedbackChartData(),
-    fetchRoomRateData(),
+    fetchRoomRateData(7),
     fetchTeacherWorkloadData(),
     fetchLeaveApplicationData(),
     fetchCourseSchedulingData(),
     fetchFeedbackListData(),
     fetchLeaveChartData(),
-    fetchNotificationConnection(),
   ])
 }
 
@@ -857,774 +831,5 @@ const chartOption4 = ref({
 })
 </script>
 <style lang="scss" scoped>
-.component-box {
-  margin: 10px auto;
-  margin-top: 0px;
-  width: 80%;
-  height: 40px;
-  line-height: 40px;
-  display: flex;
-
-  .search-word {
-    margin-top: 5px;
-    margin-right: 20px;
-  }
-
-  .search-box {
-    display: flex;
-    width: 75%;
-
-    @media (max-width: 765px) {
-    }
-
-    @media (min-width: 765px) and (max-width: 1024px) {
-      width: 60%;
-    }
-
-    @media (min-width: 1024px) {
-    }
-
-    .search-content {
-      --el-border-radius-base: 10px 0 0 10px;
-    }
-
-    .el-button {
-      border-radius: 0 10px 10px 0;
-      border: 0;
-      height: 40px;
-      width: 80px;
-    }
-  }
-}
-
-.module-boxes {
-  color: $word-black-color;
-  width: 75%;
-  font-size: 15px;
-  margin: 0 auto;
-  margin-top: 55px;
-  display: grid;
-  grid-template-columns: repeat(7, 10%);
-  grid-gap: 10px 5%;
-
-  @media (max-width: 765px) {
-    margin-top: 45px;
-    width: 70%;
-    grid-template-columns: repeat(3, 23%);
-    grid-gap: 15px 15%;
-    grid-template-rows: repeat(2, 40%);
-  }
-
-  @media (min-width: 765px) and (max-width: 1024px) {
-    grid-template-columns: repeat(6, 12%);
-    grid-gap: 10px 5%;
-    margin-top: 50px;
-    width: 92%;
-  }
-
-  @media (min-width: 1024px) {
-  }
-
-  > div:hover {
-    box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
-  }
-
-  .module-box {
-    background-color: #fff;
-    border-radius: 10px;
-    height: 65%;
-    font-size: 14px;
-    text-align: center;
-
-    img {
-      cursor: pointer;
-      transform: translateY(-50%);
-      width: 80%;
-    }
-
-    div {
-      cursor: pointer;
-      height: 100%;
-      transform: translateY(-70%);
-
-      @media (max-width: 765px) {
-        transform: translateY(-90%);
-      }
-
-      @media (min-width: 765px) and (max-width: 1024px) {
-      }
-
-      @media (min-width: 1024px) {
-      }
-    }
-  }
-}
-
-.middle-box {
-  width: 97%;
-  margin: 0 auto;
-  transform: translateY(-15px);
-  display: flex;
-  background-color: rgb(174, 208, 244, 0);
-
-  @media (max-width: 765px) {
-    transform: translateY(-36px);
-  }
-
-  @media (min-width: 765px) and (max-width: 1024px) {
-  }
-
-  @media (min-width: 1024px) {
-  }
-
-  .left-boxes {
-    flex: 10;
-    display: grid;
-    grid-template-areas:
-      'chart1 chart1 chart2 chart2 chart3 chart3 chart4 chart4'
-      'footer1 footer1 footer1 footer2 footer2 footer2 footer2 footer2';
-    grid-template-rows: 200px 450px;
-    grid-template-columns: repeat(8, 11%);
-    grid-gap: 10px 1.7%;
-    margin-right: 10px;
-    background-color: rgb(174, 208, 244, 0);
-
-    @media (max-width: 765px) {
-      flex: 4;
-      grid-template-rows: 175px 175px 500px;
-      grid-template-areas:
-        'chart1 chart1 chart1 chart1 chart2 chart2 chart2 chart2'
-        ' chart3 chart3 chart3 chart3 chart4 chart4 chart4 chart4'
-        'footer1 footer1 footer1 footer1 footer1 footer1 footer1 footer1';
-    }
-
-    @media (min-width: 765px) and (max-width: 1024px) {
-      flex: 4;
-      grid-template-rows: 175px 175px 500px;
-      grid-template-areas:
-        'chart1 chart1 chart1 chart1 chart2 chart2 chart2 chart2'
-        ' chart3 chart3 chart3 chart3 chart4 chart4 chart4 chart4'
-        'footer1 footer1 footer1 footer1 footer2 footer2 footer2 footer2';
-    }
-
-    @media (min-width: 1024px) {
-    }
-
-    div {
-      background-color: #fff;
-    }
-    > div {
-      box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
-    }
-    .el-dropdown {
-      cursor: pointer;
-    }
-
-    .chart1,
-    .chart2,
-    .chart3,
-    .chart4 {
-      border-radius: 10px;
-
-      @media (max-width: 765px) {
-      }
-
-      @media (min-width: 765px) and (max-width: 1300px) {
-        padding-bottom: 0%;
-      }
-
-      @media (min-width: 1300px) {
-      }
-
-      .chart-content {
-        height: 75%;
-        width: 94%;
-        padding: 0 3%;
-        margin-top: 3%;
-        border-radius: 10%;
-      }
-
-      .el-dropdown {
-        border-radius: 10px;
-        margin: 3% 3% 0 3%;
-        padding: 3px 5px 3px 5px;
-        font-size: 12px;
-
-        #el-id-5859-0 {
-          display: flex;
-          justify-content: center;
-          align-content: center;
-        }
-
-        .icon-down::before {
-          font-size: 12px;
-        }
-      }
-      .el-dropdown-link {
-        outline: none;
-        border: none;
-        box-shadow: none;
-      }
-    }
-
-    .chart1 {
-      grid-area: chart1;
-
-      .el-dropdown {
-        border: 1.5px solid #547bf1;
-        color: #547bf1;
-      }
-    }
-
-    .chart2 {
-      grid-area: chart2;
-
-      .el-dropdown {
-        border: 1.5px solid #6c54f1;
-        color: #6c54f1;
-      }
-    }
-
-    .chart3 {
-      grid-area: chart3;
-
-      .el-dropdown {
-        border: 1.5px solid #ed8b31;
-        color: #ed8b31;
-      }
-    }
-
-    .chart4 {
-      grid-area: chart4;
-
-      .el-dropdown {
-        border: 1.5px solid #7ab25f;
-        color: #7ab25f;
-      }
-    }
-
-    .chart-title1,
-    .chart-title2,
-    .chart-title3,
-    .chart-title4 {
-      font-size: 18px;
-      font-weight: 600;
-      display: block;
-      margin-top: 10px;
-      margin-left: 5px;
-    }
-
-    .chart-title1 {
-      color: #547bf1;
-    }
-
-    .chart-title2 {
-      color: #6c54f1;
-    }
-
-    .chart-title3 {
-      color: #ed8b31;
-    }
-
-    .chart-title4 {
-      color: #7ab25f;
-    }
-
-    .none-data {
-      line-height: 130px;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .footer1,
-    .footer2 {
-      color: $word-black-color;
-      border-radius: 10px;
-      position: relative;
-    }
-
-    .footer1 {
-      grid-area: footer1;
-
-      .application-img {
-        height: 80px;
-        position: absolute;
-        bottom: 0;
-        right: 10%;
-      }
-
-      .application-boxes {
-        cursor: pointer;
-        word-wrap: break-word;
-        font-size: 14px;
-        padding: 10px 5px 0 10px;
-
-        .application-box {
-          margin-bottom: 6px;
-          padding: 5px 5px 5px 5px;
-          border-radius: 5px;
-
-          .application-title {
-            margin-right: auto;
-            margin-bottom: 5px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            text-overflow: ellipsis;
-          }
-          .application-detail {
-            span {
-              padding-left: 8px;
-            }
-          }
-          .disabled {
-            display: none;
-          }
-
-          .application-bottom {
-            font-size: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            line-height: 20px;
-            align-items: center;
-
-            .first-label {
-              border-radius: 5px;
-              padding: 0 5px;
-            }
-
-            .matter-label {
-              background-color: $blue-back;
-              color: $main-blue;
-            }
-            .public-label {
-              color: $main-purple;
-              background-color: $purple-back;
-            }
-            .illness-label {
-              color: $main-yellow;
-              background-color: $yellow-shallow;
-            }
-            .wed-label {
-              color: $pink;
-              background-color: $red-back;
-            }
-            .maternity-label {
-              color: $green;
-              background-color: $green-back;
-            }
-            .funeral-label {
-              color: $deep-color;
-              background-color: $blue-back;
-            }
-            .other-label {
-              color: $word-grey-color;
-              background-color: $word-back-color;
-            }
-            .signature-img {
-              width: 100%;
-            }
-
-            .change-label,
-            .adjust-label,
-            .place-label {
-              font-size: 13px;
-              border-radius: 5px;
-              margin-left: 6%;
-              margin-right: 6px;
-              color: $main-green;
-            }
-            .change-label {
-              color: $purple;
-            }
-            .place-label {
-              color: $main-blue;
-            }
-
-            .second-label {
-              margin-left: 5px;
-              margin-right: 8px;
-              background-color: #e6eaf2;
-              border-radius: 5px;
-              padding: 0 5px;
-            }
-
-            .second-label1 {
-              color: $main-blue;
-            }
-            .second-label2 {
-              color: $main-purple;
-            }
-            .second-label3 {
-              color: $word-black-color;
-            }
-
-            .name-label {
-              margin-right: auto;
-            }
-
-            .time-label {
-              @media (max-width: 765px) {
-              }
-
-              @media (min-width: 765px) and (max-width: 1024px) {
-                display: none;
-              }
-
-              @media (min-width: 1024px) {
-              }
-            }
-          }
-        }
-
-        .application-box:hover {
-          background-color: #f3f5f8;
-        }
-      }
-    }
-
-    .footer2 {
-      grid-area: footer2;
-      background-color: transparent;
-      box-shadow: none;
-      display: flex;
-      flex-direction: column;
-
-      @media (max-width: 765px) {
-        display: none;
-      }
-
-      @media (min-width: 765px) and (max-width: 1024px) {
-      }
-
-      @media (min-width: 1024px) {
-      }
-
-      .footer2-child1,
-      .footer2-child2 {
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
-
-        .teacher-boxes {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          border-radius: 8px;
-
-          .teacher-box {
-            border-radius: 0 0 8px 8px;
-            width: 25%;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 14px;
-
-            .teacher-name {
-              font-weight: 600;
-            }
-
-            .teacher-bottom {
-              display: flex;
-              font-size: 12px;
-              padding-top: 5px;
-
-              .teacher-subject {
-                padding: 2.5px 6px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-              }
-
-              .teacher-status {
-                color: $word-grey-color;
-                padding: 1px 3px;
-                border: 1.5px solid $word-grey-color;
-                border-radius: 5px;
-              }
-            }
-          }
-        }
-
-        .class-boxes {
-          border-radius: 8px;
-          .class-box {
-            border-radius: 0 0 8px 8px;
-            display: flex;
-            padding: 10px 20px;
-
-            .class-left {
-              margin-right: auto;
-
-              .class-left-top {
-                margin-bottom: 6px;
-
-                .class-left-title {
-                  display: inline-block;
-                  font-size: 16px;
-                  font-weight: 600;
-                  margin-right: 10px;
-                }
-                .class-left-status {
-                  display: inline-block;
-                  font-size: 12px;
-                  padding: 1px 6px;
-                  border-radius: 5px;
-                  color: #fff;
-                }
-                .status {
-                  line-height: 22px;
-                  border-radius: 5px;
-                  font-size: 14px;
-                  padding: 2px 6px;
-                  color: #fff;
-                }
-                .status0 {
-                  background-color: $word-grey-color;
-                }
-                .status1 {
-                  background-color: $main-yellow;
-                }
-                .status2 {
-                  background-color: $purple;
-                }
-                .status3 {
-                  background-color: $red;
-                }
-                .status4 {
-                  background-color: $main-green;
-                }
-              }
-
-              .class-left-bottom {
-                color: $word-grey-color;
-                font-size: 14px;
-                line-height: 30px;
-              }
-            }
-
-            .class-right {
-              display: flex;
-
-              .class-right-box {
-                margin-left: 20px;
-                .class-right-title {
-                  color: $word-grey-color;
-                  font-size: 14px;
-                  margin-bottom: 6px;
-                }
-
-                .class-right-content {
-                  line-height: 30px;
-                  font-size: 18px;
-                  font-weight: 600;
-                }
-                .class-teacher {
-                  display: flex;
-
-                  .class-teacher-img {
-                    width: 25px;
-                    border-radius: 15px;
-                    border: 2px solid #fff;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      .footer2-child1 {
-        margin-bottom: 1%;
-      }
-
-      .footer2-child2 {
-        height: 100%;
-      }
-    }
-  }
-
-  .right-boxes {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    background-color: transparent;
-    border-radius: 10px;
-
-    .right-box1,
-    .right-box2 {
-      border-radius: 10px;
-      background-color: #fff;
-      box-shadow: 0px 2px 5px 1px rgba(0, 0, 0, 0.1);
-
-      .application-img {
-        height: 80px;
-        position: absolute;
-        bottom: 0;
-        right: 10%;
-      }
-
-      .panel-box {
-        display: flex;
-        cursor: pointer;
-        flex: 1;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-
-        &:hover .panel-button {
-          color: #fff;
-          background-color: $main-blue;
-          box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.1);
-        }
-
-        .iconfont::before {
-          font-size: 34px;
-        }
-        .iconfont:nth-child(1) {
-          color: yellow;
-        }
-        .panel-word {
-          font-size: 12px;
-          color: $word-shallow-color;
-        }
-        .panel-number {
-          font-size: 20px;
-          font-weight: 600;
-        }
-        .panel-button {
-          font-size: 12px;
-          color: $main-blue;
-          border: 1px solid $main-blue;
-          border-radius: 8px;
-          padding: 0.5px 8px;
-        }
-      }
-
-      .feedback-boxes {
-        padding: 10px 10px;
-        font-size: 12px;
-        border-radius: 8px;
-
-        .feedback-box {
-          border-radius: 0 0 8px 8px;
-          cursor: pointer;
-          padding: 5px;
-          line-height: 20px;
-
-          &:hover {
-            background-color: #f3f5f8;
-          }
-
-          .feedback-top {
-            display: flex;
-
-            .feedback-content {
-              font-size: 14px;
-              margin-right: auto;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-          }
-
-          .feedback-bottom {
-            display: flex;
-            margin-top: 5px;
-
-            .feedback-bottom-top {
-              margin-right: auto;
-              display: flex;
-              gap: 8px;
-            }
-            .feedback-identity {
-              color: #fff;
-              padding: 0 5px;
-              border-radius: 5px;
-              font-size: 11px;
-            }
-
-            .teacher-identity {
-              background-color: $main-purple;
-            }
-            .student-identity {
-              background-color: $main-blue;
-            }
-
-            .feedback-time {
-              color: $word-grey-color;
-            }
-
-            .feedback-status {
-              padding: 0 5px;
-              font-size: 11px;
-              border-radius: 2px;
-            }
-
-            .red-status {
-              color: $red-word;
-              background-color: $red-back;
-            }
-            .green-status {
-              color: $green-word;
-              background-color: $green-back;
-            }
-          }
-        }
-      }
-    }
-
-    .right-box1 {
-      display: flex;
-      justify-content: center;
-      padding: 15px 0;
-    }
-
-    .right-box2 {
-      margin-top: 2%;
-      height: 100%;
-    }
-  }
-}
-
-.footer-title {
-  display: flex;
-  align-items: center;
-  border-radius: 10px 10px 0 0;
-  height: 40px;
-  line-height: 25px;
-  border-bottom: 1px solid #ccc;
-
-  .el-divider {
-    height: 13px;
-    border-left: 5px solid $title-color;
-    margin-right: 4px;
-  }
-
-  .title-box {
-    color: $title-color;
-    font-weight: 600;
-    margin-right: auto;
-  }
-
-  .more-view {
-    font-size: 12px;
-    color: $word-shallow-color;
-    margin-right: 8px;
-    cursor: pointer;
-
-    .iconfont::before {
-      font-size: 12px;
-    }
-  }
-}
-
-:deep(.el-progress-circle) {
-  height: 50px !important;
-  width: 50px !important;
-}
+@import url('./scss/index.scss');
 </style>

@@ -534,9 +534,9 @@ const submitApplicationForm = async () => {
         application.arr.attachment.push(newFile)
       })
       console.log(application.arr)
-      const res = await addApplicationAPI(application.arr)
-      if (res.data.code == 0) ElMessage.success('提交成功！')
-      else ElMessage.error('提交失败！')
+      await addApplicationAPI(application.arr)
+      applicationSearchClick()
+      ElMessage.success('提交成功！')
     } else {
       ElMessage.error('表单验证失败，请检查输入')
       return false
@@ -561,10 +561,9 @@ const submitFeedbackForm = async () => {
         feedback.arr.attachment.push(newFile)
       })
       console.log(feedback.arr)
-      const res = await addFeedbackAPI(feedback.arr)
-      console.log(res.data)
-      if (res.data.code == 0) ElMessage.success('提交成功！')
-      else ElMessage.error('提交失败！')
+      await addFeedbackAPI(feedback.arr)
+      ElMessage.success('提交成功！')
+      feedbackSearchClick()
     } else {
       ElMessage.error('表单验证失败，请检查输入')
       return false

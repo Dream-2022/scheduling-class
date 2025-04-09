@@ -47,9 +47,12 @@
                     @click="messageClick(item.md5)"
                   >
                     <div>
-                      <strong>{{ messageContent.apkName }}</strong> 已分析完毕
+                      <strong>{{ item.apkName }}</strong> 已分析完毕
                     </div>
-                    <div style="margin-left: auto; color: #757575">去查看 >></div>
+                    <div style="display: flex; justify-content: space-between; color: #757575">
+                      <span>{{ item.timestamp }}</span>
+                      <span>去查看 >></span>
+                    </div>
                   </el-dropdown-item>
                   <el-dropdown-item v-if="messageContent.length == 0">
                     <div style="margin: 0 80px">
@@ -350,6 +353,7 @@ import {
 } from 'vue'
 import { Delete, Plus, Promotion, Microphone } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
+import { useSseStore } from '@/stores/sseStore'
 import { Bell } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getCourseAllAPI } from '@/apis/course'
@@ -363,6 +367,7 @@ let internalInstance = getCurrentInstance()
 let echarts = internalInstance.appContext.config.globalProperties.$echarts
 
 const userStore = useUserStore()
+const sseStore = useSseStore()
 const router = useRouter()
 const aiVisible = ref(false) // 智能小助手
 let myChart = ref(null) // logo 动画
@@ -513,7 +518,30 @@ onMounted(async () => {
       { content: '如何查看学校信息', value: 0 },
     ]
   }
+  //获取通知连接
+  fetchNotificationConnection()
 })
+
+//获取通知连接
+async function fetchNotificationConnection() {
+  const eventSource = sseStore.setEventSource()
+  console.log(eventSource)
+
+  eventSource.onmessage = event => {
+    const data = event.data
+    console.log('收到新消息:', data)
+    // 将新消息添加到消息列表的开头
+    messageContent.value.unshift({
+      apkName: data.apkName,
+      md5: data.md5,
+      timestamp: new Date().toLocaleString(),
+    })
+    // 限制消息列表长度，保持最新的10条消息
+    if (messageContent.value.length > 10) {
+      messageContent.value = messageContent.value.slice(0, 10)
+    }
+  }
+}
 let reversedAndLimitedList = computed(() => {
   return recordList.value.slice().reverse().slice(0, 3)
 })
