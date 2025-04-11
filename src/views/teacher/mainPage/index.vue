@@ -228,8 +228,9 @@
           </div>
         </div>
         <div class="arrage-box">
-          <div>今日课程:</div>
-          <div class="arrage-content">
+          <div v-if="courseList.arr.length > 0">课程:</div>
+          <div v-else>今日暂无课程</div>
+          <div v-if="courseList.arr.length > 0" class="arrage-content">
             <div class="arrage-content-title">{{ date }}</div>
             <div class="arrage-content-boxes">
               <div class="arrage-content-box">
@@ -266,7 +267,7 @@
             </div>
           </div>
           <div class="arrge-bottom">
-            <div>今日建议:</div>
+            <div>建议:</div>
             <div class="suggestion">
               {{ suggestion }}
             </div>
