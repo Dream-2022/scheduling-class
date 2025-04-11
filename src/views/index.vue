@@ -32,7 +32,10 @@
         <div class="navigation-icon">
           <div style="display: flex">
             <el-dropdown class="dropdown-class" style="margin-top: 10px">
-              <el-badge :value="1" class="icon-badge">
+              <el-badge
+                :value="messageContent.length == 0 ? '' : messageContent.length"
+                class="icon-badge"
+              >
                 <el-icon class="icon-bell">
                   <Bell />
                 </el-icon>
@@ -43,15 +46,62 @@
                   <el-dropdown-item
                     v-for="item in messageContent"
                     :key="item"
-                    style="width: 350px"
+                    style="width: 360px; padding: 10px"
                     @click="messageClick(item.md5)"
                   >
-                    <div>
-                      <strong>{{ item.apkName }}</strong> 已分析完毕
+                    <div v-if="item.type === 'CourseAdjustmentMessage'">
+                      <div class="message-title">
+                        <strong>{{ item.title }}</strong>
+                      </div>
+                      <div class="message-content">
+                        <div class="message-course">
+                          <span class="message-label">课程：</span>
+                          <span class="message-value">{{ item.courseName }}</span>
+                          <span class="message-class">({{ item.className }})</span>
+                        </div>
+                        <div class="message-teacher">
+                          <span class="message-label">教师：</span>
+                          <span class="message-value">{{ item.teacherName }}</span>
+                        </div>
+                        <div class="message-change">
+                          <div class="message-original">
+                            <span class="message-label">原定时间：</span>
+                            <span class="message-value">{{ item.originalTime }}</span>
+                            <span class="message-room">({{ item.originalRoom }})</span>
+                          </div>
+                          <div class="message-new">
+                            <span class="message-label">调整时间：</span>
+                            <span class="message-value">{{ item.newTime }}</span>
+                            <span class="message-room">({{ item.newRoom }})</span>
+                          </div>
+                        </div>
+                        <div class="message-reason" v-if="item.reason">
+                          <span class="message-label">调整原因：</span>
+                          <span class="message-value">{{ item.reason }}</span>
+                        </div>
+                      </div>
+                      <div class="message-footer">
+                        <span class="message-time">{{ item.adjustTime }}</span>
+                        <span class="message-action">去查看 >></span>
+                      </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; color: #757575">
-                      <span>{{ item.timestamp }}</span>
-                      <span>去查看 >></span>
+                    <div v-else class="system-box">
+                      <div class="system-message">
+                        <div class="system-title">
+                          <el-icon><Check /></el-icon>
+                          <span>系统通知</span>
+                        </div>
+                        <div class="system-content">
+                          <p>
+                            系统成功修改教师<strong>{{ item.teacherName || '未知' }}</strong
+                            >反馈后的课表
+                          </p>
+                        </div>
+                      </div>
+                      <div class="system-footer" @click.stop="goToTimetable(item)">
+                        <span class="system-time">{{ item.timestamp || item.adjustTime }}</span>
+                        去查看课表 >>
+                      </div>
                     </div>
                   </el-dropdown-item>
                   <el-dropdown-item v-if="messageContent.length == 0">
@@ -351,7 +401,7 @@ import {
   getCurrentInstance,
   computed,
 } from 'vue'
-import { Delete, Plus, Promotion, Microphone } from '@element-plus/icons-vue'
+import { Delete, Plus, Promotion, Microphone, Check } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 import { useSseStore } from '@/stores/sseStore'
 import { Bell } from '@element-plus/icons-vue'
@@ -512,17 +562,15 @@ async function fetchNotificationConnection() {
   console.log(eventSource)
 
   eventSource.onmessage = event => {
-    const data = event.data
-    console.log('收到新消息:', data)
-    // 将新消息添加到消息列表的开头
-    messageContent.value.unshift({
-      apkName: data.apkName,
-      md5: data.md5,
-      timestamp: new Date().toLocaleString(),
-    })
-    // 限制消息列表长度，保持最新的10条消息
-    if (messageContent.value.length > 10) {
-      messageContent.value = messageContent.value.slice(0, 10)
+    const eventData = JSON.parse(event.data)
+    console.log('收到新消息:', eventData)
+    if (eventData.eventType == 'CourseAdjustmentMessage') {
+      // 将新消息添加到消息列表的开头
+      messageContent.value.unshift(eventData.data)
+      // 限制消息列表长度，保持最新的10条消息
+      if (messageContent.value.length > 10) {
+        messageContent.value = messageContent.value.slice(0, 10)
+      }
     }
   }
 }
@@ -815,6 +863,18 @@ onUnmounted(() => {
   myChart.value.dispose()
   window.removeEventListener('resize', setChart)
 })
+
+// 跳转到课表页面
+const goToTimetable = item => {
+  // 阻止事件冒泡，避免触发父元素的点击事件
+  event.stopPropagation()
+
+  // 构建跳转路径
+  const path = `/manager/functionPage/course/${item.courseId || '1902649449470054400'}/class?name=${encodeURIComponent(item.courseName || '第一次排课')}`
+
+  // 跳转到指定页面
+  router.push(path)
+}
 </script>
 <style scoped lang="scss">
 .main-container-all {
@@ -1348,5 +1408,112 @@ onUnmounted(() => {
 }
 :deep(.el-input__suffix .el-input__icon) {
   font-size: 18px;
+}
+.message-title {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.message-content {
+  font-size: 14px;
+  margin-bottom: 8px;
+
+  .message-course,
+  .message-teacher,
+  .message-change,
+  .message-reason {
+    margin-bottom: 5px;
+  }
+
+  .message-label {
+    color: #606266;
+    margin-right: 5px;
+  }
+
+  .message-value {
+    color: #303133;
+    font-weight: 500;
+  }
+
+  .message-class,
+  .message-room {
+    color: #909399;
+    font-size: 12px;
+    margin-left: 5px;
+  }
+
+  .message-change {
+    background-color: #f5f7fa;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+  }
+
+  .message-reason {
+    color: #e6a23c;
+  }
+}
+
+.message-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #909399;
+  font-size: 12px;
+  margin-top: 5px;
+
+  .message-action {
+    color: #409eff;
+    cursor: pointer;
+  }
+}
+
+.system-box {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  .system-message {
+    padding: 5px 0;
+
+    .system-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #67c23a;
+      font-weight: 600;
+
+      .el-icon {
+        margin-right: 5px;
+        font-size: 16px;
+      }
+    }
+
+    .system-content {
+      margin-bottom: 10px;
+      line-height: 1.5;
+
+      p {
+        margin: 0;
+      }
+
+      strong {
+        color: #409eff;
+      }
+    }
+  }
+  .system-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .system-time {
+      color: #909399;
+      font-size: 12px;
+    }
+
+    .system-button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
 }
 </style>

@@ -50,7 +50,7 @@ const router = useRouter()
 const examScheduleData = ref([])
 
 onMounted(async () => {
-  const res = await getExamTableDetailAPI('2001L')
+  const res = await getExamTableDetailAPI('1')
   console.log(res.data)
   examScheduleData.value = res.data.data || []
 })

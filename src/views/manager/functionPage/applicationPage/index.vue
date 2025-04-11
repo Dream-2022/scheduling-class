@@ -165,11 +165,11 @@
               <el-button
                 color="#368eec"
                 size="small"
-                @click="byApplicationClick(row.id, 1)"
+                @click="byFeedbackClick(row.id)"
                 v-if="!navigationValue && row?.status == '0'"
                 style="margin-bottom: 10px; color: #fff"
               >
-                已查看
+                标记已读
               </el-button>
             </div>
             <div v-if="!navigationValue && row?.status == '1'">--</div>
@@ -205,9 +205,24 @@
   <el-dialog v-model="dialogVisible">
     <img w-full :src="dialogImageUrl" class="dialog-img" alt="Image" />
   </el-dialog>
+  <!-- 提示采纳反馈 -->
+  <el-dialog v-model="informVisible" title="提示采纳反馈" width="500">
+    <div class="inform-content">
+      <div class="inform-text">
+        <p>是否需要按照反馈内容，自动修改课表？</p>
+      </div>
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="sendInformClick" color="#547bf1">确定</el-button>
+        <el-button @click="informVisible = false">关闭</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 <script setup>
 import { onMounted, ref } from 'vue'
+import { getCodeAPI } from '@/apis/inform'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
@@ -219,6 +234,7 @@ let feedbackList = ref([])
 let navigationValue = ref(true)
 const dialogImageUrl = ref('') //预览图
 const dialogVisible = ref(false) //预览图是否存在
+const informVisible = ref(false) //提示采纳反馈是否存在
 let teacher = ref(''),
   type = ref(''),
   title = ref(''),
@@ -286,7 +302,23 @@ async function byApplicationClick(id, status) {
     })
   }
 }
-
+//已读反馈
+async function byFeedbackClick(id) {
+  informVisible.value = true
+  feedbackList.value.forEach((item, index) => {
+    if (item.id === id) {
+      feedbackList.value[index].status = '1'
+    }
+  })
+}
+//发送采纳反馈
+async function sendInformClick() {
+  informVisible.value = false
+  ElMessage.success('已采纳反馈，系统将在一分钟内修改课表...')
+  //告诉后端需要发布通知
+  const res = await getCodeAPI(2)
+  console.log(res.data)
+}
 //获取申请类型
 function getLabelByValue(value) {
   for (let i = 0; i < typeApplication.length; i++) {

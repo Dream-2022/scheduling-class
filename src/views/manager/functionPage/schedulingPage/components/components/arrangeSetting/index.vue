@@ -216,9 +216,12 @@ const generateTotalSchedule = async () => {
       const eventData = JSON.parse(event.data)
 
       // 更新进度条
-      const currentSize = eventData.data.currentSize
-      progressPercentage.value = Math.floor((currentSize / 1306) * 100)
-      progressText.value = `正在处理: ${currentSize}/1306`
+      let currentSize
+      if (eventData.eventType == 'ScheduleTaskProgressMessage') {
+        currentSize = eventData.data.currentSize
+        progressPercentage.value = Math.floor((currentSize / 1306) * 100)
+        progressText.value = `正在处理: ${currentSize}/1306`
+      }
 
       // 当进度达到1306时
       if (currentSize >= 1306) {

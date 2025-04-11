@@ -102,46 +102,41 @@
         class="course-box"
         v-for="item in examList.arr"
         :key="item"
-        @click="courseClick(item.id, 'exam', item.taskName)"
+        @click="courseClick(item.id, 'exam', item.arrangementName)"
       >
         <div class="course-box-left">
           <div>
             <div class="title">
-              <div class="left-title">{{ item.title }}</div>
-              <div
-                class="publish"
-                :class="item.status === '已发布' ? 'class-status1' : 'class-status2'"
-              >
-                {{ item.status }}
+              <div class="left-title">{{ item.arrangementName }}</div>
+              <div class="publish" :class="item.status == '0' ? 'class-status1' : 'class-status2'">
+                {{ item.status == '0' ? '进行中' : item.status == '1' ? '已完成' : '已发布' }}
               </div>
             </div>
-            <div class="time">{{ item.time }}</div>
+            <div class="time">{{ item.createTime }}</div>
           </div>
         </div>
         <div class="course-box-middle">
           <div class="class-right">
             <div class="class-right-box">
-              <div class="class-right-title">课程数量</div>
-              <div class="class-right-content">{{ item.course }}</div>
+              <div class="class-right-title">考试数量</div>
+              <div class="class-right-content">{{ item.examSize }}</div>
             </div>
             <div class="class-right-box">
               <div class="class-right-title">参与班级</div>
-              <div class="class-right-content">{{ item.class }}</div>
+              <div class="class-right-content">{{ item.classCount }}</div>
             </div>
             <div class="class-right-box">
-              <div class="class-right-title">未排课程</div>
-              <div class="class-right-content">{{ item.noCourse }}</div>
+              <div class="class-right-title">监考教师</div>
+              <div class="class-right-content">{{ item.teacherCount }}</div>
+            </div>
+            <div class="class-right-box">
+              <div class="class-right-title">未排考试</div>
+              <div class="class-right-content">{{ item.failSize }}</div>
             </div>
             <div class="class-right-box">
               <div class="class-right-title">排考负责人</div>
               <div class="class-teacher">
-                <div v-for="(teacher, index) in item.teachers" :key="teacher">
-                  <img
-                    src="@/assets/img/cat.jpeg"
-                    class="class-teacher-img"
-                    :style="{ transform: `translateX(${index * -10}px)` }"
-                  />
-                </div>
+                <div>{{ item.operatorName }}</div>
               </div>
             </div>
           </div>
@@ -242,6 +237,7 @@ import { reactive, defineProps, onMounted, ref } from 'vue'
 import { Delete, Edit, Search } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 import { getCourseSchedulingAPI, getTimetableHelpAPI } from '@/apis/course.js'
+import { getExamTableAllAPI } from '@/apis/exam.js'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import HandwrittenSignature from '@/components/signature.vue'
@@ -252,61 +248,20 @@ let courseList = reactive({
   arr: [],
 })
 let examList = reactive({
-  arr: [
-    {
-      id: 0,
-      title: '第一次考试',
-      status: '未发布',
-      time: '2025-2-8 15:30',
-      course: 54,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: '第一次排课',
-      status: '已发布',
-      course: 54,
-      time: '2025-2-8 15:30',
-      assign: 122,
-      class: 23,
-      noCourse: 1,
-      teachers: [
-        {
-          id: 0,
-          name: '李华',
-          subject: '物理',
-          picture: '@/assets/img/book.png',
-        },
-        {
-          id: 1,
-          name: '华',
-          subject: '物理',
-          picture: '@/assets/img/cat.png',
-        },
-      ],
-    },
-  ],
+  arr: [],
 })
 onMounted(async () => {
   const res = await getCourseSchedulingAPI()
   courseList.arr = [...res.data.data].reverse()
   for (let i = 0; i < courseList.arr.length; i++) {
     courseList.arr[i].startTime = courseList.arr[i].startTime.replace('T', ' ')
+  }
+  //获取考试列表
+  const res1 = await getExamTableAllAPI()
+  console.log(res1.data)
+  examList.arr = res1.data.data
+  for (let i = 0; i < examList.arr.length; i++) {
+    examList.arr[i].createTime = examList.arr[i].createTime.replace('T', ' ')
   }
 })
 defineProps({

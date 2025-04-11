@@ -120,6 +120,41 @@
       </div>
     </div>
   </div>
+  <!-- 课表改动提示弹窗 -->
+  <el-dialog v-model="editDialogVisible" title="课表改动提示" width="35%">
+    <div class="edit-dialog-content">
+      <div class="edit-info">
+        <div class="edit-title">课表调整信息</div>
+        <div class="edit-detail">
+          <p>根据<strong>汽车与智能交通学院</strong>的<strong>金龙老师</strong>的反馈：</p>
+          <div class="edit-change">
+            <div class="change-item">
+              <span class="change-label">原定时间：</span>
+              <span class="change-value">周五 3-4节</span>
+            </div>
+            <div class="change-item">
+              <span class="change-label">调整时间：</span>
+              <span class="change-value">周天 3-4节</span>
+            </div>
+            <div class="change-item">
+              <span class="change-label">上课教室：</span>
+              <span class="change-value">JXL3#308</span>
+            </div>
+            <div class="change-item">
+              <span class="change-label">周次：</span>
+              <span class="change-value">0-17周</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="cancelEdit">取消暂定更改，稍后自行修改</el-button>
+        <el-button type="primary" @click="submitEditForm">确认发布</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -132,13 +167,15 @@ import { getTeacherAndStudentAPI } from '@/apis/person'
 import { setTimetableAPI, getEverydayCourseAPI } from '@/apis/timetable'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getCodeAPI } from '@/apis/inform'
 const userStore = useUserStore()
-const selectedArr = ref(['0', '现代农业学院', '0033']) //默认选中的数据
+const selectedArr = ref(['0', '汽车与智能交通学院', '0327']) //默认选中的数据
 const weekValue = ref(null) //选择的周次
 // 每日课程数量数据
 let signData = ref([])
 //日时间线
 const dayActivities = ref([])
+const editDialogVisible = ref(false) //课表改动提示弹窗
 //选择框选项
 const angleOptions = ref([
   {
@@ -305,7 +342,7 @@ async function getOptions() {
   const res1 = await getTeacherAndStudentAPI(
     '',
     '',
-    angleOptions.value[0].children[1].label,
+    angleOptions.value[0].children[5].label,
     '',
     1,
     100,
@@ -317,7 +354,7 @@ async function getOptions() {
     label: item.name,
     leaf: true,
   }))
-  angleOptions.value[0].children[1].children = JSON.parse(JSON.stringify(nodes2))
+  angleOptions.value[0].children[5].children = JSON.parse(JSON.stringify(nodes2))
   option.value = {
     lazy: true,
     async lazyLoad(node, resolve) {
@@ -493,6 +530,21 @@ const toggleDraggable = () => {
   } else {
     isDraggable.value = !isDraggable.value
   }
+}
+// 取消暂定更改
+const cancelEdit = () => {
+  editDialogVisible.value = false
+  // 这里可以添加取消暂定更改的逻辑
+  ElMessage.info('已取消暂定更改，您可以继续手动修改课表')
+}
+
+// 提交编辑表单
+const submitEditForm = async () => {
+  editDialogVisible.value = false
+  ElMessage.success('课表调整正在发布...')
+  //告诉后端需要发布通知
+  const res = await getCodeAPI(1)
+  console.log(res.data)
 }
 </script>
 <style lang="scss" scoped>
@@ -743,6 +795,50 @@ const toggleDraggable = () => {
           .course-box-classroom {
             font-size: 14px;
             color: #efefef;
+          }
+        }
+      }
+    }
+  }
+}
+.edit-dialog-content {
+  padding: 10px;
+
+  .edit-info {
+    .edit-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #303133;
+    }
+
+    .edit-detail {
+      p {
+        margin-bottom: 15px;
+        line-height: 1.5;
+      }
+
+      .edit-change {
+        background-color: #f5f7fa;
+        border-radius: 4px;
+        padding: 15px;
+
+        .change-item {
+          display: flex;
+          margin-bottom: 10px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .change-label {
+            width: 80px;
+            color: #606266;
+          }
+
+          .change-value {
+            color: #303133;
+            font-weight: 500;
           }
         }
       }

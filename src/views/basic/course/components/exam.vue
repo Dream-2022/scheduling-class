@@ -18,22 +18,20 @@
           :header-cell-style="{ 'text-align': 'center' }"
           :cell-style="{ 'text-align': 'center' }"
         >
-          <el-table-column prop="subjectId" label="考试 id" min-width="100" />
-          <el-table-column prop="subjectName" label="考试名称" min-width="180" />
-          <el-table-column prop="examDate" label="考试时间" min-width="180" />
-          <el-table-column prop="examDayOfWeek" label="星期" min-width="180" />
-          <el-table-column prop="invigilators" label="监考教师" min-width="120">
+          <el-table-column prop="subjectId" label="考试 id" min-width="80" />
+          <el-table-column prop="subjectName" label="考试名称" min-width="120">
             <template #default="{ row }">
-              <div v-for="item in row.invigilators" :key="item">{{ item }}</div>
+              <strong>
+                <span class="subject-name">{{ row.subjectName }}</span>
+              </strong>
             </template>
           </el-table-column>
-          <el-table-column prop="examLocation" label="考试教室" min-width="120" />
-          <el-table-column prop="examClasses" label="考试班级" min-width="200">
-            <template #default="{ row }">
-              <div v-for="item in row.examClasses" :key="item">{{ item }}</div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="examDuration" label="考试时长" min-width="120">90</el-table-column>
+          <el-table-column prop="examLocation" label="考试教室" min-width="80" />
+          <el-table-column prop="examDate" label="考试日期" min-width="100" />
+          <el-table-column prop="examTime" label="考试时间" min-width="100" />
+          <el-table-column prop="examDayOfWeek" label="星期" min-width="40" />
+          <el-table-column prop="invigilators" label="监考教师" min-width="100" />
+          <el-table-column prop="examClasses" label="考试班级" min-width="220" />
         </el-table>
       </div>
     </div>
@@ -43,10 +41,11 @@
 import { ref, onMounted } from 'vue'
 import { getExamTableDetailAPI } from '@/apis/exam'
 import * as XLSX from 'xlsx'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 const examScheduleData = ref([])
 let calendarDate = ref(new Date()) //当前日期
 const calendarString = ref('') //当前日期字符串
@@ -60,9 +59,9 @@ onMounted(async () => {
 //点击搜索
 async function searchClick() {
   dateString.value = calendarDate.value.getDate()
-
+  const examId = route.params.id
   // 获取考试数据
-  const res = await getExamTableDetailAPI('2001L')
+  const res = await getExamTableDetailAPI(examId)
   console.log(res.data)
   examScheduleData.value = res.data.data || []
 }

@@ -10,7 +10,7 @@
       <b>{{ week }}</b> 周
     </div>
     <div class="course-teacher" v-if="props.identity != 'teacher'">{{ teacherName }}</div>
-    <div class="course-teacher" v-if="props.identity != 'student'">{{ teachingClassName }}''</div>
+    <div class="course-teacher" v-if="props.identity != 'student'">{{ teachingClassName }}</div>
   </div>
 </template>
 
