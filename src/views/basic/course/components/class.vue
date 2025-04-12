@@ -31,9 +31,12 @@
           {{ isDraggable ? '取消编辑' : '编辑课表' }}
         </el-button>
         <el-button color="#547bf1" v-if="isDraggable" @click="saveEditClick"> 保存编辑 </el-button>
+        <el-button color="#547bf1" @click="exportTimetableAsImage" plain :icon="Download">
+          导出课表
+        </el-button>
       </div>
       <DndProvider :backend="HTML5Backend">
-        <Container :isDraggable="isDraggable" :courses="courses" />
+        <Container :isDraggable="isDraggable" :courses="courses" ref="containerRef" />
       </DndProvider>
     </div>
     <div class="course-section-right">
@@ -165,8 +168,8 @@ import { useUserStore } from '@/stores/userStore'
 import { getMajorsAPI, getClassesAPI, getDepartmentsAPI, getGradesAPI } from '@/apis/classMajor'
 import { getTeacherAndStudentAPI } from '@/apis/person'
 import { setTimetableAPI, getEverydayCourseAPI } from '@/apis/timetable'
-import { Search } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search, Download } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import { getCodeAPI } from '@/apis/inform'
 const userStore = useUserStore()
 const selectedArr = ref(['0', '汽车与智能交通学院', '0327']) //默认选中的数据
@@ -215,6 +218,8 @@ const courses = ref([])
 let option = ref()
 const calendar = ref()
 const courseColors = ref({}) // 颜色映射
+const containerRef = ref(null)
+
 onMounted(async () => {
   initializeCalendar() // 初始化日历
   //获取选择框的信息
@@ -545,6 +550,102 @@ const submitEditForm = async () => {
   //告诉后端需要发布通知
   const res = await getCodeAPI(1)
   console.log(res.data)
+}
+
+// 导出课表为图片
+const exportTimetableAsImage = async () => {
+  if (!courses.value || courses.value.length === 0) {
+    ElMessage.warning('当前没有课表数据可导出')
+    return
+  }
+
+  try {
+    // 显示加载提示
+    const loadingInstance = ElLoading.service({
+      text: '正在生成课表图片，请稍候...',
+      background: 'rgba(0, 0, 0, 0.7)',
+    })
+
+    // 动态导入html2canvas库
+    const html2canvas = (await import('html2canvas')).default
+
+    // 获取课表容器元素
+    const timetableElement = document.querySelector('.schedule')
+    if (!timetableElement) {
+      loadingInstance.close()
+      ElMessage.error('未找到课表元素，导出失败')
+      return
+    }
+
+    // 获取当前视角信息
+    let perspective = '全部'
+    if (userStore.user.identity === 'MANAGER') {
+      if (selectedArr.value[0] === '0') {
+        perspective = `教师视角-${selectedArr.value[1]}-${selectedArr.value[2]}`
+      } else if (selectedArr.value[0] === '1') {
+        perspective = `班级视角-${selectedArr.value[1]}-${selectedArr.value[2]}-${selectedArr.value[3]}`
+      } else if (selectedArr.value[0] === '2') {
+        perspective = `年级视角-${selectedArr.value[1]}-${selectedArr.value[2]}-${selectedArr.value[3]}`
+      }
+    } else {
+      perspective = '个人视角'
+    }
+
+    // 获取周次信息
+    const weekInfo = weekValue.value ? `第${weekValue.value[0]}周` : '全部周次'
+
+    // 创建标题元素
+    const titleElement = document.createElement('div')
+    titleElement.style.textAlign = 'center'
+    titleElement.style.fontSize = '18px'
+    titleElement.style.fontWeight = 'bold'
+    titleElement.style.marginBottom = '10px'
+    titleElement.style.padding = '10px'
+    titleElement.style.backgroundColor = '#f2f5ff'
+    titleElement.style.borderRadius = '5px'
+    titleElement.textContent = `课表导出-${perspective}-${weekInfo}`
+
+    // 创建临时容器
+    const tempContainer = document.createElement('div')
+    tempContainer.style.padding = '20px'
+    tempContainer.style.backgroundColor = 'white'
+    tempContainer.appendChild(titleElement)
+
+    // 克隆课表元素
+    const timetableClone = timetableElement.cloneNode(true)
+    tempContainer.appendChild(timetableClone)
+
+    // 将临时容器添加到文档中（但不可见）
+    tempContainer.style.position = 'absolute'
+    tempContainer.style.left = '-9999px'
+    document.body.appendChild(tempContainer)
+
+    // 使用html2canvas将元素转换为canvas
+    const canvas = await html2canvas(tempContainer, {
+      scale: 2, // 提高清晰度
+      useCORS: true, // 允许跨域图片
+      backgroundColor: '#ffffff', // 设置背景色
+    })
+
+    // 将canvas转换为图片URL
+    const imageUrl = canvas.toDataURL('image/png')
+
+    // 创建下载链接
+    const link = document.createElement('a')
+    link.href = imageUrl
+    link.download = `课表_${perspective}_${weekInfo}_${new Date().toLocaleDateString()}.png`
+    link.click()
+
+    // 清理临时元素
+    document.body.removeChild(tempContainer)
+
+    // 关闭加载提示
+    loadingInstance.close()
+    ElMessage.success('课表导出成功')
+  } catch (error) {
+    console.error('导出课表失败:', error)
+    ElMessage.error('导出课表失败，请稍后重试')
+  }
 }
 </script>
 <style lang="scss" scoped>

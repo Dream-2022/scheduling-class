@@ -25,13 +25,13 @@
           <el-table-column prop="examDayOfWeek" label="星期" min-width="180" />
           <el-table-column prop="invigilators" label="监考教师" min-width="120">
             <template #default="{ row }">
-              <div v-for="item in row.invigilators" :key="item">{{ item }}</div>
+              <div>{{ row.invigilators }}</div>
             </template>
           </el-table-column>
           <el-table-column prop="examLocation" label="考试教室" min-width="120" />
           <el-table-column prop="examClasses" label="考试班级" min-width="200">
             <template #default="{ row }">
-              <div v-for="item in row.examClasses" :key="item">{{ item }}</div>
+              <div>{{ row.examClasses }}</div>
             </template>
           </el-table-column>
           <el-table-column prop="examDuration" label="考试时长" min-width="120">90</el-table-column>

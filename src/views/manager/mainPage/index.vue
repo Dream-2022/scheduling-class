@@ -290,9 +290,9 @@
                 <div class="feedback-name">{{ item?.teacherName }}</div>
                 <div
                   class="feedback-status"
-                  :class="item.status == '0' ? 'green-status' : 'red-status'"
+                  :class="item.status == '0' ? 'red-status' : 'green-status'"
                 >
-                  {{ item.status == '0' ? '已读' : '未读' }}
+                  {{ item.status == '0' ? '未读' : '已读' }}
                 </div>
               </div>
               <div class="feedback-time">{{ item.createdAt }}</div>
@@ -431,6 +431,7 @@ async function fetchFeedbackChartData(days = 7) {
   for (let i = 0; i < res.data.data.length; i++) {
     sum += res.data.data[i].data
   }
+  sum = (sum / res.data.data.length).toFixed(2)
   chartOption2.value.xAxis[0].data = extractDataData(res.data.data, 'time')
   chartOption2.value.series[0].data = extractDataData(res.data.data, 'data')
   chartOption2.value.title.subtext = `{value|平均}{titleSize| ${sum} }{value|次}`
@@ -481,7 +482,7 @@ async function fetchCourseSchedulingData() {
 async function fetchFeedbackListData() {
   const res = await getFeedbackAllAPI()
   console.log(res.data)
-  feedbackList.arr = res.data.data.slice(0, 7)
+  feedbackList.arr = res.data.data.slice(0, 8)
   feedbackList.arr.forEach((item, index) => {
     feedbackList.arr[index].createdAt = item.createdAt.replace('T', ' ')
   })

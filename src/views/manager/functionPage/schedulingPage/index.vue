@@ -223,7 +223,7 @@
   <!-- 进度条对话框 -->
   <el-dialog
     v-model="progressDialogVisible"
-    title="导入进度"
+    title="排课进度"
     width="30%"
     :close-on-click-modal="false"
     :show-close="false"

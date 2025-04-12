@@ -162,9 +162,9 @@
                     <div class="feedback-name">{{ item?.name }}</div>
                     <div
                       class="feedback-status"
-                      :class="item.status == '0' ? 'green-status' : 'red-status'"
+                      :class="item.status == '0' ? 'red-status' : 'green-status'"
                     >
-                      {{ item.status == '0' ? '已读' : '未读' }}
+                      {{ item.status == '0' ? '未读' : '已读' }}
                     </div>
                   </div>
                   <div class="feedback-time">{{ item.createdAt }}</div>
