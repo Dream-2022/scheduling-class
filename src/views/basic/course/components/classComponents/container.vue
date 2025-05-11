@@ -63,6 +63,7 @@
                     :time="rowIndex"
                     :move-course="moveCourse"
                     :isDraggable="isDraggable"
+                    @course-dropped="handleCourseDropped"
                   >
                     <CourseCard
                       v-for="course in getCourses(colIndex, rowIndex)"
@@ -83,6 +84,54 @@
                       :timeEnd="course.timeEnd"
                       :isDraggable="isDraggable"
                     />
+                    <!-- 教室占用提示 -->
+                    <el-popover
+                      v-model:visible="showConflictPopover"
+                      title="教室冲突提示"
+                      width="300"
+                      trigger="manual"
+                      placement="top"
+                      popper-class="conflict-popover"
+                      :hide-after="0"
+                      :persistent="true"
+                    >
+                      <template #reference>
+                        <div class="conflict-indicator" v-if="showRoomConflict(colIndex, rowIndex)">
+                          <el-icon><Warning /></el-icon>
+                        </div>
+                      </template>
+                      <div class="conflict-popover-content">
+                        <div class="conflict-info">
+                          <p class="conflict-title">当前节次的教室已被占用：</p>
+                          <p class="conflict-room">
+                            <strong>{{ getConflictRoom() }}</strong>
+                          </p>
+                        </div>
+                        <div class="room-selector">
+                          <p class="selector-title">请选择新教室：</p>
+                          <el-select
+                            v-model="selectedRoom"
+                            placeholder="请选择新教室"
+                            class="room-select"
+                          >
+                            <el-option
+                              v-for="room in availableRooms"
+                              :key="room.id"
+                              :label="room.name"
+                              :value="room.id"
+                            />
+                          </el-select>
+                        </div>
+                        <div class="popover-footer">
+                          <el-button type="primary" size="small" @click="changeRoom"
+                            >更改教室</el-button
+                          >
+                          <el-button type="danger" size="small" @click="cancelMove"
+                            >取消拖拽</el-button
+                          >
+                        </div>
+                      </div>
+                    </el-popover>
                   </DropZone>
                 </td>
               </template>
@@ -99,6 +148,8 @@ import { ref, toRefs, provide, defineProps } from 'vue'
 import CourseCard from './CourseCard.vue'
 import DropZone from './DropZone.vue'
 import { useUserStore } from '@/stores/userStore'
+import { ElMessage, ElPopover } from 'element-plus'
+import { Warning } from '@element-plus/icons-vue'
 const userStore = useUserStore()
 
 const days = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天']
@@ -120,6 +171,23 @@ const props = defineProps({
 const { isDraggable } = toRefs(props)
 const { courses } = toRefs(props) // 课程数据
 const courseColors = ref({}) // 颜色映射
+
+// 教室冲突相关
+const selectedRoom = ref('')
+const availableRooms = ref([
+  { id: '1', name: 'XDNY2#209' },
+  { id: '2', name: 'XXJS3#301' },
+  { id: '3', name: 'XDNY1#110' },
+])
+const conflictInfo = ref({
+  day: null,
+  time: null,
+  room: null,
+  courseId: null,
+  originalDay: null,
+  originalTime: null,
+})
+const showConflictPopover = ref(false)
 
 const colors = [
   '#e78891',
@@ -228,6 +296,121 @@ const getCoursesStartingAt = (day, time) => {
   return getCourses(day, time)
 }
 
+// 检查是否显示教室冲突提示（周六第一节课）
+const showRoomConflict = (day, time) => {
+  // 周六是第5个索引（从0开始），第一节课是第0个索引
+  return (
+    day === 5 && time === 0 && conflictInfo.value.day === day && conflictInfo.value.time === time
+  )
+}
+
+// 获取冲突的教室名称
+const getConflictRoom = () => {
+  return conflictInfo.value.room || 'XDNY1#102'
+}
+
+// 处理课程拖放事件
+const handleCourseDropped = ({ courseId, dragDay, dragTime, hoverDay, hoverTime }) => {
+  console.log('课程拖放事件', { courseId, dragDay, dragTime, hoverDay, hoverTime })
+
+  // 检查是否是周六第一节课
+  if (hoverDay === 5 && hoverTime === 0) {
+    console.log('检测到周六第一节课冲突')
+    // 设置冲突信息，同时保存原始位置
+    conflictInfo.value = {
+      day: hoverDay,
+      time: hoverTime,
+      room: 'XDNY1#102',
+      courseId: courseId,
+      originalDay: dragDay,
+      originalTime: dragTime,
+    }
+    // 显示冲突弹出框
+    showConflictPopover.value = true
+    // 不立即移动课程，等待用户选择操作
+    return
+  }
+
+  // 其他情况正常移动课程
+  moveCourse({ courseId, dragDay, dragTime, hoverDay, hoverTime })
+}
+
+// 更改教室
+const changeRoom = () => {
+  if (!selectedRoom.value) {
+    ElMessage.warning('请选择新教室')
+    return
+  }
+
+  // 获取选中的教室名称
+  const selectedRoomName = availableRooms.value.find(room => room.id === selectedRoom.value)?.name
+
+  if (!selectedRoomName) {
+    ElMessage.error('未找到选中的教室')
+    return
+  }
+
+  // 更新课程教室
+  const { day, time, courseId } = conflictInfo.value
+  const courseIndex = courses.value.findIndex(course => course.courseId === courseId)
+
+  if (courseIndex !== -1) {
+    // 更新课程教室
+    courses.value[courseIndex].classroomId = selectedRoom.value
+    courses.value[courseIndex].classroomName = selectedRoomName
+    // 移动课程到新位置
+    moveCourse({
+      courseId,
+      dragDay: conflictInfo.value.originalDay,
+      dragTime: conflictInfo.value.originalTime,
+      hoverDay: day,
+      hoverTime: time,
+    })
+    ElMessage.success(`已将课程教室更改为 ${selectedRoomName}`)
+  }
+
+  // 重置冲突信息
+  conflictInfo.value = {
+    day: null,
+    time: null,
+    room: null,
+    courseId: null,
+    originalDay: null,
+    originalTime: null,
+  }
+  // 关闭弹出框
+  showConflictPopover.value = false
+}
+
+// 取消移动
+const cancelMove = () => {
+  // 如果有原始位置信息，将课程移回原位置
+  if (conflictInfo.value.originalDay !== null && conflictInfo.value.originalTime !== null) {
+    moveCourse({
+      courseId: conflictInfo.value.courseId,
+      dragDay: conflictInfo.value.day,
+      dragTime: conflictInfo.value.time,
+      hoverDay: conflictInfo.value.originalDay,
+      hoverTime: conflictInfo.value.originalTime,
+    })
+    ElMessage.info('已将课程移回原位置')
+  } else {
+    ElMessage.info('已取消课程移动')
+  }
+
+  // 重置冲突信息
+  conflictInfo.value = {
+    day: null,
+    time: null,
+    room: null,
+    courseId: null,
+    originalDay: null,
+    originalTime: null,
+  }
+  // 关闭弹出框
+  showConflictPopover.value = false
+}
+
 // 拖拽移动课程
 const moveCourse = ({ courseId, dragDay, dragTime, hoverDay, hoverTime }) => {
   console.log('拖拽课程', { courseId, dragDay, dragTime, hoverDay, hoverTime })
@@ -314,6 +497,81 @@ table {
       font-size: 13px;
       font-weight: normal;
     }
+  }
+}
+
+.conflict-indicator {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background-color: #f56c6c;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 5;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  .el-icon {
+    font-size: 14px;
+  }
+}
+
+.conflict-popover-content {
+  .conflict-info {
+    margin-bottom: 15px;
+
+    .conflict-title {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #606266;
+    }
+
+    .conflict-room {
+      margin: 0;
+      font-size: 16px;
+
+      strong {
+        color: #f56c6c;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .room-selector {
+    margin-bottom: 15px;
+
+    .selector-title {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #606266;
+    }
+
+    .room-select {
+      width: 100%;
+    }
+  }
+
+  .popover-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+:deep(.conflict-popover) {
+  .el-popover__title {
+    font-weight: bold;
+    color: #303133;
+  }
+
+  // 防止弹出框自动隐藏
+  &.el-popper {
+    pointer-events: auto;
   }
 }
 </style>

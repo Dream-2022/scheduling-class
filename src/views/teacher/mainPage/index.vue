@@ -13,7 +13,10 @@
   </div>
   <div class="module-boxes">
     <div class="module-box">
-      <img src="@/assets/3D/3-t.png" @click="staticAnalysis('course/main', true)" />
+      <img
+        src="@/assets/3D/3-t.png"
+        @click="staticAnalysis('course/1902649449470054400/class?', true)"
+      />
       <div @click="staticAnalysis('course')">授课安排</div>
     </div>
     <div class="module-box">

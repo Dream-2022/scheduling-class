@@ -9,7 +9,7 @@ import { tokenAPI } from '@/apis/login'
 import { showLoading, hideLoading } from '@/utils/loading.js'
 
 const http = axios.create({
-  baseURL: 'http://192.168.75.118:80',
+  baseURL: 'http://192.168.83.118:80',
   // headers: {
   //   Origin: 'http://192.168.50.32:10010', // 设置允许的源
   // },

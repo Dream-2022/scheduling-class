@@ -7,7 +7,7 @@ export const useSseStore = defineStore('sse', () => {
     const userStore = useUserStore()
     const userId = userStore.user.userId
     eventSource.value = new EventSource(
-      `http://192.168.75.243:8085/inform/connect?userId=${userId}`,
+      `http://192.168.83.243:8085/inform/connect?userId=${userId}`,
     )
     eventSource.value.onopen = function () {
       console.log('连接建立')
